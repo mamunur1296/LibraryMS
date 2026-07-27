@@ -13,3 +13,4 @@ C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain\obj\Debug\net10.0\LibraryMS
 C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain\obj\Debug\net10.0\refint\LibraryMS.Domain.dll
 C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain\obj\Debug\net10.0\LibraryMS.Domain.pdb
 C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain\obj\Debug\net10.0\ref\LibraryMS.Domain.dll
+C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain\obj\Debug\net10.0\LibraryMS.Domain.sourcelink.json

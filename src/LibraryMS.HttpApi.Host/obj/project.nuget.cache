@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "rHPeHyFDG30=",
+  "dgSpecHash": "2pVudpM55NY=",
   "success": true,
   "projectFilePath": "C:\\MyParsonal\\Project\\LibraryMS\\src\\LibraryMS.HttpApi.Host\\LibraryMS.HttpApi.Host.csproj",
   "expectedPackageFiles": [
@@ -8,8 +8,6 @@
     "C:\\Users\\Mamunur Rushid\\.nuget\\packages\\asp.versioning.http\\10.0.0\\asp.versioning.http.10.0.0.nupkg.sha512",
     "C:\\Users\\Mamunur Rushid\\.nuget\\packages\\aspnetcore.healthchecks.npgsql\\9.0.0\\aspnetcore.healthchecks.npgsql.9.0.0.nupkg.sha512",
     "C:\\Users\\Mamunur Rushid\\.nuget\\packages\\aspnetcore.healthchecks.redis\\9.0.0\\aspnetcore.healthchecks.redis.9.0.0.nupkg.sha512",
-    "C:\\Users\\Mamunur Rushid\\.nuget\\packages\\automapper\\16.2.0\\automapper.16.2.0.nupkg.sha512",
-    "C:\\Users\\Mamunur Rushid\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.1\\automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",
     "C:\\Users\\Mamunur Rushid\\.nuget\\packages\\bouncycastle.cryptography\\2.6.2\\bouncycastle.cryptography.2.6.2.nupkg.sha512",
     "C:\\Users\\Mamunur Rushid\\.nuget\\packages\\closedxml\\0.105.1\\closedxml.0.105.1.nupkg.sha512",
     "C:\\Users\\Mamunur Rushid\\.nuget\\packages\\closedxml.parser\\2.0.0\\closedxml.parser.2.0.0.nupkg.sha512",
@@ -67,18 +65,6 @@
     "C:\\Users\\Mamunur Rushid\\.nuget\\packages\\system.security.cryptography.pkcs\\10.0.0\\system.security.cryptography.pkcs.10.0.0.nupkg.sha512"
   ],
   "logs": [
-    {
-      "code": "NU1608",
-      "level": "Warning",
-      "message": "Detected package version outside of dependency constraint: AutoMapper.Extensions.Microsoft.DependencyInjection 12.0.1 requires AutoMapper (= 12.0.1) but version AutoMapper 16.2.0 was resolved.",
-      "projectPath": "C:\\MyParsonal\\Project\\LibraryMS\\src\\LibraryMS.HttpApi.Host\\LibraryMS.HttpApi.Host.csproj",
-      "warningLevel": 1,
-      "filePath": "C:\\MyParsonal\\Project\\LibraryMS\\src\\LibraryMS.HttpApi.Host\\LibraryMS.HttpApi.Host.csproj",
-      "libraryId": "AutoMapper",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    },
     {
       "code": "NU1903",
       "level": "Warning",

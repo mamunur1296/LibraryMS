@@ -1,0 +1,105 @@
+## ============================================================
+## LibraryMS — .gitignore
+## ============================================================
+
+# ──── Build outputs ────
+[Oo]bj/
+[Bb]in/
+out/
+build/
+dist/
+*.dll
+*.exe
+*.pdb
+*.lib
+*.cache
+
+# ──── .NET ────
+*.user
+*.suo
+*.sln.docstates
+*.userprefs
+.vs/
+.vscode/settings.json
+*.DotSettings.user
+TestResults/
+[Tt]emp/
+[Ll]ogs/
+logs/
+*.log
+
+# ──── NuGet ────
+*.nupkg
+*.snupkg
+packages/
+!**/packages/repositories.config
+.nuget/
+NuGet.Config
+
+# ──── EF Core Migrations (keep migrations, ignore snapshots from old runs) ────
+# Migrations are committed intentionally — do NOT ignore them
+
+# ──── Secrets & Config (NEVER commit these) ────
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.Development.json
+secrets.json
+*.pfx
+*.key
+.env
+.env.*
+!.env.example
+
+# ──── Docker ────
+docker-compose.override.yml
+
+# ──── Node.js / Next.js frontend ────
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnpm-debug.log*
+
+# ──── OS files ────
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ──── IDE / Editor ────
+.idea/
+*.swp
+*.swo
+*~
+.vscode/
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# ──── Coverage & Test outputs ────
+coverage/
+*.coverage
+*.coveragexml
+*.opencover.xml
+BenchmarkDotNet.Artifacts/
+
+# ──── Hangfire ────
+hangfire*.db
+
+# ──── Redis dump ────
+dump.rdb
+
+# ──── Publish profiles ────
+**/Properties/PublishProfiles/
+PublishOutput/
+
+# ──── Certificates ────
+*.pem
+*.crt
+*.cer

@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "NA1CpEQdNUU=",
+  "dgSpecHash": "AXrAH/S6sng=",
   "success": true,
   "projectFilePath": "C:\\MyParsonal\\Project\\LibraryMS\\src\\LibraryMS.Domain\\LibraryMS.Domain.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\Mamunur Rushid\\.nuget\\packages\\fluentvalidation\\11.12.0\\fluentvalidation.11.12.0.nupkg.sha512",
     "C:\\Users\\Mamunur Rushid\\.nuget\\packages\\mediatr\\14.2.0\\mediatr.14.2.0.nupkg.sha512",
     "C:\\Users\\Mamunur Rushid\\.nuget\\packages\\mediatr.contracts\\2.0.1\\mediatr.contracts.2.0.1.nupkg.sha512",
     "C:\\Users\\Mamunur Rushid\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.0\\microsoft.extensions.dependencyinjection.abstractions.10.0.0.nupkg.sha512",

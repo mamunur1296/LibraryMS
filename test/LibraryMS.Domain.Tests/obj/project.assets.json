@@ -636,6 +636,9 @@
       "LibraryMS.Domain.Shared/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "FluentValidation": "11.0.0"
+        },
         "compile": {
           "bin/placeholder/LibraryMS.Domain.Shared.dll": {}
         },
@@ -647,6 +650,7 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
+          "FluentAssertions": "8.10.0",
           "LibraryMS.Application.Contracts": "1.0.0",
           "LibraryMS.Domain": "1.0.0"
         },
