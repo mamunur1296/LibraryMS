@@ -39,7 +39,7 @@ public sealed class OutboxProcessorJob
     public async Task ProcessAsync(CancellationToken cancellationToken = default)
     {
         var messages = await _dbContext.OutboxMessages
-            .Where(m => m.IsEligibleForProcessing)
+            .Where(m => m.ProcessedOn == null && m.RetryCount < m.MaxRetries)
             .OrderBy(m => m.OccurredOn)
             .Take(50)
             .ToListAsync(cancellationToken);

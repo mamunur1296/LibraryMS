@@ -1,6 +1,9 @@
 using LibraryMS.Domain.MemberManagement;
 using LibraryMS.Domain.Shared.Exceptions;
+using LibraryMS.Domain.Shared.Enums;
 using FluentAssertions;
+using System;
+using Xunit;
 
 namespace LibraryMS.Domain.Tests.MemberManagement;
 
@@ -8,20 +11,21 @@ public class MemberTests
 {
     private static Member CreateMember(string email = "test@example.com")
     {
-        var ctor = typeof(Member).GetConstructors(
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .First(c => c.GetParameters().Length == 7);
-
-        return (Member)ctor.Invoke([
-            Guid.NewGuid(), "John", "Doe", email, "+8801711111111", "LIB-2024-00001", null
-        ]);
+        return new Member(
+            Guid.NewGuid(),
+            "John",
+            "Doe",
+            email,
+            "+8801711111111",
+            "LIB-2024-00001",
+            "123 Main St");
     }
 
     [Fact]
     public void Constructor_ShouldSetStatusActive()
     {
         var member = CreateMember();
-        member.Status.Should().Be(Shared.Enums.MemberStatus.Active);
+        member.Status.Should().Be(MemberStatus.Active);
     }
 
     [Fact]
@@ -46,30 +50,24 @@ public class MemberTests
     }
 
     [Fact]
-    public void Suspend_WhenActive_ShouldChangStatus()
+    public void Suspend_WhenActive_ShouldChangeStatus()
     {
         var member = CreateMember();
-        var suspendMethod = typeof(Member).GetMethod("Suspend",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        member.Suspend(DateTime.UtcNow.AddDays(7), "Overdue books");
 
-        suspendMethod!.Invoke(member, [DateTime.UtcNow.AddDays(7), "Overdue books"]);
-
-        member.Status.Should().Be(Shared.Enums.MemberStatus.Suspended);
-        member.CanBorrow().Should().BeFalse();
+        member.Status.Should().Be(MemberStatus.Suspended);
+        member.CanBorrow().Should().Be(false);
     }
 
     [Fact]
     public void Suspend_WhenAlreadySuspended_ShouldThrowDomainException()
     {
         var member = CreateMember();
-        var suspendMethod = typeof(Member).GetMethod("Suspend",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        member.Suspend(DateTime.UtcNow.AddDays(7), "First suspension");
+        
+        var act = () => member.Suspend(DateTime.UtcNow.AddDays(7), "Second suspension");
 
-        suspendMethod!.Invoke(member, [DateTime.UtcNow.AddDays(7), "First suspension"]);
-        var act = () => suspendMethod.Invoke(member, [DateTime.UtcNow.AddDays(7), "Second suspension"]);
-
-        act.Should().Throw<System.Reflection.TargetInvocationException>()
-            .WithInnerException<DomainException>()
+        act.Should().Throw<DomainException>()
             .WithMessage("*already suspended*");
     }
 
@@ -77,15 +75,28 @@ public class MemberTests
     public void Activate_WhenSuspended_ShouldRestoreActiveStatus()
     {
         var member = CreateMember();
-        var suspendMethod = typeof(Member).GetMethod("Suspend",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var activateMethod = typeof(Member).GetMethod("Activate",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        member.Suspend(DateTime.UtcNow.AddDays(7), "Reason");
+        member.Activate();
 
-        suspendMethod!.Invoke(member, [DateTime.UtcNow.AddDays(7), "Reason"]);
-        activateMethod!.Invoke(member, []);
-
-        member.Status.Should().Be(Shared.Enums.MemberStatus.Active);
+        member.Status.Should().Be(MemberStatus.Active);
         member.CanBorrow().Should().BeTrue();
+    }
+
+    [Fact]
+    public void CanBorrow_WhenSuspensionExpired_ShouldAutoLiftSuspensionAndReturnTrue()
+    {
+        // Arrange
+        var member = CreateMember();
+        
+        // Suspend until 1 hour ago
+        member.Suspend(DateTime.UtcNow.AddHours(-1), "Expired suspension");
+
+        // Act
+        var result = member.CanBorrow();
+
+        // Assert
+        result.Should().BeTrue();
+        member.Status.Should().Be(MemberStatus.Active);
+        member.SuspendedUntil.Should().BeNull();
     }
 }
