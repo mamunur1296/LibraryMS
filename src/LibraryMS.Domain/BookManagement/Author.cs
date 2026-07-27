@@ -1,0 +1,21 @@
+using LibraryMS.Domain.Common;
+
+namespace LibraryMS.Domain.BookManagement;
+
+/// <summary>Author entity — belongs to Book aggregate via navigation.</summary>
+public sealed class Author : Entity<Guid>
+{
+    public string Name { get; private set; } = default!;
+    public string? Biography { get; private set; }
+    public DateTime CreatedAt { get; private set; }
+
+    private Author() { }
+
+    public Author(Guid id, string name, string? biography = null)
+        : base(id)
+    {
+        Name = name;
+        Biography = biography;
+        CreatedAt = DateTime.UtcNow;
+    }
+}

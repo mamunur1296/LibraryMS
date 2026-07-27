@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LibraryMS.Application.Contracts/LibraryMS.Application.Contracts.csproj" />
+    <Project Path="src/LibraryMS.Application/LibraryMS.Application.csproj" />
+    <Project Path="src/LibraryMS.DbMigrator/LibraryMS.DbMigrator.csproj" />
+    <Project Path="src/LibraryMS.Domain.Shared/LibraryMS.Domain.Shared.csproj" />
+    <Project Path="src/LibraryMS.Domain/LibraryMS.Domain.csproj" />
+    <Project Path="src/LibraryMS.EntityFrameworkCore/LibraryMS.EntityFrameworkCore.csproj" />
+    <Project Path="src/LibraryMS.HttpApi.Host/LibraryMS.HttpApi.Host.csproj" />
+    <Project Path="src/LibraryMS.HttpApi/LibraryMS.HttpApi.csproj" />
+    <Project Path="src/LibraryMS.Infrastructure/LibraryMS.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/LibraryMS.Application.Tests/LibraryMS.Application.Tests.csproj" />
+    <Project Path="test/LibraryMS.Domain.Tests/LibraryMS.Domain.Tests.csproj" />
+    <Project Path="test/LibraryMS.TestBase/LibraryMS.TestBase.csproj" />
+  </Folder>
+</Solution>

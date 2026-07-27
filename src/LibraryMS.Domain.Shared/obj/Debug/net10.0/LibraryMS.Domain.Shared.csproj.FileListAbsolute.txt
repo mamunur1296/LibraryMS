@@ -1,0 +1,11 @@
+C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain.Shared\bin\Debug\net10.0\LibraryMS.Domain.Shared.deps.json
+C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain.Shared\bin\Debug\net10.0\LibraryMS.Domain.Shared.dll
+C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain.Shared\bin\Debug\net10.0\LibraryMS.Domain.Shared.pdb
+C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain.Shared\obj\Debug\net10.0\LibraryMS.Domain.Shared.GeneratedMSBuildEditorConfig.editorconfig
+C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain.Shared\obj\Debug\net10.0\LibraryMS.Domain.Shared.AssemblyInfoInputs.cache
+C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain.Shared\obj\Debug\net10.0\LibraryMS.Domain.Shared.AssemblyInfo.cs
+C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain.Shared\obj\Debug\net10.0\LibraryMS.Domain.Shared.csproj.CoreCompileInputs.cache
+C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain.Shared\obj\Debug\net10.0\LibraryMS.Domain.Shared.dll
+C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain.Shared\obj\Debug\net10.0\refint\LibraryMS.Domain.Shared.dll
+C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain.Shared\obj\Debug\net10.0\LibraryMS.Domain.Shared.pdb
+C:\MyParsonal\Project\LibraryMS\src\LibraryMS.Domain.Shared\obj\Debug\net10.0\ref\LibraryMS.Domain.Shared.dll
