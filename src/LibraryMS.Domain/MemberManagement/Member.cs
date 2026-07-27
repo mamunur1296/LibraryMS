@@ -19,8 +19,6 @@ public sealed class Member : AggregateRoot<Guid>
     public MemberStatus Status { get; private set; }
     public DateTime JoinDate { get; private set; }
     public DateTime? SuspendedUntil { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
 
     // Optimistic concurrency token
     public byte[] RowVersion { get; private set; } = default!;
@@ -52,7 +50,7 @@ public sealed class Member : AggregateRoot<Guid>
         SetLastName(lastName);
         SetPhone(phone);
         Address = address;
-        UpdatedAt = DateTime.UtcNow;
+        LastModifiedAt = DateTime.UtcNow;
     }
 
     internal void Suspend(DateTime until, string reason)
@@ -62,7 +60,7 @@ public sealed class Member : AggregateRoot<Guid>
 
         Status = MemberStatus.Suspended;
         SuspendedUntil = until;
-        UpdatedAt = DateTime.UtcNow;
+        LastModifiedAt = DateTime.UtcNow;
 
         AddDomainEvent(new MemberSuspendedEvent(Id, FullName, until, reason));
     }
@@ -74,7 +72,7 @@ public sealed class Member : AggregateRoot<Guid>
 
         Status = MemberStatus.Active;
         SuspendedUntil = null;
-        UpdatedAt = DateTime.UtcNow;
+        LastModifiedAt = DateTime.UtcNow;
     }
 
     /// <summary>Checks if the member can borrow a book (not suspended, not overdue-blocked).</summary>
@@ -122,3 +120,5 @@ public sealed class Member : AggregateRoot<Guid>
         Phone = phone.Trim();
     }
 }
+
+

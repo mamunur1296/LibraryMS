@@ -1,16 +1,19 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\LibraryMS.Application.Contracts\LibraryMS.Application.Contracts.csproj" />
+    <ProjectReference Include="..\LibraryMS.EntityFrameworkCore\LibraryMS.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.105.1" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.8.24" />
     <PackageReference Include="Hangfire.Core" Version="1.8.24" />
     <PackageReference Include="Hangfire.PostgreSql" Version="1.21.1" />
     <PackageReference Include="MailKit" Version="4.17.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.10" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.10" />
+    <PackageReference Include="QuestPDF" Version="2025.4.0" />
     <PackageReference Include="StackExchange.Redis" Version="3.0.17" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.21.0" />
   </ItemGroup>

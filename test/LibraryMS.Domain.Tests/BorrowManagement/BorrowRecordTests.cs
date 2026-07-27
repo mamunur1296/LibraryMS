@@ -56,7 +56,7 @@ public class BorrowRecordTests
     public void Constructor_ShouldRaiseDomainEvent()
     {
         var borrow = CreateBorrowViaConstructor();
-        borrow.DomainEvents.Should().ContainSingle(e => e is BorrowManagement.Events.BookBorrowedEvent);
+        borrow.DomainEvents.Should().ContainSingle(e => e is LibraryMS.Domain.BorrowManagement.Events.BookBorrowedEvent);
     }
 
     // ────────────────────────────────────────────────────────────
@@ -108,7 +108,7 @@ public class BorrowRecordTests
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         returnMethod!.Invoke(borrow, [null]);
 
-        borrow.DomainEvents.Should().ContainSingle(e => e is BorrowManagement.Events.BookReturnedEvent);
+        borrow.DomainEvents.Should().ContainSingle(e => e is LibraryMS.Domain.BorrowManagement.Events.BookReturnedEvent);
     }
 
     // ────────────────────────────────────────────────────────────

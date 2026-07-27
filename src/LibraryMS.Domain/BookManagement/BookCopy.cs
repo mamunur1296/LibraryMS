@@ -14,8 +14,6 @@ public sealed class BookCopy : Entity<Guid>
     public Guid BranchId { get; private set; }
     public string CopyNumber { get; private set; } = default!;  // e.g., "B001-C003"
     public CopyStatus Status { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
 
     // Navigation - EF Core
     public Book Book { get; private set; } = default!;
@@ -38,13 +36,13 @@ public sealed class BookCopy : Entity<Guid>
             throw new DomainException($"Copy '{CopyNumber}' is not available for borrowing. Current status: {Status}",
                 "COPY_NOT_AVAILABLE");
         Status = CopyStatus.Borrowed;
-        UpdatedAt = DateTime.UtcNow;
+        LastModifiedAt = DateTime.UtcNow;
     }
 
     internal void MarkAsAvailable()
     {
         Status = CopyStatus.Available;
-        UpdatedAt = DateTime.UtcNow;
+        LastModifiedAt = DateTime.UtcNow;
     }
 
     internal void MarkAsReserved()
@@ -53,14 +51,16 @@ public sealed class BookCopy : Entity<Guid>
             throw new DomainException($"Copy '{CopyNumber}' cannot be reserved. Current status: {Status}",
                 "COPY_NOT_RESERVABLE");
         Status = CopyStatus.Reserved;
-        UpdatedAt = DateTime.UtcNow;
+        LastModifiedAt = DateTime.UtcNow;
     }
 
     internal void MarkAsDamaged()
     {
         Status = CopyStatus.Damaged;
-        UpdatedAt = DateTime.UtcNow;
+        LastModifiedAt = DateTime.UtcNow;
     }
 
     public bool IsAvailable => Status == CopyStatus.Available;
 }
+
+
