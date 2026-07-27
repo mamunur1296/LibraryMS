@@ -22,7 +22,7 @@ public class BookTests
     public void Constructor_ShouldRaiseBookCreatedEvent()
     {
         var book = CreateBook();
-        book.DomainEvents.Should().ContainSingle(e => e is BookManagement.Events.BookCreatedEvent);
+        book.DomainEvents.Should().ContainSingle(e => e is LibraryMS.Domain.BookManagement.Events.BookCreatedEvent);
     }
 
     [Fact]

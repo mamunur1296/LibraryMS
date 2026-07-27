@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\LibraryMS.Domain.Shared\LibraryMS.Domain.Shared.csproj" />
@@ -13,5 +13,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="LibraryMS.Application" />
+    <InternalsVisibleTo Include="LibraryMS.Infrastructure" />
+    <InternalsVisibleTo Include="LibraryMS.DbMigrator" />
+  </ItemGroup>
 
 </Project>

@@ -1,3 +1,4 @@
+using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.ReservationManagement;
 using Microsoft.Extensions.Logging;

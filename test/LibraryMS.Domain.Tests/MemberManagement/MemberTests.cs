@@ -28,7 +28,7 @@ public class MemberTests
     public void Constructor_ShouldRaiseMemberRegisteredEvent()
     {
         var member = CreateMember();
-        member.DomainEvents.Should().ContainSingle(e => e is MemberManagement.Events.MemberRegisteredEvent);
+        member.DomainEvents.Should().ContainSingle(e => e is LibraryMS.Domain.MemberManagement.Events.MemberRegisteredEvent);
     }
 
     [Fact]

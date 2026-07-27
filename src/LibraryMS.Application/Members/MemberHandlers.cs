@@ -1,3 +1,4 @@
+using LibraryMS.Domain.Shared;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Application.Contracts.Members;
 using LibraryMS.Application.Contracts.Common;
