@@ -20,13 +20,13 @@ public static class EntityFrameworkCoreServiceRegistration
     {
         // Register Interceptors
         services.AddScoped<AuditableEntityInterceptor>();
-        services.AddScoped<DomainEventDispatcherInterceptor>();
+        services.AddScoped<DomainEventToOutboxInterceptor>();
 
         // Register DbContext with PostgreSQL
         services.AddDbContext<LibraryDbContext>((sp, options) =>
         {
             var auditableInterceptor = sp.GetRequiredService<AuditableEntityInterceptor>();
-            var domainEventInterceptor = sp.GetRequiredService<DomainEventDispatcherInterceptor>();
+            var domainEventInterceptor = sp.GetRequiredService<DomainEventToOutboxInterceptor>();
 
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
                    .AddInterceptors(auditableInterceptor, domainEventInterceptor);

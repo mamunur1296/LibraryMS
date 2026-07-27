@@ -24,9 +24,10 @@ public static class ApplicationServiceRegistration
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(assembly);
-            // Pipeline behaviors (order matters)
-            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            // Chain of Responsibility pipeline (order matters: Logging -> Retry -> Validation -> Handler)
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(RetryBehavior<,>));
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         });
 
 
@@ -39,6 +40,10 @@ public static class ApplicationServiceRegistration
         services.AddScoped<BranchManager>();
         services.AddScoped<MemberManager>();
         services.AddScoped<BorrowManager>();
+
+        // Application-level Background Job classes (registered here to avoid circular dependency)
+        services.AddScoped<BackgroundJobs.OverdueCheckJob>();
+        services.AddScoped<BackgroundJobs.ReservationExpiryJob>();
 
         return services;
     }

@@ -5,6 +5,7 @@ using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.MemberManagement;
 using LibraryMS.Domain.ReservationManagement;
 using LibraryMS.EntityFrameworkCore.Interceptors;
+using LibraryMS.EntityFrameworkCore.Outbox;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryMS.EntityFrameworkCore;
@@ -12,12 +13,12 @@ namespace LibraryMS.EntityFrameworkCore;
 public sealed class LibraryDbContext : DbContext
 {
     private readonly AuditableEntityInterceptor _auditableInterceptor;
-    private readonly DomainEventDispatcherInterceptor _domainEventInterceptor;
+    private readonly DomainEventToOutboxInterceptor _domainEventInterceptor;
 
     public LibraryDbContext(
         DbContextOptions<LibraryDbContext> options,
         AuditableEntityInterceptor auditableInterceptor,
-        DomainEventDispatcherInterceptor domainEventInterceptor)
+        DomainEventToOutboxInterceptor domainEventInterceptor)
         : base(options)
     {
         _auditableInterceptor = auditableInterceptor;
@@ -37,6 +38,8 @@ public sealed class LibraryDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

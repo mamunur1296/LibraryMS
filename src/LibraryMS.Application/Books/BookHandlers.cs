@@ -164,7 +164,7 @@ public sealed class GetAvailableCopiesQueryHandler : IRequestHandler<GetAvailabl
         var book = await _repository.GetByIdWithCopiesAsync(request.BookId, cancellationToken);
         if (book == null) return new List<BookCopyDto>();
         return book.Copies
-            .Where(c => c.Status == LibraryMS.Domain.Shared.Enums.BookStatus.Available)
+            .Where(c => c.Status == LibraryMS.Domain.Shared.Enums.CopyStatus.Available)
             .Select(c => c.ToDto())
             .ToList();
     }

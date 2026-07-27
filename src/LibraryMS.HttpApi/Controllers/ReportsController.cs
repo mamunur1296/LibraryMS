@@ -3,6 +3,7 @@ using LibraryMS.Application.Contracts.DTOs.Report;
 using LibraryMS.Application.Contracts.Reports;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryMS.HttpApi.Controllers;

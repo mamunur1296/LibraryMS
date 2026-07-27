@@ -1,8 +1,9 @@
 using LibraryMS.Domain.Shared.Interfaces;
 using LibraryMS.Domain.Common;
-using MediatR;
+using LibraryMS.EntityFrameworkCore.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using System.Text.Json;
 
 namespace LibraryMS.EntityFrameworkCore.Interceptors;
 
@@ -51,38 +52,51 @@ public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
     }
 }
 
-public sealed class DomainEventDispatcherInterceptor : SaveChangesInterceptor
+/// <summary>
+/// Interceptor that implements the Transactional Outbox Pattern.
+/// Instead of publishing domain events immediately (which breaks atomicity),
+/// it serializes them into the OutboxMessages table within the same DB transaction.
+/// A separate Hangfire background job (OutboxProcessorJob) polls and dispatches them.
+/// </summary>
+public sealed class DomainEventToOutboxInterceptor : SaveChangesInterceptor
 {
-    private readonly IPublisher _publisher;
-
-    public DomainEventDispatcherInterceptor(IPublisher publisher)
+    private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        _publisher = publisher;
-    }
+        WriteIndented = false
+    };
 
-    public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(DbContextEventData eventData, InterceptionResult<int> result, CancellationToken cancellationToken = default)
+    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
+        DbContextEventData eventData,
+        InterceptionResult<int> result,
+        CancellationToken cancellationToken = default)
     {
         var dbContext = eventData.Context;
         if (dbContext is null)
-            return await base.SavingChangesAsync(eventData, result, cancellationToken);
+            return base.SavingChangesAsync(eventData, result, cancellationToken);
 
+        // Gather all domain events from all aggregates being tracked
         var entitiesWithEvents = dbContext.ChangeTracker.Entries()
             .Select(e => e.Entity)
             .OfType<AggregateRoot<Guid>>()
             .Where(e => e.DomainEvents.Any())
             .ToList();
 
-        var domainEvents = entitiesWithEvents
+        var outboxMessages = entitiesWithEvents
             .SelectMany(e => e.DomainEvents)
+            .Select(domainEvent => OutboxMessage.Create(
+                type: domainEvent.GetType().FullName ?? domainEvent.GetType().Name,
+                content: JsonSerializer.Serialize(domainEvent, domainEvent.GetType(), JsonOptions)))
             .ToList();
 
+        // Clear events before save so they are not processed again
         entitiesWithEvents.ForEach(e => e.ClearDomainEvents());
 
-        foreach (var domainEvent in domainEvents)
+        // Add to OutboxMessages table — persisted in the SAME transaction as business data
+        if (outboxMessages.Count > 0)
         {
-            await _publisher.Publish(domainEvent, cancellationToken);
+            dbContext.Set<OutboxMessage>().AddRange(outboxMessages);
         }
 
-        return await base.SavingChangesAsync(eventData, result, cancellationToken);
+        return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 }

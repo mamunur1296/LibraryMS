@@ -1,9 +1,12 @@
 using System.Text;
+using Hangfire;
 using LibraryMS.Application;
+using LibraryMS.Application.BackgroundJobs;
 using LibraryMS.EntityFrameworkCore;
 using LibraryMS.HttpApi.Controllers;
 using LibraryMS.HttpApi.Host.Middleware;
 using LibraryMS.Infrastructure;
+using LibraryMS.Infrastructure.Jobs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -115,5 +118,31 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
+
+// Hangfire Dashboard (accessible at /hangfire)
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    DashboardTitle = "LibraryMS Job Dashboard",
+    // In production, add authorization filter here
+});
+
+// Schedule recurring jobs
+RecurringJob.AddOrUpdate<OutboxProcessorJob>(
+    "outbox-processor",
+    job => job.ProcessAsync(CancellationToken.None),
+    "*/30 * * * * *",  // Every 30 seconds
+    new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc, QueueName = "outbox" });
+
+RecurringJob.AddOrUpdate<OverdueCheckJob>(
+    "overdue-checker",
+    job => job.ExecuteAsync(CancellationToken.None),
+    Cron.Daily(2), // Every day at 02:00 UTC
+    new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
+
+RecurringJob.AddOrUpdate<ReservationExpiryJob>(
+    "reservation-expiry",
+    job => job.ExecuteAsync(CancellationToken.None),
+    Cron.Hourly(), // Every hour
+    new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
 
 app.Run();
