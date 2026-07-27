@@ -42,3 +42,6 @@ public sealed record GetAllAuthorsQuery()
 
 public sealed record GetAllCategoriesQuery()
     : IRequest<List<CategoryDto>>;
+
+public sealed record GetAvailableCopiesQuery(Guid BookId)
+    : IRequest<List<BookCopyDto>>;
