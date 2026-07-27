@@ -8,7 +8,7 @@ public sealed class RefreshToken : Entity<Guid>
     public Guid UserId { get; private set; }
     public string Token { get; private set; } = default!;
     public DateTime ExpiresAt { get; private set; }
-    public DateTime CreatedAt { get; private set; }
+
     public DateTime? RevokedAt { get; private set; }
     public string? CreatedByIp { get; private set; }
 
@@ -33,3 +33,4 @@ public sealed class RefreshToken : Entity<Guid>
         RevokedAt = DateTime.UtcNow;
     }
 }
+

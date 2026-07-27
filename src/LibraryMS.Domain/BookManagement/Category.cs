@@ -7,7 +7,6 @@ public sealed class Category : Entity<Guid>
 {
     public string Name { get; private set; } = default!;
     public string? Description { get; private set; }
-    public DateTime CreatedAt { get; private set; }
 
     private Category() { }
 
@@ -19,3 +18,4 @@ public sealed class Category : Entity<Guid>
         CreatedAt = DateTime.UtcNow;
     }
 }
+

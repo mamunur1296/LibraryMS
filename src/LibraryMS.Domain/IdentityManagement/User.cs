@@ -17,7 +17,7 @@ public sealed class User : AggregateRoot<Guid>
     public UserRole Role { get; private set; }
     public bool IsActive { get; private set; } = true;
     public Guid? MemberId { get; private set; }  // linked to Member if role=Member
-    public DateTime CreatedAt { get; private set; }
+
     public DateTime? LastLoginAt { get; private set; }
 
     private User() { }
@@ -84,3 +84,4 @@ public sealed class User : AggregateRoot<Guid>
         Email = email.Trim().ToLowerInvariant();
     }
 }
+

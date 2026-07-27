@@ -19,8 +19,6 @@ public sealed class Book : AggregateRoot<Guid>
     public Guid AuthorId { get; private set; }
     public string Language { get; private set; } = "English";
     public string? CoverImageUrl { get; private set; }
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
 
     // Optimistic concurrency token
     public byte[] RowVersion { get; private set; } = default!;
@@ -55,13 +53,13 @@ public sealed class Book : AggregateRoot<Guid>
         CategoryId = categoryId;
         AuthorId = authorId;
         Language = language;
-        UpdatedAt = DateTime.UtcNow;
+        LastModifiedAt = DateTime.UtcNow;
     }
 
     internal void SetCoverImage(string? url)
     {
         CoverImageUrl = url;
-        UpdatedAt = DateTime.UtcNow;
+        LastModifiedAt = DateTime.UtcNow;
     }
 
     /// <summary>Adds a new physical copy of this book to a branch.</summary>
@@ -123,3 +121,5 @@ public sealed class Book : AggregateRoot<Guid>
         PublicationYear = year;
     }
 }
+
+

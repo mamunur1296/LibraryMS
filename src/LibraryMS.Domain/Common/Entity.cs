@@ -1,12 +1,25 @@
+using LibraryMS.Domain.Shared.Interfaces;
+
 namespace LibraryMS.Domain.Common;
 
 /// <summary>
 /// Base class for all domain entities. Holds the typed identity key.
 /// </summary>
 /// <typeparam name="TId">Type of the entity's unique identifier.</typeparam>
-public abstract class Entity<TId>
+public abstract class Entity<TId> : IAuditableEntity, ISoftDelete
 {
     public TId Id { get; protected set; } = default!;
+
+    // IAuditableEntity properties
+    public DateTime CreatedAt { get; set; }
+    public string? CreatedBy { get; set; }
+    public DateTime? LastModifiedAt { get; set; }
+    public string? LastModifiedBy { get; set; }
+
+    // ISoftDelete properties
+    public bool IsDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public string? DeletedBy { get; set; }
 
     protected Entity() { }
 
@@ -30,3 +43,4 @@ public abstract class Entity<TId>
     public static bool operator !=(Entity<TId>? left, Entity<TId>? right)
         => !(left == right);
 }
+

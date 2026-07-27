@@ -1,3 +1,4 @@
+using LibraryMS.Domain.Shared.Interfaces;
 using LibraryMS.Domain.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -23,17 +24,28 @@ public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
     {
         if (context is null) return;
 
-        var entries = context.ChangeTracker.Entries();
+        var entries = context.ChangeTracker.Entries<IAuditableEntity>();
 
         foreach (var entry in entries)
         {
-            if (entry.State == EntityState.Added && entry.Metadata.FindProperty("CreatedAt") != null)
+            if (entry.State == EntityState.Added)
             {
-                entry.Property("CreatedAt").CurrentValue = DateTime.UtcNow;
+                entry.Entity.CreatedAt = DateTime.UtcNow;
             }
-            if ((entry.State == EntityState.Modified || entry.State == EntityState.Added) && entry.Metadata.FindProperty("UpdatedAt") != null)
+            if (entry.State == EntityState.Modified)
             {
-                entry.Property("UpdatedAt").CurrentValue = DateTime.UtcNow;
+                entry.Entity.LastModifiedAt = DateTime.UtcNow;
+            }
+        }
+
+        var softDeleteEntries = context.ChangeTracker.Entries<ISoftDelete>();
+        foreach (var entry in softDeleteEntries)
+        {
+            if (entry.State == EntityState.Deleted)
+            {
+                entry.State = EntityState.Modified;
+                entry.Entity.IsDeleted = true;
+                entry.Entity.DeletedAt = DateTime.UtcNow;
             }
         }
     }

@@ -7,7 +7,6 @@ public sealed class Author : Entity<Guid>
 {
     public string Name { get; private set; } = default!;
     public string? Biography { get; private set; }
-    public DateTime CreatedAt { get; private set; }
 
     private Author() { }
 
@@ -19,3 +18,4 @@ public sealed class Author : Entity<Guid>
         CreatedAt = DateTime.UtcNow;
     }
 }
+

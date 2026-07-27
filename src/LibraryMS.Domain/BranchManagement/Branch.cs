@@ -14,8 +14,6 @@ public sealed class Branch : AggregateRoot<Guid>
     public string Phone { get; private set; } = default!;
     public string Email { get; private set; } = default!;
     public bool IsActive { get; private set; } = true;
-    public DateTime CreatedAt { get; private set; }
-    public DateTime? UpdatedAt { get; private set; }
 
     private Branch() { } // Required for EF Core
 
@@ -37,7 +35,7 @@ public sealed class Branch : AggregateRoot<Guid>
         SetAddress(address);
         SetPhone(phone);
         SetEmail(email);
-        UpdatedAt = DateTime.UtcNow;
+        LastModifiedAt = DateTime.UtcNow;
     }
 
     internal void Deactivate()
@@ -46,7 +44,7 @@ public sealed class Branch : AggregateRoot<Guid>
             throw new DomainException("Branch is already inactive.", "BRANCH_ALREADY_INACTIVE");
 
         IsActive = false;
-        UpdatedAt = DateTime.UtcNow;
+        LastModifiedAt = DateTime.UtcNow;
     }
 
     internal void Activate()
@@ -55,7 +53,7 @@ public sealed class Branch : AggregateRoot<Guid>
             throw new DomainException("Branch is already active.", "BRANCH_ALREADY_ACTIVE");
 
         IsActive = true;
-        UpdatedAt = DateTime.UtcNow;
+        LastModifiedAt = DateTime.UtcNow;
     }
 
     private void SetName(string name)
@@ -88,3 +86,5 @@ public sealed class Branch : AggregateRoot<Guid>
         Email = email.Trim().ToLowerInvariant();
     }
 }
+
+

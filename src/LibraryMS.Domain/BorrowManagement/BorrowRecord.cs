@@ -30,7 +30,6 @@ public sealed class BorrowRecord : AggregateRoot<Guid>
     public decimal LateFine { get; private set; }
     public bool IsFinePaid { get; private set; }
     public string? Notes { get; private set; }
-    public DateTime CreatedAt { get; private set; }
 
     private BorrowRecord() { }
 
@@ -103,3 +102,4 @@ public sealed class BorrowRecord : AggregateRoot<Guid>
     public bool IsOverdue => Status == BorrowStatus.Active && DateTime.UtcNow > DueDate;
     public int DaysUntilDue => (int)(DueDate - DateTime.UtcNow).TotalDays;
 }
+

@@ -21,7 +21,7 @@ public sealed class Reservation : AggregateRoot<Guid>
     public Guid BranchId { get; private set; }
     public int QueuePosition { get; private set; }
     public ReservationStatus Status { get; private set; }
-    public DateTime CreatedAt { get; private set; }
+
     public DateTime? NotifiedAt { get; private set; }
     public DateTime? ExpiresAt { get; private set; }
     public DateTime? FulfilledAt { get; private set; }
@@ -96,3 +96,4 @@ public sealed class Reservation : AggregateRoot<Guid>
     public bool IsExpiredByTime => Status == ReservationStatus.Available
         && ExpiresAt.HasValue && DateTime.UtcNow > ExpiresAt.Value;
 }
+

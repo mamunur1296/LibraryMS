@@ -42,6 +42,19 @@ public sealed class LibraryDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LibraryDbContext).Assembly);
+
+        // Apply Global Query Filter for Soft Delete
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(LibraryMS.Domain.Shared.Interfaces.ISoftDelete).IsAssignableFrom(entityType.ClrType))
+            {
+                var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
+                var property = System.Linq.Expressions.Expression.Property(parameter, "IsDeleted");
+                var condition = System.Linq.Expressions.Expression.Equal(property, System.Linq.Expressions.Expression.Constant(false));
+                var lambda = System.Linq.Expressions.Expression.Lambda(condition, parameter);
+                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+            }
+        }
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
