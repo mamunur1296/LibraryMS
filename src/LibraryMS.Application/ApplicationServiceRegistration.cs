@@ -40,6 +40,8 @@ public static class ApplicationServiceRegistration
         services.AddScoped<BranchManager>();
         services.AddScoped<MemberManager>();
         services.AddScoped<BorrowManager>();
+        services.AddScoped<UserManager>();
+        services.AddScoped<RefreshTokenManager>();
 
         // Application-level Background Job classes (registered here to avoid circular dependency)
         services.AddScoped<BackgroundJobs.OverdueCheckJob>();

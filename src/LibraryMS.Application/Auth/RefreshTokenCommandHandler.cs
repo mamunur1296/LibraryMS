@@ -14,11 +14,16 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
 {
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenService _jwtService;
+    private readonly RefreshTokenManager _refreshTokenManager;
 
-    public RefreshTokenCommandHandler(IUserRepository userRepository, IJwtTokenService jwtService)
+    public RefreshTokenCommandHandler(
+        IUserRepository userRepository, 
+        IJwtTokenService jwtService,
+        RefreshTokenManager refreshTokenManager)
     {
         _userRepository = userRepository;
         _jwtService = jwtService;
+        _refreshTokenManager = refreshTokenManager;
     }
 
     public async Task<AuthResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
@@ -43,8 +48,7 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
         var (newAccessToken, expiresAt) = _jwtService.GenerateAccessToken(user);
         var newRefreshToken = _jwtService.GenerateRefreshToken();
 
-        var newTokenEntity = new RefreshToken(Guid.NewGuid(), user.Id, newRefreshToken,
-            DateTime.UtcNow.AddDays(7), null);
+        var newTokenEntity = _refreshTokenManager.Create(user.Id, newRefreshToken, null);
         await _userRepository.AddRefreshTokenAsync(newTokenEntity, cancellationToken);
 
         return new AuthResponse

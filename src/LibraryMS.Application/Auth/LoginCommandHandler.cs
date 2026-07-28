@@ -4,30 +4,33 @@ using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.Shared.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace LibraryMS.Application.Auth;
 
-/// <summary>Handles login — validates credentials, issues JWT + refresh token.</summary>
+/// Handles login — validates credentials, issues JWT + refresh token
 public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenService _jwtService;
     private readonly ILogger<LoginCommandHandler> _logger;
+    private readonly UserManager _userManager;
+    private readonly RefreshTokenManager _refreshTokenManager;
 
     public LoginCommandHandler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         IJwtTokenService jwtService,
-        ILogger<LoginCommandHandler> logger)
+        ILogger<LoginCommandHandler> logger,
+        UserManager userManager,
+        RefreshTokenManager refreshTokenManager)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _jwtService = jwtService;
         _logger = logger;
+        _userManager = userManager;
+        _refreshTokenManager = refreshTokenManager;
     }
 
     public async Task<AuthResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -43,19 +46,15 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResp
         if (!isValid)
             throw new UnauthorizedException("Invalid username or password.");
 
-        // Record login time
-        var updateMethod = typeof(User).GetMethod("RecordLogin",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        updateMethod?.Invoke(user, null);
+        // Record login time using the domain service
+        _userManager.RecordLogin(user);
         await _userRepository.UpdateAsync(user, cancellationToken);
 
         // Generate tokens
         var (accessToken, expiresAt) = _jwtService.GenerateAccessToken(user);
         var refreshToken = _jwtService.GenerateRefreshToken();
 
-        var refreshTokenEntity = new RefreshToken(
-            Guid.NewGuid(), user.Id, refreshToken,
-            DateTime.UtcNow.AddDays(7), null);
+        var refreshTokenEntity = _refreshTokenManager.Create(user.Id, refreshToken, null);
 
         await _userRepository.AddRefreshTokenAsync(refreshTokenEntity, cancellationToken);
 
