@@ -1,10 +1,9 @@
 using LibraryMS.Application.Contracts.Auth;
 using LibraryMS.Application.Contracts.DTOs.Auth;
+using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.IdentityManagement;
-using LibraryMS.Domain.Shared.Exceptions;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
-using LibraryMS.Application.Mapping;
 
 namespace LibraryMS.Application.Auth;
 

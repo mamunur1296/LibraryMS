@@ -1,7 +1,6 @@
 using LibraryMS.Application.Contracts.Auth;
 using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.Shared.Enums;
-using LibraryMS.Domain.Shared.Exceptions;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
 
@@ -14,7 +13,7 @@ public sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserCom
     private readonly UserManager _userManager;
 
     public RegisterUserCommandHandler(
-        IUserRepository userRepository, 
+        IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         UserManager userManager)
     {
