@@ -2,6 +2,7 @@ using LibraryMS.Domain.Shared.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using LibraryMS.Application.Contracts.Common;
 
 namespace LibraryMS.HttpApi.Host.Middleware;
 
@@ -45,13 +46,9 @@ public class GlobalExceptionMiddleware
 
         context.Response.StatusCode = statusCode;
 
-        var result = JsonSerializer.Serialize(new
-        {
-            Status = statusCode,
-            Message = message,
-            ErrorCode = errorCode,
-            Errors = errors
-        }, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        var apiResponse = ApiResponse<object>.FailureResult(message, errorCode, errors);
+
+        var result = JsonSerializer.Serialize(apiResponse, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
         await context.Response.WriteAsync(result);
     }

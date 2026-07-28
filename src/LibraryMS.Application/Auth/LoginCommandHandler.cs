@@ -4,6 +4,8 @@ using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.Shared.Exceptions;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using LibraryMS.Application.Mapping;
+using LibraryMS.Domain.Shared.Guards;
 
 namespace LibraryMS.Application.Auth;
 
@@ -39,12 +41,10 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResp
         var user = await _userRepository.GetByUsernameAsync(request.Username, cancellationToken)
                    ?? await _userRepository.GetByEmailAsync(request.Username, cancellationToken);
 
-        if (user is null || !user.IsActive)
-            throw new UnauthorizedException("Invalid username or password.");
+        Ensure.Authorized(user is not null && user.IsActive);
 
-        var isValid = _passwordHasher.Verify(request.Password, user.PasswordHash, user.PasswordSalt);
-        if (!isValid)
-            throw new UnauthorizedException("Invalid username or password.");
+        var isValid = _passwordHasher.Verify(request.Password, user!.PasswordHash, user.PasswordSalt);
+        Ensure.Authorized(isValid);
 
         // Record login time using the domain service
         _userManager.RecordLogin(user);
@@ -65,14 +65,7 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResp
             AccessToken = accessToken,
             RefreshToken = refreshToken,
             ExpiresAt = expiresAt,
-            User = new UserDto
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = user.Email,
-                Role = user.Role.ToString(),
-                MemberId = user.MemberId
-            }
+            User = user.ToDto()
         };
     }
 }

@@ -42,6 +42,7 @@ public static class ApplicationServiceRegistration
         services.AddScoped<BorrowManager>();
         services.AddScoped<UserManager>();
         services.AddScoped<RefreshTokenManager>();
+        services.AddSingleton<LibraryMS.Domain.Common.IGuidGenerator, LibraryMS.Domain.Common.GuidGenerator>();
 
         // Application-level Background Job classes (registered here to avoid circular dependency)
         services.AddScoped<BackgroundJobs.OverdueCheckJob>();

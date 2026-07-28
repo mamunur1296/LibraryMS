@@ -2,14 +2,13 @@ using LibraryMS.Application.Contracts.Auth;
 using LibraryMS.Application.Contracts.DTOs.Auth;
 using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.Shared.Exceptions;
+using LibraryMS.Domain.Shared.Guards;
 using MediatR;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using LibraryMS.Application.Mapping;
 
 namespace LibraryMS.Application.Auth;
 
-/// <summary>Handles refresh token rotation.</summary>
+// Handles refresh token rotation.
 public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, AuthResponse>
 {
     private readonly IUserRepository _userRepository;
@@ -17,7 +16,7 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
     private readonly RefreshTokenManager _refreshTokenManager;
 
     public RefreshTokenCommandHandler(
-        IUserRepository userRepository, 
+        IUserRepository userRepository,
         IJwtTokenService jwtService,
         RefreshTokenManager refreshTokenManager)
     {
@@ -29,17 +28,17 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
     public async Task<AuthResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var principal = _jwtService.GetPrincipalFromExpiredToken(request.AccessToken);
-        var userId = Guid.Parse(principal.FindFirst("sub")?.Value
-            ?? throw new UnauthorizedException("Invalid access token."));
+        var subClaim = principal.FindFirst("sub")?.Value;
+        Ensure.Authorized(subClaim is not null, "Invalid access token.");
+        var userId = Guid.Parse(subClaim!);
 
-        var storedToken = await _userRepository.GetRefreshTokenAsync(request.RefreshToken, cancellationToken)
-            ?? throw new UnauthorizedException("Refresh token not found.");
+        var storedToken = await _userRepository.GetRefreshTokenAsync(request.RefreshToken, cancellationToken);
+        Ensure.Authorized(storedToken is not null, "Refresh token not found.");
 
-        if (!storedToken.IsActive || storedToken.UserId != userId)
-            throw new UnauthorizedException("Invalid or expired refresh token.");
+        Ensure.Authorized(storedToken!.IsActive && storedToken.UserId == userId, "Invalid or expired refresh token.");
 
-        var user = await _userRepository.GetByIdAsync(userId, cancellationToken)
-            ?? throw new UnauthorizedException("User not found.");
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        Ensure.Authorized(user is not null, "User not found.");
 
         // Revoke old token, issue new
         storedToken.Revoke();
@@ -56,12 +55,7 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
             AccessToken = newAccessToken,
             RefreshToken = newRefreshToken,
             ExpiresAt = expiresAt,
-            User = new UserDto
-            {
-                Id = user.Id, Username = user.Username,
-                Email = user.Email, Role = user.Role.ToString(),
-                MemberId = user.MemberId
-            }
+            User = user.ToDto()
         };
     }
 }

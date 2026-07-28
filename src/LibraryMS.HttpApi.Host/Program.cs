@@ -27,7 +27,10 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // 2. Add Controllers from HttpApi project
-builder.Services.AddControllers()
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<LibraryMS.HttpApi.Filters.ApiResponseFilter>();
+})
     .AddApplicationPart(typeof(BaseController).Assembly);
 
 // 3. Configure Authentication (JWT)
