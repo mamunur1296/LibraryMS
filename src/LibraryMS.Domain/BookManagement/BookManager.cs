@@ -1,5 +1,8 @@
 using LibraryMS.Domain.Common;
 using LibraryMS.Domain.Shared.Exceptions;
+using System.Threading;
+using System.Threading.Tasks;
+using System;
 
 namespace LibraryMS.Domain.BookManagement;
 
@@ -7,9 +10,13 @@ namespace LibraryMS.Domain.BookManagement;
 public sealed class BookManager
 {
     private readonly IBookRepository _repository;
+    private readonly IGuidGenerator _guidGenerator;
 
-    public BookManager(IBookRepository repository)
-        => _repository = repository;
+    public BookManager(IBookRepository repository, IGuidGenerator guidGenerator)
+    {
+        _repository = repository;
+        _guidGenerator = guidGenerator;
+    }
 
     public async Task<Book> CreateAsync(
         string title, string isbn, string? description,
@@ -18,7 +25,7 @@ public sealed class BookManager
     {
         await EnsureIsbnUniqueAsync(isbn, excludeId: null, ct);
 
-        return new Book(Guid.NewGuid(), title, isbn, description, publicationYear, categoryId, authorId, language);
+        return new Book(_guidGenerator.Create(), title, isbn, description, publicationYear, categoryId, authorId, language);
     }
 
     public async Task<Book> UpdateAsync(
@@ -33,7 +40,7 @@ public sealed class BookManager
     public BookCopy AddCopyToBranch(Book book, Guid branchId)
     {
         ArgumentNullException.ThrowIfNull(book);
-        return book.AddCopy(branchId);
+        return book.AddCopy(_guidGenerator.Create(), branchId);
     }
 
     private async Task EnsureIsbnUniqueAsync(string isbn, Guid? excludeId, CancellationToken ct)

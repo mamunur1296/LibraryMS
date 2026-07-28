@@ -63,10 +63,10 @@ public sealed class Book : AggregateRoot<Guid>
     }
 
     /// <summary>Adds a new physical copy of this book to a branch.</summary>
-    internal BookCopy AddCopy(Guid branchId)
+    internal BookCopy AddCopy(Guid copyId, Guid branchId)
     {
         var copyNumber = GenerateCopyNumber(branchId);
-        var copy = new BookCopy(Guid.NewGuid(), Id, branchId, copyNumber);
+        var copy = new BookCopy(copyId, Id, branchId, copyNumber);
         _copies.Add(copy);
         AddDomainEvent(new BookCopyAddedEvent(Id, copy.Id, branchId));
         return copy;

@@ -37,6 +37,7 @@ public static class ApplicationServiceRegistration
 
         // Domain Services
         services.AddScoped<BookManager>();
+        services.AddScoped<AuthorManager>();
         services.AddScoped<BranchManager>();
         services.AddScoped<MemberManager>();
         services.AddScoped<BorrowManager>();
