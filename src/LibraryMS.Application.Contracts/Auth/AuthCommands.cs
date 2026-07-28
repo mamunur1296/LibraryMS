@@ -14,6 +14,5 @@ public sealed record RefreshTokenCommand(string AccessToken, string RefreshToken
 public sealed record RevokeTokenCommand(string RefreshToken)
     : IRequest;
 
-// ──── Queries ────
-public sealed record GetCurrentUserQuery(Guid UserId)
-    : IRequest<UserDto?>;
+public sealed record RegisterUserCommand(string Username, string Email, string Password, string Role)
+    : IRequest<Guid>;

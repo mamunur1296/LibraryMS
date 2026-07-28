@@ -8,6 +8,11 @@ export const authService = {
     return response.data;
   },
 
+  async register(data: any): Promise<string> {
+    const response = await apiClient.post<string>("/api/Auth/register", data);
+    return response.data;
+  },
+
   logout() {
     if (typeof window !== "undefined") {
       localStorage.removeItem("token");

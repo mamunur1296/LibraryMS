@@ -68,6 +68,16 @@ public sealed class User : AggregateRoot<Guid>
         Role = newRole;
     }
 
+    internal void ChangeUsername(string newUsername)
+    {
+        SetUsername(newUsername);
+    }
+
+    internal void ChangeEmail(string newEmail)
+    {
+        SetEmail(newEmail);
+    }
+
     private void SetUsername(string username)
     {
         if (string.IsNullOrWhiteSpace(username))

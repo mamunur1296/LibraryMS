@@ -11,6 +11,7 @@ const navigation = [
   { name: "Borrows", href: "/borrows", icon: "ClipboardListIcon" },
   { name: "Reservations", href: "/reservations", icon: "ClockIcon" },
   { name: "Reports", href: "/reports", icon: "ChartBarIcon" },
+  { name: "Settings", href: "/settings", icon: "CogIcon" },
 ];
 
 export function Sidebar() {

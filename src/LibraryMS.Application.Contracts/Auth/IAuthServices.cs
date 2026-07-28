@@ -1,4 +1,5 @@
 using LibraryMS.Domain.IdentityManagement;
+using System.Security.Claims;
 
 namespace LibraryMS.Application.Contracts.Auth;
 
@@ -14,5 +15,5 @@ public interface IJwtTokenService
 {
     (string Token, DateTime ExpiresAt) GenerateAccessToken(User user);
     string GenerateRefreshToken();
-    System.Security.Claims.ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
+    ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
 }

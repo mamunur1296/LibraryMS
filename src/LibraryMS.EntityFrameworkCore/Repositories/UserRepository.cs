@@ -63,4 +63,9 @@ public sealed class UserRepository : BaseRepository<User>, IUserRepository
     {
         return await DbSet.AnyAsync(u => u.Email.ToLower() == email.ToLower(), cancellationToken);
     }
+
+    public async Task<List<User>> GetAllUsersAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet.ToListAsync(cancellationToken);
+    }
 }
