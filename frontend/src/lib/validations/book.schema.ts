@@ -16,7 +16,7 @@ export type CategoryFormData = z.infer<typeof categorySchema>;
 
 export const bookSchema = z.object({
   title: z.string().min(2, "Title is required"),
-  isbn: z.string().min(10, "ISBN is required").max(20, "ISBN is too long"),
+  isbn: z.string().min(1, "ISBN is required").min(10, "ISBN must be at least 10 characters").max(20, "ISBN is too long"),
   description: z.string().optional(),
   publicationYear: z.number().min(1000, "Invalid year").max(new Date().getFullYear(), "Year cannot be in the future"),
   categoryId: z.string().min(1, "Category is required"),

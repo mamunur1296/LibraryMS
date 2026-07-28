@@ -30,7 +30,9 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResp
 
     public async Task<AuthResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByUsernameAsync(request.Username, cancellationToken);
+        // Support login with either username or email
+        var user = await _userRepository.GetByUsernameAsync(request.Username, cancellationToken)
+                   ?? await _userRepository.GetByEmailAsync(request.Username, cancellationToken);
 
         if (user is null || !user.IsActive)
             throw new UnauthorizedException("Invalid username or password.");

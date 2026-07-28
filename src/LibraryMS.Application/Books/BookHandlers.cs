@@ -36,8 +36,17 @@ public sealed class CreateBookCommandHandler : IRequestHandler<CreateBookCommand
         for (int i = 0; i < request.InitialCopies; i++)
             _manager.AddCopyToBranch(book, request.BranchId);
 
-        await _repository.AddAsync(book, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await _repository.AddAsync(book, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Database constraint violation while creating book.");
+            var innerMsg = ex.InnerException?.Message ?? ex.Message;
+            throw new DomainException($"Failed to save book to database. Error: {innerMsg}", "DB_UPDATE_ERROR");
+        }
 
         _logger.LogInformation("Book '{Title}' (ISBN: {ISBN}) created with {Copies} copies",
             book.Title, book.ISBN.Value, request.InitialCopies);
@@ -183,5 +192,87 @@ public sealed class GetBookByIdQueryHandler : IRequestHandler<GetBookByIdQuery, 
     {
         var book = await _repository.GetByIdWithCopiesAsync(request.Id, cancellationToken);
         return book?.ToDto();
+    }
+}
+
+public sealed class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQuery, List<AuthorDto>>
+{
+    private readonly IBookRepository _repository;
+
+    public GetAllAuthorsQueryHandler(IBookRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<List<AuthorDto>> Handle(GetAllAuthorsQuery request, CancellationToken cancellationToken)
+    {
+        var authors = await _repository.GetAllAuthorsAsync(cancellationToken);
+        return authors.Select(a => a.ToDto()).ToList();
+    }
+}
+
+public sealed class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuery, List<CategoryDto>>
+{
+    private readonly IBookRepository _repository;
+
+    public GetAllCategoriesQueryHandler(IBookRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<List<CategoryDto>> Handle(GetAllCategoriesQuery request, CancellationToken cancellationToken)
+    {
+        var categories = await _repository.GetAllCategoriesAsync(cancellationToken);
+        return categories.Select(c => c.ToDto()).ToList();
+    }
+}
+
+public sealed class CreateAuthorCommandHandler : IRequestHandler<CreateAuthorCommand, AuthorDto>
+{
+    private readonly IBookRepository _repository;
+
+    public CreateAuthorCommandHandler(IBookRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<AuthorDto> Handle(CreateAuthorCommand request, CancellationToken cancellationToken)
+    {
+        var author = new Author(Guid.NewGuid(), request.Name, request.Biography);
+        try
+        {
+            await _repository.AddAuthorAsync(author, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            var innerMsg = ex.InnerException?.Message ?? ex.Message;
+            throw new DomainException($"Failed to save author. Error: {innerMsg}", "DB_UPDATE_ERROR");
+        }
+        return author.ToDto();
+    }
+}
+
+public sealed class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, CategoryDto>
+{
+    private readonly IBookRepository _repository;
+
+    public CreateCategoryCommandHandler(IBookRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<CategoryDto> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
+    {
+        var category = new Category(Guid.NewGuid(), request.Name, request.Description);
+        try
+        {
+            await _repository.AddCategoryAsync(category, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            var innerMsg = ex.InnerException?.Message ?? ex.Message;
+            throw new DomainException($"Failed to save category. Error: {innerMsg}", "DB_UPDATE_ERROR");
+        }
+        return category.ToDto();
     }
 }

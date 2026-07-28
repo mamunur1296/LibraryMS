@@ -61,4 +61,23 @@ public sealed class BookRepository : BaseRepository<Book>, IBookRepository
             
         return await query.AnyAsync(cancellationToken);
     }
+
+    public async Task<List<Author>> GetAllAuthorsAsync(CancellationToken ct = default)
+        => await DbContext.Authors.AsNoTracking().OrderBy(a => a.Name).ToListAsync(ct);
+
+    public async Task<List<Category>> GetAllCategoriesAsync(CancellationToken ct = default)
+        => await DbContext.Categories.AsNoTracking().OrderBy(c => c.Name).ToListAsync(ct);
+
+    public async Task AddAuthorAsync(Author author, CancellationToken ct = default)
+    {
+        DbContext.Authors.Add(author);
+        await DbContext.SaveChangesAsync(ct);
+    }
+
+    public async Task AddCategoryAsync(Category category, CancellationToken ct = default)
+    {
+        DbContext.Categories.Add(category);
+        await DbContext.SaveChangesAsync(ct);
+    }
 }
+

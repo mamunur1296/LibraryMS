@@ -39,6 +39,7 @@ public class GlobalExceptionMiddleware
             DomainException de => (400, de.Message, new Dictionary<string, string[]>(), "DOMAIN_ERROR"),
             NotFoundException ne => (404, ne.Message, new Dictionary<string, string[]>(), "NOT_FOUND"),
             UnauthorizedAccessException => (401, "Unauthorized", new Dictionary<string, string[]>(), "UNAUTHORIZED"),
+            Microsoft.EntityFrameworkCore.DbUpdateException dbEx => (400, "Database Update Error: " + (dbEx.InnerException?.Message ?? dbEx.Message), new Dictionary<string, string[]>(), "DB_UPDATE_ERROR"),
             _ => (500, "Internal Server Error", new Dictionary<string, string[]>(), "INTERNAL_ERROR")
         };
 

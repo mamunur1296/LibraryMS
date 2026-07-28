@@ -12,4 +12,8 @@ public interface IBookRepository
     Task AddAsync(Book book, CancellationToken ct = default);
     Task UpdateAsync(Book book, CancellationToken ct = default);
     Task DeleteAsync(Book book, CancellationToken ct = default);
+    Task<List<Author>> GetAllAuthorsAsync(CancellationToken ct = default);
+    Task<List<Category>> GetAllCategoriesAsync(CancellationToken ct = default);
+    Task AddAuthorAsync(Author author, CancellationToken ct = default);
+    Task AddCategoryAsync(Category category, CancellationToken ct = default);
 }
