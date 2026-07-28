@@ -1,5 +1,6 @@
 using LibraryMS.Application.Mapping;
 using LibraryMS.Application.Contracts.Books;
+using LibraryMS.Application.Contracts.DTOs.Book;
 using LibraryMS.Domain.BookManagement;
 using MediatR;
 using System.Threading;

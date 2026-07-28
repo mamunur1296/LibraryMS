@@ -6,6 +6,7 @@ using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.MemberManagement;
 using LibraryMS.Domain.BranchManagement;
 using LibraryMS.Domain.ReservationManagement;
+using LibraryMS.Domain.IdentityManagement;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
