@@ -9,6 +9,7 @@ using LibraryMS.Domain.IdentityManagement.Services;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 
 namespace LibraryMS.Application.Auth;
 
@@ -37,7 +38,7 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
         _logger.LogInformation("Processing refresh token request.");
 
         var principal = _jwtService.GetPrincipalFromExpiredToken(request.AccessToken);
-        var subClaim = principal.FindFirst("sub")?.Value;
+        var subClaim = principal.FindFirst("sub")?.Value ?? principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         Ensure.Authorized(subClaim is not null, "Invalid access token.");
         var userId = Guid.Parse(subClaim!);
 
