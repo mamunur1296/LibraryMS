@@ -1,16 +1,13 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { bookService } from "@/lib/services/book.service";
-import { BookDto, PagedResult } from "@/types/book.types";
-import { BookFormModal } from "@/components/books/BookFormModal";
+import { useEffect, useState } from 'react';
+import { bookService } from '@/lib/services/book.service';
+import { BookDto, PagedResult } from '@/types/book.types';
+import { BookFormModal } from '@/components/books/BookFormModal';
 
 export default function BooksPage() {
   const [data, setData] = useState<PagedResult<BookDto> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
-  
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bookToEdit, setBookToEdit] = useState<BookDto | null>(null);
 
@@ -20,7 +17,7 @@ export default function BooksPage() {
       const result = await bookService.search(searchTerm, undefined, undefined, undefined, page, 10);
       setData(result);
     } catch (error) {
-      console.error("Failed to fetch books", error);
+      console.error('Failed to fetch books', error);
     } finally {
       setLoading(false);
     }
@@ -29,8 +26,7 @@ export default function BooksPage() {
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       fetchBooks();
-    }, 300); // 300ms debounce for search
-
+    }, 300);
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, page]);
 
@@ -45,12 +41,12 @@ export default function BooksPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this book?")) {
+    if (confirm('Are you sure you want to delete this book?')) {
       try {
         await bookService.delete(id);
         fetchBooks();
-      } catch (error) {
-        alert("Failed to delete the book.");
+      } catch {
+        alert('Failed to delete the book.');
       }
     }
   };
@@ -85,11 +81,8 @@ export default function BooksPage() {
               type="text"
               placeholder="Search books by title, author, or ISBN..."
               value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPage(1); // reset to page 1 on search
-              }}
-              className="block w-full pl-10 pr-3 py-2 border border-slate-700 rounded-lg leading-5 bg-slate-950 text-slate-300 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
+              className="block w-full pl-10 pr-3 py-2 border border-slate-700 rounded-lg bg-slate-950 text-slate-300 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
           </div>
         </div>
@@ -107,19 +100,13 @@ export default function BooksPage() {
             </thead>
             <tbody>
               {loading && !data ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-                    </div>
-                  </td>
-                </tr>
+                <tr><td colSpan={5} className="px-6 py-8 text-center">
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+                  </div>
+                </td></tr>
               ) : !data || data.items.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
-                    No books found matching your criteria.
-                  </td>
-                </tr>
+                <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-500">No books found matching your criteria.</td></tr>
               ) : (
                 data.items.map((book) => (
                   <tr key={book.id} className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
@@ -132,27 +119,13 @@ export default function BooksPage() {
                       <div className="text-xs text-slate-500 mt-0.5">{book.language}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`font-medium ${book.availableCopies > 0 ? "text-emerald-400" : "text-red-400"}`}>
-                        {book.availableCopies}
-                      </span>
+                      <span className={`font-medium ${book.availableCopies > 0 ? 'text-emerald-400' : 'text-red-400'}`}>{book.availableCopies}</span>
                       <span className="text-slate-500"> / {book.totalCopies}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-slate-400">
-                      {book.publicationYear}
-                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-slate-400">{book.publicationYear}</td>
                     <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
-                      <button
-                        onClick={() => handleEdit(book)}
-                        className="text-indigo-400 hover:text-indigo-300 text-xs font-medium transition-colors"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(book.id)}
-                        className="text-red-400 hover:text-red-300 text-xs font-medium transition-colors"
-                      >
-                        Delete
-                      </button>
+                      <button onClick={() => handleEdit(book)} className="text-indigo-400 hover:text-indigo-300 text-xs font-medium">Edit</button>
+                      <button onClick={() => handleDelete(book.id)} className="text-red-400 hover:text-red-300 text-xs font-medium">Delete</button>
                     </td>
                   </tr>
                 ))
@@ -160,28 +133,15 @@ export default function BooksPage() {
             </tbody>
           </table>
         </div>
-        
-        {/* Pagination */}
+
         {data && data.totalPages > 1 && (
           <div className="px-6 py-3 border-t border-slate-800 bg-slate-900/50 flex items-center justify-between">
             <div className="text-sm text-slate-400">
               Showing <span className="font-medium text-white">{(page - 1) * 10 + 1}</span> to <span className="font-medium text-white">{Math.min(page * 10, data.totalCount)}</span> of <span className="font-medium text-white">{data.totalCount}</span> results
             </div>
             <div className="flex space-x-2">
-              <button
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={!data.hasPreviousPage}
-                className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 disabled:hover:bg-slate-800 transition-colors text-sm"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
-                disabled={!data.hasNextPage}
-                className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 disabled:hover:bg-slate-800 transition-colors text-sm"
-              >
-                Next
-              </button>
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={!data.hasPreviousPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm">Previous</button>
+              <button onClick={() => setPage(p => Math.min(data.totalPages, p + 1))} disabled={!data.hasNextPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm">Next</button>
             </div>
           </div>
         )}

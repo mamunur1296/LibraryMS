@@ -1,14 +1,12 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { authService } from "@/lib/services/auth.service";
+import { useNavigate } from 'react-router-dom';
+import { authService } from '@/lib/services/auth.service';
 
 export function Navbar() {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     authService.logout();
-    router.push("/login");
+    navigate('/login');
   };
 
   return (
@@ -16,7 +14,7 @@ export function Navbar() {
       <div className="flex items-center">
         {/* Mobile menu button could go here */}
       </div>
-      
+
       <div className="flex items-center space-x-4">
         <button
           onClick={handleLogout}
