@@ -1,4 +1,4 @@
-namespace LibraryMS.Application.Contracts.Auth.Interfaces;
+namespace LibraryMS.Application.Contracts.Services;
 
 // Interface for password hashing — implemented in Infrastructure.
 public interface IPasswordHasher

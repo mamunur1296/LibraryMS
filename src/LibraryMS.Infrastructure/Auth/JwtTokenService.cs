@@ -2,7 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using LibraryMS.Application.Contracts.Auth.Interfaces;
+using LibraryMS.Application.Contracts.Services;
 using LibraryMS.Domain.IdentityManagement;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;

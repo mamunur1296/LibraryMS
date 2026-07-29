@@ -1,5 +1,5 @@
 using LibraryMS.Application.Contracts.Auth;
-using LibraryMS.Application.Contracts.Auth.Interfaces;
+using LibraryMS.Application.Contracts.Services;
 using LibraryMS.Application.Contracts.DTOs.Auth;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.IdentityManagement;

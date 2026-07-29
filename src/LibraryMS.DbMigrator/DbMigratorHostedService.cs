@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using LibraryMS.Application.Contracts.Auth.Interfaces;
+using LibraryMS.Application.Contracts.Services;
 
 namespace LibraryMS.DbMigrator;
 

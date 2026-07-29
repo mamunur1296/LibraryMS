@@ -1,4 +1,3 @@
-using LibraryMS.Application.Contracts.Common;
 using LibraryMS.Application.Contracts.DTOs.Branch;
 using MediatR;
 
@@ -21,10 +20,3 @@ public sealed record ActivateBranchCommand(Guid Id)
 
 public sealed record DeactivateBranchCommand(Guid Id)
     : IRequest<BranchDto>;
-
-// ──── Queries ────
-public sealed record GetBranchByIdQuery(Guid Id)
-    : IRequest<BranchDto?>;
-
-public sealed record GetAllBranchesQuery(bool IncludeInactive = false)
-    : IRequest<List<BranchDto>>;

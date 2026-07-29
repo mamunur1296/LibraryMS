@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using LibraryMS.Application.Contracts.Auth.Interfaces;
+using LibraryMS.Application.Contracts.Services;
 
 namespace LibraryMS.Infrastructure.Auth;
 

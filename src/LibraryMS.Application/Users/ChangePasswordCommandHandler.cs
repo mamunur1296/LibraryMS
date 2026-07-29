@@ -1,4 +1,4 @@
-using LibraryMS.Application.Contracts.Auth.Interfaces;
+using LibraryMS.Application.Contracts.Services;
 using LibraryMS.Application.Contracts.Users;
 using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.Shared;

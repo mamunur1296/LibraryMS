@@ -1,7 +1,7 @@
 using LibraryMS.Domain.IdentityManagement;
 using System.Security.Claims;
 
-namespace LibraryMS.Application.Contracts.Auth.Interfaces;
+namespace LibraryMS.Application.Contracts.Services;
 
 // Interface for JWT token service — implemented in Infrastructure.
 public interface IJwtTokenService

@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-
 namespace LibraryMS.Application.Contracts.Common;
 
-/// <summary>
-/// A standardized wrapper for all API responses.
-/// </summary>
+
+// A standardized wrapper for all API responses.
+
 public sealed class ApiResponse<T>
 {
     public bool Success { get; init; }
