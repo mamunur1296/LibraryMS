@@ -1,35 +1,31 @@
-using LibraryMS.Application.Contracts.Auth;
 using LibraryMS.Application.Contracts.DTOs.Auth;
 using LibraryMS.Application.Contracts.Users;
+using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.IdentityManagement;
 using MediatR;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace LibraryMS.Application.Users;
 
 public sealed class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<UserDto>>
 {
     private readonly IUserRepository _userRepository;
+    private readonly ILogger<GetAllUsersQueryHandler> _logger;
 
-    public GetAllUsersQueryHandler(IUserRepository userRepository)
+    public GetAllUsersQueryHandler(IUserRepository userRepository, ILogger<GetAllUsersQueryHandler> logger)
     {
         _userRepository = userRepository;
+        _logger = logger;
     }
 
     public async Task<List<UserDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Retrieving all users from database.");
+
         var users = await _userRepository.GetAllUsersAsync(cancellationToken);
-        
-        return users.Select(u => new UserDto
-        {
-            Id = u.Id,
-            Username = u.Username,
-            Email = u.Email,
-            Role = u.Role.ToString(),
-            MemberId = u.MemberId
-        }).ToList();
+
+        _logger.LogInformation("Successfully retrieved {Count} users.", users.Count);
+
+        return users.Select(u => u.ToDto()).ToList();
     }
 }

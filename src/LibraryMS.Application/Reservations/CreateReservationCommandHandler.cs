@@ -1,17 +1,13 @@
-using LibraryMS.Domain.Shared;
-using LibraryMS.Application.Mapping;
-using LibraryMS.Application.Contracts.Reservations;
 using LibraryMS.Application.Contracts.DTOs.Reservation;
+using LibraryMS.Application.Contracts.Reservations;
+using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BookManagement;
 using LibraryMS.Domain.MemberManagement;
 using LibraryMS.Domain.ReservationManagement;
-using LibraryMS.Domain.Shared.Exceptions;
+using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace LibraryMS.Application.Reservations;
 
@@ -38,6 +34,9 @@ public sealed class CreateReservationCommandHandler : IRequestHandler<CreateRese
 
     public async Task<ReservationDto> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Processing CreateReservationCommand for MemberId: {MemberId}, BookId: {BookId}, BranchId: {BranchId}",
+            request.MemberId, request.BookId, request.BranchId);
+
         // Validate member exists and is active
         var member = await _memberRepo.GetByIdAsync(request.MemberId, cancellationToken);
         Ensure.Found(member, $"Member with ID '{request.MemberId}' was not found.");
@@ -64,8 +63,19 @@ public sealed class CreateReservationCommandHandler : IRequestHandler<CreateRese
             Guid.NewGuid(), request.MemberId, request.BookId,
             request.BranchId, queuePosition);
 
-        await _reservationRepo.AddAsync(reservation, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        var dbFailed = false;
+        try
+        {
+            await _reservationRepo.AddAsync(reservation, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to save reservation for member {MemberId} and book {BookId}.", request.MemberId, request.BookId);
+            dbFailed = true;
+        }
+
+        Ensure.Against(dbFailed, "An error occurred while creating the reservation in the database.", "DB_UPDATE_ERROR");
 
         _logger.LogInformation("Reservation created for member {MemberId}, book {BookId}, position #{Position}",
             request.MemberId, request.BookId, queuePosition);
