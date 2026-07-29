@@ -61,4 +61,16 @@ public static class Ensure
             throw new UnauthorizedException(message);
         }
     }
+
+    /// <summary>
+    /// Throws ValidationException if any validation failures are present.
+    /// </summary>
+    public static void HasNoValidationFailures(IEnumerable<FluentValidation.Results.ValidationFailure> failures)
+    {
+        var failureList = failures as IList<FluentValidation.Results.ValidationFailure> ?? failures.ToList();
+        if (failureList.Count > 0)
+        {
+            throw new ValidationException(failureList);
+        }
+    }
 }

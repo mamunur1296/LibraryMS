@@ -1,4 +1,5 @@
 using FluentValidation;
+using LibraryMS.Domain.Shared.Guards;
 using MediatR;
 
 namespace LibraryMS.Application.Behaviours;
@@ -26,8 +27,7 @@ public sealed class ValidationBehavior<TRequest, TResponse>
             .Where(f => f is not null)
             .ToList();
 
-        if (failures.Count > 0)
-            throw new ValidationException(failures);
+        Ensure.HasNoValidationFailures(failures);
 
         return await next(cancellationToken);
     }
