@@ -44,7 +44,8 @@ public static class InfrastructureServiceRegistration
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
             .UsePostgreSqlStorage(c =>
-                c.UseNpgsqlConnection(configuration.GetConnectionString("DefaultConnection"))));
+                c.UseNpgsqlConnection(configuration.GetConnectionString("DefaultConnection")),
+                new PostgreSqlStorageOptions { DistributedLockTimeout = TimeSpan.FromSeconds(30) }));
 
         services.AddHangfireServer(options =>
         {
