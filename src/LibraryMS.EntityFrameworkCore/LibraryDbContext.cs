@@ -1,21 +1,12 @@
-using LibraryMS.Domain.BookManagement;
 using LibraryMS.Domain.BookManagement.AggregateRoots;
 using LibraryMS.Domain.BookManagement.Entities;
-using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.BorrowManagement.AggregateRoots;
-using LibraryMS.Domain.BorrowManagement.Services;
-using LibraryMS.Domain.BranchManagement;
 using LibraryMS.Domain.BranchManagement.AggregateRoots;
-using LibraryMS.Domain.BranchManagement.Services;
-using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.IdentityManagement.AggregateRoots;
 using LibraryMS.Domain.IdentityManagement.Entities;
-using LibraryMS.Domain.IdentityManagement.Services;
-using LibraryMS.Domain.MemberManagement;
 using LibraryMS.Domain.MemberManagement.AggregateRoots;
-using LibraryMS.Domain.MemberManagement.Services;
-using LibraryMS.Domain.ReservationManagement;
 using LibraryMS.Domain.ReservationManagement.AggregateRoots;
+using LibraryMS.Domain.Shared.Interfaces;
 using LibraryMS.EntityFrameworkCore.Interceptors;
 using LibraryMS.EntityFrameworkCore.Outbox;
 using Microsoft.EntityFrameworkCore;
@@ -61,7 +52,7 @@ public sealed class LibraryDbContext : DbContext
         // Apply Global Query Filter for Soft Delete
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(LibraryMS.Domain.Shared.Interfaces.ISoftDelete).IsAssignableFrom(entityType.ClrType))
+            if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
             {
                 var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
                 var property = System.Linq.Expressions.Expression.Property(parameter, "IsDeleted");

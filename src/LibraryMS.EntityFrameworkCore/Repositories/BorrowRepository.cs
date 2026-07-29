@@ -1,6 +1,5 @@
 using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.BorrowManagement.AggregateRoots;
-using LibraryMS.Domain.BorrowManagement.Services;
 using LibraryMS.Domain.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,7 +25,7 @@ public sealed class BorrowRepository : BaseRepository<BorrowRecord>, IBorrowRepo
     }
 
     public async Task<(List<BorrowRecord> Items, int TotalCount)> GetPagedAsync(
-        Guid? memberId, Guid? bookId, string? status, 
+        Guid? memberId, Guid? bookId, string? status,
         int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsNoTracking().AsQueryable();

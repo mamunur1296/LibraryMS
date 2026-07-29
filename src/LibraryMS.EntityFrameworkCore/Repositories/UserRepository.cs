@@ -1,7 +1,6 @@
 using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.IdentityManagement.AggregateRoots;
 using LibraryMS.Domain.IdentityManagement.Entities;
-using LibraryMS.Domain.IdentityManagement.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryMS.EntityFrameworkCore.Repositories;
@@ -46,13 +45,13 @@ public sealed class UserRepository : BaseRepository<User>, IUserRepository
         var tokens = await DbContext.RefreshTokens
             .Where(rt => rt.UserId == userId && rt.IsActive)
             .ToListAsync(cancellationToken);
-            
+
         foreach (var rt in tokens)
         {
             rt.Revoke();
             DbContext.RefreshTokens.Update(rt);
         }
-        
+
         if (tokens.Count > 0)
             await DbContext.SaveChangesAsync(cancellationToken);
     }

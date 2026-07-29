@@ -1,4 +1,3 @@
-using LibraryMS.Application.Contracts.Common;
 using LibraryMS.Domain.BookManagement;
 using LibraryMS.Domain.BookManagement.AggregateRoots;
 using LibraryMS.Domain.BookManagement.Entities;
@@ -25,7 +24,7 @@ public sealed class BookRepository : BaseRepository<Book>, IBookRepository
     }
 
     public async Task<(List<Book> Items, int TotalCount)> SearchAsync(
-        string? searchTerm, Guid? categoryId, Guid? authorId, Guid? branchId, 
+        string? searchTerm, Guid? categoryId, Guid? authorId, Guid? branchId,
         int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsNoTracking().AsQueryable();
@@ -46,7 +45,7 @@ public sealed class BookRepository : BaseRepository<Book>, IBookRepository
             query = query.Where(b => b.Copies.Any(c => c.BranchId == branchId.Value));
 
         var total = await query.CountAsync(cancellationToken);
-        
+
         var items = await query
             .OrderByDescending(b => b.CreatedAt)
             .Skip((page - 1) * pageSize)
@@ -60,7 +59,7 @@ public sealed class BookRepository : BaseRepository<Book>, IBookRepository
         var query = DbSet.Where(b => b.ISBN.Value == isbn);
         if (excludeId.HasValue)
             query = query.Where(b => b.Id != excludeId.Value);
-            
+
         return await query.AnyAsync(cancellationToken);
     }
 
