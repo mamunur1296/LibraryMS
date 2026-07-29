@@ -1,5 +1,3 @@
-"use client";
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { returnBookSchema, ReturnBookFormData } from "@/lib/validations/borrow.schema";

@@ -1,33 +1,46 @@
-import { useEffect, useState } from 'react';
-import { borrowService } from '@/lib/services/borrow.service';
-import { BorrowDto, PagedResult } from '@/types/borrow.types';
-import { BorrowFormModal } from '@/components/borrows/BorrowFormModal';
-import { ReturnBookModal } from '@/components/borrows/ReturnBookModal';
+import { useEffect, useState, useCallback } from "react";
+import { borrowService } from "@/lib/services/borrow.service";
+import { BorrowDto, PagedResult } from "@/types/borrow.types";
+import { BorrowFormModal } from "@/components/borrows/BorrowFormModal";
+import { ReturnBookModal } from "@/components/borrows/ReturnBookModal";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { toast } from "@/components/ui/Toast";
 
 export default function BorrowsPage() {
   const [data, setData] = useState<PagedResult<BorrowDto> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
   const [borrowToManage, setBorrowToManage] = useState<BorrowDto | null>(null);
+  const [finePayTarget, setFinePayTarget] = useState<BorrowDto | null>(null);
 
-  const fetchBorrows = async () => {
+  const fetchBorrows = useCallback(async () => {
     setLoading(true);
     try {
       const result = await borrowService.search(undefined, undefined, statusFilter || undefined, page, 10);
       setData(result);
-    } catch (error) { console.error('Failed to fetch borrows', error); }
-    finally { setLoading(false); }
-  };
+    } catch {
+      toast.error("Failed to fetch borrow records.");
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter, page]);
 
-  useEffect(() => { fetchBorrows(); }, [statusFilter, page]);
+  useEffect(() => { void fetchBorrows(); }, [fetchBorrows]);
 
-  const handlePayFine = async (id: string) => {
-    if (confirm('Confirm fine payment?')) {
-      try { await borrowService.payFine(id); fetchBorrows(); }
-      catch (error: any) { alert(error.response?.data?.message || 'Failed to process payment.'); }
+  const handlePayFineConfirm = async () => {
+    if (!finePayTarget) return;
+    try {
+      await borrowService.payFine(finePayTarget.id);
+      toast.success("Fine payment processed successfully.");
+      void fetchBorrows();
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "Failed to process payment.";
+      toast.error(msg);
+    } finally {
+      setFinePayTarget(null);
     }
   };
 
@@ -38,7 +51,7 @@ export default function BorrowsPage() {
           <h1 className="text-2xl font-bold tracking-tight text-white">Borrow &amp; Return</h1>
           <p className="text-sm text-slate-400 mt-1">Issue books, process returns, and manage fines.</p>
         </div>
-        <button onClick={() => setIsFormModalOpen(true)} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow-lg shadow-indigo-500/20 text-sm font-medium transition-all flex items-center gap-2">
+        <button onClick={() => { setIsFormModalOpen(true); }} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow-lg shadow-indigo-500/20 text-sm font-medium transition-all flex items-center gap-2">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
           Issue Book
         </button>
@@ -66,7 +79,7 @@ export default function BorrowsPage() {
               </tr>
             </thead>
             <tbody>
-              {loading && !data ? (
+              {loading ? (
                 <tr><td colSpan={5} className="px-6 py-8 text-center"><div className="flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div></div></td></tr>
               ) : !data || data.items.length === 0 ? (
                 <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-500">No borrowing records found.</td></tr>
@@ -83,24 +96,26 @@ export default function BorrowsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-xs text-slate-400">Borrowed: {new Date(borrow.borrowDate).toLocaleDateString()}</div>
-                      <div className={`text-xs mt-1 ${borrow.isOverdue && borrow.status === 'Active' ? 'text-red-400 font-medium' : 'text-slate-400'}`}>Due: {new Date(borrow.dueDate).toLocaleDateString()}</div>
+                      <div className={`text-xs mt-1 ${borrow.isOverdue && borrow.status === "Active" ? "text-red-400 font-medium" : "text-slate-400"}`}>Due: {new Date(borrow.dueDate).toLocaleDateString()}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-2 items-start">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${borrow.status === 'Returned' ? 'bg-slate-500/10 text-slate-400 border-slate-500/20' : borrow.isOverdue ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
-                          {borrow.isOverdue && borrow.status === 'Active' ? 'Overdue' : borrow.status}
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${borrow.status === "Returned" ? "bg-slate-500/10 text-slate-400 border-slate-500/20" : borrow.isOverdue ? "bg-red-500/10 text-red-400 border-red-500/20" : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"}`}>
+                          {borrow.isOverdue && borrow.status === "Active" ? "Overdue" : borrow.status}
                         </span>
                         {borrow.lateFine > 0 && (
-                          <span className={`text-xs font-semibold ${borrow.isFinePaid ? 'text-emerald-500' : 'text-red-400'}`}>Fine: ${borrow.lateFine.toFixed(2)} {borrow.isFinePaid ? '(Paid)' : '(Unpaid)'}</span>
+                          <span className={`text-xs font-semibold ${borrow.isFinePaid ? "text-emerald-500" : "text-red-400"}`}>
+                            Fine: ${borrow.lateFine.toFixed(2)} {borrow.isFinePaid ? "(Paid)" : "(Unpaid)"}
+                          </span>
                         )}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
-                      {borrow.status === 'Active' && (
+                      {borrow.status === "Active" && (
                         <button onClick={() => { setBorrowToManage(borrow); setIsReturnModalOpen(true); }} className="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded text-xs font-medium">Process Return</button>
                       )}
                       {borrow.lateFine > 0 && !borrow.isFinePaid && (
-                        <button onClick={() => handlePayFine(borrow.id)} className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded text-xs font-medium">Pay Fine</button>
+                        <button onClick={() => { setFinePayTarget(borrow); }} className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded text-xs font-medium">Pay Fine</button>
                       )}
                     </td>
                   </tr>
@@ -114,15 +129,25 @@ export default function BorrowsPage() {
           <div className="px-6 py-3 border-t border-slate-800 bg-slate-900/50 flex items-center justify-between">
             <div className="text-sm text-slate-400">Showing <span className="font-medium text-white">{(page - 1) * 10 + 1}</span> to <span className="font-medium text-white">{Math.min(page * 10, data.totalCount)}</span> of <span className="font-medium text-white">{data.totalCount}</span> results</div>
             <div className="flex space-x-2">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={!data.hasPreviousPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm">Previous</button>
-              <button onClick={() => setPage(p => Math.min(data.totalPages, p + 1))} disabled={!data.hasNextPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm">Next</button>
+              <button onClick={() => { setPage((p) => Math.max(1, p - 1)); }} disabled={!data.hasPreviousPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm">Previous</button>
+              <button onClick={() => { setPage((p) => Math.min(data.totalPages, p + 1)); }} disabled={!data.hasNextPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm">Next</button>
             </div>
           </div>
         )}
       </div>
 
-      <BorrowFormModal isOpen={isFormModalOpen} onClose={() => setIsFormModalOpen(false)} onSuccess={fetchBorrows} />
-      <ReturnBookModal isOpen={isReturnModalOpen} onClose={() => setIsReturnModalOpen(false)} onSuccess={fetchBorrows} borrow={borrowToManage} />
+      <BorrowFormModal isOpen={isFormModalOpen} onClose={() => { setIsFormModalOpen(false); }} onSuccess={() => { void fetchBorrows(); }} />
+      <ReturnBookModal isOpen={isReturnModalOpen} onClose={() => { setIsReturnModalOpen(false); }} onSuccess={() => { void fetchBorrows(); }} borrow={borrowToManage} />
+
+      <ConfirmDialog
+        isOpen={finePayTarget !== null}
+        title="Confirm Fine Payment"
+        message={`Confirm payment of $${finePayTarget?.lateFine.toFixed(2)} fine for "${finePayTarget?.bookTitle}"?`}
+        confirmText="Confirm Payment"
+        variant="warning"
+        onConfirm={() => { void handlePayFineConfirm(); }}
+        onCancel={() => { setFinePayTarget(null); }}
+      />
     </div>
   );
 }

@@ -1,34 +1,35 @@
-import { useEffect, useState } from 'react';
-import { bookService } from '@/lib/services/book.service';
-import { BookDto, PagedResult } from '@/types/book.types';
-import { BookFormModal } from '@/components/books/BookFormModal';
+import { useEffect, useState, useCallback } from "react";
+import { bookService } from "@/lib/services/book.service";
+import { BookDto, PagedResult } from "@/types/book.types";
+import { BookFormModal } from "@/components/books/BookFormModal";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { toast } from "@/components/ui/Toast";
 
 export default function BooksPage() {
   const [data, setData] = useState<PagedResult<BookDto> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bookToEdit, setBookToEdit] = useState<BookDto | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<BookDto | null>(null);
 
-  const fetchBooks = async () => {
+  const fetchBooks = useCallback(async () => {
     setLoading(true);
     try {
       const result = await bookService.search(searchTerm, undefined, undefined, undefined, page, 10);
       setData(result);
-    } catch (error) {
-      console.error('Failed to fetch books', error);
+    } catch {
+      toast.error("Failed to fetch books.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, page]);
 
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      fetchBooks();
-    }, 300);
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, page]);
+    const delay = setTimeout(() => { void fetchBooks(); }, 300);
+    return () => { clearTimeout(delay); };
+  }, [fetchBooks]);
 
   const handleCreateNew = () => {
     setBookToEdit(null);
@@ -40,14 +41,16 @@ export default function BooksPage() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this book?')) {
-      try {
-        await bookService.delete(id);
-        fetchBooks();
-      } catch {
-        alert('Failed to delete the book.');
-      }
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    try {
+      await bookService.delete(deleteTarget.id);
+      toast.success("Book deleted successfully.");
+      void fetchBooks();
+    } catch {
+      toast.error("Failed to delete the book.");
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -99,7 +102,7 @@ export default function BooksPage() {
               </tr>
             </thead>
             <tbody>
-              {loading && !data ? (
+              {loading ? (
                 <tr><td colSpan={5} className="px-6 py-8 text-center">
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
@@ -119,13 +122,13 @@ export default function BooksPage() {
                       <div className="text-xs text-slate-500 mt-0.5">{book.language}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`font-medium ${book.availableCopies > 0 ? 'text-emerald-400' : 'text-red-400'}`}>{book.availableCopies}</span>
+                      <span className={`font-medium ${book.availableCopies > 0 ? "text-emerald-400" : "text-red-400"}`}>{book.availableCopies}</span>
                       <span className="text-slate-500"> / {book.totalCopies}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-slate-400">{book.publicationYear}</td>
                     <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
-                      <button onClick={() => handleEdit(book)} className="text-indigo-400 hover:text-indigo-300 text-xs font-medium">Edit</button>
-                      <button onClick={() => handleDelete(book.id)} className="text-red-400 hover:text-red-300 text-xs font-medium">Delete</button>
+                      <button onClick={() => { handleEdit(book); }} className="text-indigo-400 hover:text-indigo-300 text-xs font-medium">Edit</button>
+                      <button onClick={() => { setDeleteTarget(book); }} className="text-red-400 hover:text-red-300 text-xs font-medium">Delete</button>
                     </td>
                   </tr>
                 ))
@@ -137,11 +140,13 @@ export default function BooksPage() {
         {data && data.totalPages > 1 && (
           <div className="px-6 py-3 border-t border-slate-800 bg-slate-900/50 flex items-center justify-between">
             <div className="text-sm text-slate-400">
-              Showing <span className="font-medium text-white">{(page - 1) * 10 + 1}</span> to <span className="font-medium text-white">{Math.min(page * 10, data.totalCount)}</span> of <span className="font-medium text-white">{data.totalCount}</span> results
+              Showing <span className="font-medium text-white">{(page - 1) * 10 + 1}</span> to{" "}
+              <span className="font-medium text-white">{Math.min(page * 10, data.totalCount)}</span> of{" "}
+              <span className="font-medium text-white">{data.totalCount}</span> results
             </div>
             <div className="flex space-x-2">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={!data.hasPreviousPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm">Previous</button>
-              <button onClick={() => setPage(p => Math.min(data.totalPages, p + 1))} disabled={!data.hasNextPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm">Next</button>
+              <button onClick={() => { setPage((p) => Math.max(1, p - 1)); }} disabled={!data.hasPreviousPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm">Previous</button>
+              <button onClick={() => { setPage((p) => Math.min(data.totalPages, p + 1)); }} disabled={!data.hasNextPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm">Next</button>
             </div>
           </div>
         )}
@@ -149,9 +154,19 @@ export default function BooksPage() {
 
       <BookFormModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={fetchBooks}
+        onClose={() => { setIsModalOpen(false); }}
+        onSuccess={() => { void fetchBooks(); }}
         bookToEdit={bookToEdit}
+      />
+
+      <ConfirmDialog
+        isOpen={deleteTarget !== null}
+        title="Delete Book"
+        message={`Are you sure you want to delete "${deleteTarget?.title}"? This action cannot be undone.`}
+        confirmText="Delete"
+        variant="danger"
+        onConfirm={() => { void handleDeleteConfirm(); }}
+        onCancel={() => { setDeleteTarget(null); }}
       />
     </div>
   );

@@ -3,8 +3,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { userService } from '@/lib/services/user.service';
-import { apiClient } from '@/lib/api-client';
-import { User } from '@/types/auth.types';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from '@/components/ui/Toast';
+import type { User } from '@/types/auth.types';
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
@@ -19,6 +20,7 @@ type PasswordFormData = z.infer<typeof passwordSchema>;
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'users'>('profile');
+  const { user: authUser, refreshUser } = useAuth();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,22 +33,20 @@ export default function SettingsPage() {
   });
   const [pwdMessage, setPwdMessage] = useState({ type: '', text: '' });
 
-  useEffect(() => { fetchCurrentUser(); }, []);
-  useEffect(() => { if (activeTab === 'users' && currentUser?.role === 'Admin') { fetchUsers(); } }, [activeTab, currentUser]);
+  useEffect(() => {
+    if (authUser) {
+      setCurrentUser(authUser);
+      setUsername(authUser.username);
+      setEmail(authUser.email);
+      setLoading(false);
+    }
+  }, [authUser]);
+  useEffect(() => { if (activeTab === 'users' && currentUser?.role === 'Admin') { void fetchUsers(); } }, [activeTab, currentUser]);
 
-  const fetchCurrentUser = async () => {
-    try {
-      const response = await apiClient.get<User>('/api/Users/me');
-      setCurrentUser(response.data);
-      setUsername(response.data.username);
-      setEmail(response.data.email);
-    } catch { console.error('Failed to fetch user'); }
-    finally { setLoading(false); }
-  };
 
   const fetchUsers = async () => {
     try { const data = await userService.getAllUsers(); setUsers(data); }
-    catch { console.error('Failed to fetch all users'); }
+    catch { /* silently ignore */ }
   };
 
   const onUpdateProfile = async (e: React.FormEvent) => {
@@ -57,9 +57,10 @@ export default function SettingsPage() {
       if (username !== currentUser.username) { await userService.changeUsername({ userId: currentUser.id, newUsername: username }); }
       if (email !== currentUser.email) { await userService.changeEmail({ userId: currentUser.id, newEmail: email }); }
       setProfileMessage({ type: 'success', text: 'Profile updated successfully.' });
-      fetchCurrentUser();
-    } catch (error: any) {
-      setProfileMessage({ type: 'error', text: error.response?.data?.message || 'Failed to update profile.' });
+      await refreshUser();
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Failed to update profile.';
+      setProfileMessage({ type: 'error', text: msg });
     }
   };
 
@@ -76,8 +77,8 @@ export default function SettingsPage() {
   };
 
   const onChangeRole = async (userId: string, newRole: string) => {
-    try { await userService.changeRole(userId, newRole); fetchUsers(); }
-    catch (error: any) { alert(error.response?.data?.message || 'Failed to change role.'); }
+    try { await userService.changeRole(userId, newRole); void fetchUsers(); }
+    catch { toast.error('Failed to change role.'); }
   };
 
   if (loading) return <div className="p-8 text-slate-400">Loading...</div>;

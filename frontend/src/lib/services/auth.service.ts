@@ -8,22 +8,33 @@ export const authService = {
     return response.data;
   },
 
-  async register(data: any): Promise<string> {
+  async register(data: unknown): Promise<string> {
     const response = await apiClient.post<string>("/api/Auth/register", data);
     return response.data;
   },
 
   logout() {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
-      localStorage.removeItem("refreshToken");
-    }
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
   },
 
-  getToken() {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("token");
+  getToken(): string | null {
+    return localStorage.getItem("token");
+  },
+
+  getRefreshToken(): string | null {
+    return localStorage.getItem("refreshToken");
+  },
+
+  isTokenValid(): boolean {
+    const token = localStorage.getItem("token");
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      // exp is in seconds, Date.now() is in milliseconds
+      return payload.exp * 1000 > Date.now();
+    } catch {
+      return false;
     }
-    return null;
-  }
+  },
 };

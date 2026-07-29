@@ -12,14 +12,19 @@ export default function DashboardPage() {
       try {
         const data = await dashboardService.getSummary();
         setSummary(data);
-      } catch {
-        setError('Failed to load dashboard data. Please try again.');
+      } catch (err: unknown) {
+        // Show detailed error in dev for easier debugging
+        const axiosErr = err as { response?: { status?: number; data?: { message?: string } }; message?: string };
+        const status = axiosErr?.response?.status;
+        const msg = axiosErr?.response?.data?.message || axiosErr?.message || 'Unknown error';
+        setError(`Failed to load dashboard data. (${status ?? 'Network Error'}: ${msg})`);
       } finally {
         setLoading(false);
       }
     };
-    fetchDashboard();
+    void fetchDashboard();
   }, []);
+
 
   if (loading) {
     return (

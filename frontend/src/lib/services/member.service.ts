@@ -1,8 +1,8 @@
-import { apiClient } from "../api-client";
-import { 
-  MemberDto, PagedResult, CreateMemberRequest, 
-  UpdateMemberRequest, SuspendMemberRequest 
-} from "../../types/member.types";
+import { apiClient } from "@/lib/api-client";
+import {
+  MemberDto, PagedResult, CreateMemberRequest,
+  UpdateMemberRequest, SuspendMemberRequest
+} from "@/types/member.types";
 
 export const memberService = {
   async search(

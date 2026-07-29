@@ -3,10 +3,12 @@ export interface User {
   username: string;
   email: string;
   role: string;
+  memberId?: string | null;
 }
 
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
-  expiresIn: number;
+  expiresAt: string; // ISO date string from backend DateTime
+  user: User;        // Backend returns full user object on login
 }
