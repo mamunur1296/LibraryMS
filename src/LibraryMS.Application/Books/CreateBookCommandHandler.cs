@@ -21,15 +21,22 @@ public sealed class CreateBookCommandHandler : IRequestHandler<CreateBookCommand
     private readonly ILogger<CreateBookCommandHandler> _logger;
 
     public CreateBookCommandHandler(
-        BookManager manager, IBookRepository repository,
-        IUnitOfWork unitOfWork, ILogger<CreateBookCommandHandler> logger)
+        BookManager manager,
+        IBookRepository repository,
+        IUnitOfWork unitOfWork,
+        ILogger<CreateBookCommandHandler> logger)
     {
-        _manager = manager; _repository = repository;
-        _unitOfWork = unitOfWork; _logger = logger;
+        _manager = manager;
+        _repository = repository;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     public async Task<BookDto> Handle(CreateBookCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Creating book with Title: {Title}, ISBN: {ISBN}, InitialCopies: {InitialCopies}",
+            request.Title, request.ISBN, request.InitialCopies);
+
         var book = await _manager.CreateAsync(
             request.Title, request.ISBN, request.Description,
             request.PublicationYear, request.CategoryId, request.AuthorId,
@@ -48,14 +55,14 @@ public sealed class CreateBookCommandHandler : IRequestHandler<CreateBookCommand
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Database constraint violation while creating book.");
+            _logger.LogError(ex, "Database constraint violation while creating book '{Title}'.", request.Title);
             dbFailed = true;
             innerMsg = ex.InnerException?.Message ?? ex.Message;
         }
 
         Ensure.Against(dbFailed, $"Failed to save book to database. Error: {innerMsg}", "DB_UPDATE_ERROR");
 
-        _logger.LogInformation("Book '{Title}' (ISBN: {ISBN}) created with {Copies} copies",
+        _logger.LogInformation("Book '{Title}' (ISBN: {ISBN}) created successfully with {Copies} copies",
             book.Title, book.ISBN.Value, request.InitialCopies);
 
         return book.ToDto();

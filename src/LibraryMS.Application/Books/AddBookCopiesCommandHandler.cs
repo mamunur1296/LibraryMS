@@ -5,6 +5,7 @@ using LibraryMS.Domain.BookManagement;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace LibraryMS.Application.Books;
 
@@ -13,19 +14,24 @@ public sealed class AddBookCopiesCommandHandler : IRequestHandler<AddBookCopiesC
     private readonly BookManager _manager;
     private readonly IBookRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<AddBookCopiesCommandHandler> _logger;
 
     public AddBookCopiesCommandHandler(
         BookManager manager,
         IBookRepository repository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ILogger<AddBookCopiesCommandHandler> logger)
     {
         _manager = manager;
         _repository = repository;
         _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     public async Task<List<BookCopyDto>> Handle(AddBookCopiesCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Adding {Quantity} copies to Book {BookId} at Branch {BranchId}", request.Quantity, request.BookId, request.BranchId);
+
         var book = await _repository.GetByIdWithCopiesAsync(request.BookId, cancellationToken);
         Ensure.Found(book, $"Book with ID '{request.BookId}' was not found.");
 
@@ -38,6 +44,8 @@ public sealed class AddBookCopiesCommandHandler : IRequestHandler<AddBookCopiesC
 
         await _repository.UpdateAsync(book!, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Successfully added {Quantity} copies to Book {BookId}", request.Quantity, request.BookId);
 
         return addedCopies.Select(c => c.ToDto()).ToList();
     }
