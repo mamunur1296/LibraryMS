@@ -17,20 +17,3 @@ public sealed class ReservationDto
     public DateTime? NotifiedAt { get; init; }
     public DateTime? ExpiresAt { get; init; }
 }
-
-public sealed class CreateReservationRequest
-{
-    public Guid MemberId { get; init; }
-    public Guid BookId { get; init; }
-    public Guid BranchId { get; init; }
-}
-
-public sealed class ReservationQueueDto
-{
-    public Guid BookId { get; init; }
-    public string BookTitle { get; init; } = default!;
-    public Guid BranchId { get; init; }
-    public string BranchName { get; init; } = default!;
-    public int TotalInQueue { get; init; }
-    public List<ReservationDto> Queue { get; init; } = [];
-}

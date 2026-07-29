@@ -21,27 +21,3 @@ public sealed class BorrowDto
     public bool IsOverdue { get; init; }
     public int DaysUntilDue { get; init; }
 }
-
-public sealed class BorrowBookRequest
-{
-    public Guid MemberId { get; init; }
-    public Guid BookCopyId { get; init; }
-    public Guid BookId { get; init; }
-    public Guid BranchId { get; init; }
-    public int? BorrowDays { get; init; }  // null = use default (14 days)
-}
-
-public sealed class ReturnBookRequest
-{
-    public Guid BorrowId { get; init; }
-    public string? Notes { get; init; }
-}
-
-public sealed class BorrowSearchRequest
-{
-    public Guid? MemberId { get; init; }
-    public Guid? BookId { get; init; }
-    public string? Status { get; init; }  // "Active", "Returned", "Overdue"
-    public int Page { get; init; } = 1;
-    public int PageSize { get; init; } = 10;
-}
