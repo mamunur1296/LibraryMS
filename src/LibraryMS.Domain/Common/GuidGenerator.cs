@@ -1,5 +1,3 @@
-using System;
-
 namespace LibraryMS.Domain.Common;
 
 public sealed class GuidGenerator : IGuidGenerator
