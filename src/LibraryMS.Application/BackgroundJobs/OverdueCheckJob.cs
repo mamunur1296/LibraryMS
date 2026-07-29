@@ -25,14 +25,14 @@ public sealed class OverdueCheckJob
     // Runs daily: marks all Active borrows past due date as Overdue.
     public async Task ExecuteAsync(CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("Starting overdue check job at {Time}", DateTime.UtcNow);
+        _logger.LogInformation("Starting overdue check background job at {Time}", DateTime.UtcNow);
 
         var activeBorrows = await _borrowRepo.GetOverdueBorrowsAsync(cancellationToken);
         var processedCount = 0;
 
         foreach (var borrow in activeBorrows)
         {
-            // Call internal method directly due to InternalsVisibleTo
+            _logger.LogDebug("Marking borrow record {BorrowId} for member {MemberId} as overdue.", borrow.Id, borrow.MemberId);
             borrow.MarkAsOverdue();
             await _borrowRepo.UpdateAsync(borrow, cancellationToken);
             processedCount++;
@@ -41,11 +41,11 @@ public sealed class OverdueCheckJob
         if (processedCount > 0)
         {
             await _unitOfWork.SaveChangesAsync(cancellationToken);
-            _logger.LogInformation("Overdue check: {Count} borrows marked as overdue", processedCount);
+            _logger.LogInformation("Overdue check job completed: {Count} borrows successfully marked as overdue.", processedCount);
         }
         else
         {
-            _logger.LogDebug("Overdue check: no new overdue borrows found");
+            _logger.LogInformation("Overdue check job completed: No overdue borrows found.");
         }
     }
 }

@@ -12,19 +12,19 @@ public sealed class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRe
 
     public LoggingBehavior(ILogger<LoggingBehavior<TRequest, TResponse>> logger) => _logger = logger;
 
-    public async Task<TResponse> Handle( TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
         var requestName = typeof(TRequest).Name;
-        _logger.LogDebug("Handling {Request}", requestName);
+        _logger.LogInformation("Processing request {RequestName}", requestName);
 
         var sw = System.Diagnostics.Stopwatch.StartNew();
         var response = await next(cancellationToken);
         sw.Stop();
 
         if (sw.ElapsedMilliseconds > 500)
-            _logger.LogWarning("Slow request {Request} took {Elapsed}ms", requestName, sw.ElapsedMilliseconds);
+            _logger.LogWarning("Slow request {RequestName} took {Elapsed}ms", requestName, sw.ElapsedMilliseconds);
         else
-            _logger.LogDebug("Handled {Request} in {Elapsed}ms", requestName, sw.ElapsedMilliseconds);
+            _logger.LogInformation("Successfully handled {RequestName} in {Elapsed}ms", requestName, sw.ElapsedMilliseconds);
 
         return response;
     }

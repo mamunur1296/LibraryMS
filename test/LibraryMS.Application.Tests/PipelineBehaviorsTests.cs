@@ -28,7 +28,8 @@ public class PipelineBehaviorsTests
             .Returns(new ValidationResult()); // No errors
 
         var validators = new List<IValidator<TestCommand>> { mockValidator.Object };
-        var behavior = new ValidationBehavior<TestCommand, string>(validators);
+        var loggerMock = new Mock<ILogger<ValidationBehavior<TestCommand, string>>>();
+        var behavior = new ValidationBehavior<TestCommand, string>(validators, loggerMock.Object);
 
         var nextCalled = false;
         RequestHandlerDelegate<string> next = (ct) =>
@@ -56,7 +57,8 @@ public class PipelineBehaviorsTests
             .Returns(new ValidationResult(failures));
 
         var validators = new List<IValidator<TestCommand>> { mockValidator.Object };
-        var behavior = new ValidationBehavior<TestCommand, string>(validators);
+        var loggerMock = new Mock<ILogger<ValidationBehavior<TestCommand, string>>>();
+        var behavior = new ValidationBehavior<TestCommand, string>(validators, loggerMock.Object);
 
         RequestHandlerDelegate<string> next = (ct) => Task.FromResult("Success");
 
