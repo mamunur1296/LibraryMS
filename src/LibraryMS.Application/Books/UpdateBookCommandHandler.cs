@@ -1,12 +1,14 @@
-using LibraryMS.Application.Mapping;
 using LibraryMS.Application.Contracts.Books;
 using LibraryMS.Application.Contracts.DTOs.Book;
+using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
+using LibraryMS.Domain.BookManagement.Services;
 using LibraryMS.Domain.Shared;
-using LibraryMS.Domain.Shared.Exceptions;
+using LibraryMS.Domain.Shared.Guards;
 using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace LibraryMS.Application.Books;
 
@@ -15,27 +17,37 @@ public sealed class UpdateBookCommandHandler : IRequestHandler<UpdateBookCommand
     private readonly BookManager _manager;
     private readonly IBookRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<UpdateBookCommandHandler> _logger;
 
     public UpdateBookCommandHandler(
-        BookManager manager, IBookRepository repository,
-        IUnitOfWork unitOfWork)
+        BookManager manager,
+        IBookRepository repository,
+        IUnitOfWork unitOfWork,
+        ILogger<UpdateBookCommandHandler> logger)
     {
-        _manager = manager; _repository = repository;
+        _manager = manager;
+        _repository = repository;
         _unitOfWork = unitOfWork;
+        _logger = logger;
     }
 
     public async Task<BookDto> Handle(UpdateBookCommand request, CancellationToken cancellationToken)
     {
-        var book = await _repository.GetByIdWithCopiesAsync(request.Id, cancellationToken)
-            ?? throw new NotFoundException(nameof(Book), request.Id);
+        _logger.LogInformation("Updating book with ID: {BookId}", request.Id);
 
-        await _manager.UpdateAsync(book, request.Title, request.Description,
+        var book = await _repository.GetByIdWithCopiesAsync(request.Id, cancellationToken);
+        Ensure.Found(book, $"Book with ID '{request.Id}' was not found.");
+
+        await _manager.UpdateAsync(book!, request.Title, request.Description,
             request.PublicationYear, request.CategoryId, request.AuthorId,
             request.Language, cancellationToken);
 
-        await _repository.UpdateAsync(book, cancellationToken);
+        await _repository.UpdateAsync(book!, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return book.ToDto();
+        _logger.LogInformation("Book with ID {BookId} updated successfully.", request.Id);
+
+        return book!.ToDto();
     }
 }
+

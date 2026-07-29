@@ -1,12 +1,17 @@
-using LibraryMS.Application.Contracts.Auth;
 using LibraryMS.Domain.BranchManagement;
+using LibraryMS.Domain.BranchManagement.AggregateRoots;
+using LibraryMS.Domain.BranchManagement.Services;
 using LibraryMS.Domain.IdentityManagement;
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+using LibraryMS.Domain.IdentityManagement.Entities;
+using LibraryMS.Domain.IdentityManagement.Services;
 using LibraryMS.Domain.Shared.Enums;
 using LibraryMS.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using LibraryMS.Application.Contracts.Services;
 
 namespace LibraryMS.DbMigrator;
 
@@ -74,3 +79,4 @@ public class DbMigratorHostedService : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }
+

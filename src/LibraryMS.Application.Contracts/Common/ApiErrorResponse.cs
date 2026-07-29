@@ -1,6 +1,6 @@
 namespace LibraryMS.Application.Contracts.Common;
 
-/// <summary>Standard API error response.</summary>
+// Standard API error response.
 public sealed class ApiErrorResponse
 {
     public string Type { get; init; } = default!;

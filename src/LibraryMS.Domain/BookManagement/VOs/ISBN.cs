@@ -2,9 +2,8 @@ using LibraryMS.Domain.Common;
 
 namespace LibraryMS.Domain.BookManagement.VOs;
 
-/// <summary>
-/// ISBN Value Object — validates ISBN-10 and ISBN-13 formats.
-/// </summary>
+// ISBN Value Object — validates ISBN-10 and ISBN-13 formats.
+
 public sealed class ISBN : ValueObject
 {
     public string Value { get; }

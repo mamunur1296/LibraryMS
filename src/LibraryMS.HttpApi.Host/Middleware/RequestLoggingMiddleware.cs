@@ -1,6 +1,4 @@
 using System.Diagnostics;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 
 namespace LibraryMS.HttpApi.Host.Middleware;
 
@@ -18,7 +16,7 @@ public class RequestLoggingMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         var watch = Stopwatch.StartNew();
-        
+
         try
         {
             await _next(context);

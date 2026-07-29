@@ -1,4 +1,6 @@
 using LibraryMS.Domain.MemberManagement;
+using LibraryMS.Domain.MemberManagement.AggregateRoots;
+using LibraryMS.Domain.MemberManagement.Services;
 using LibraryMS.Domain.Shared.Exceptions;
 using LibraryMS.Domain.Shared.Enums;
 using FluentAssertions;
@@ -100,3 +102,4 @@ public class MemberTests
         member.SuspendedUntil.Should().BeNull();
     }
 }
+

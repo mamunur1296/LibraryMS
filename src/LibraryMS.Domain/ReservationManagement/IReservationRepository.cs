@@ -1,6 +1,8 @@
+using LibraryMS.Domain.ReservationManagement.AggregateRoots;
+
 namespace LibraryMS.Domain.ReservationManagement;
 
-/// <summary>Repository contract for Reservation aggregate.</summary>
+// Repository contract for Reservation aggregate.
 public interface IReservationRepository
 {
     Task<Reservation?> GetByIdAsync(Guid id, CancellationToken ct = default);

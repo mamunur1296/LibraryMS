@@ -1,7 +1,5 @@
 using LibraryMS.Application.Contracts.DTOs.Auth;
 using MediatR;
-using System;
-using System.Collections.Generic;
 
 namespace LibraryMS.Application.Contracts.Users;
 

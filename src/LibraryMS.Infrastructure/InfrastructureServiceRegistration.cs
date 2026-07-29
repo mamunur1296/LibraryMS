@@ -1,6 +1,5 @@
 using Hangfire;
 using Hangfire.PostgreSql;
-using LibraryMS.Application.Contracts.Auth;
 using LibraryMS.Application.Contracts.Services;
 using LibraryMS.Infrastructure.Auth;
 using LibraryMS.Infrastructure.Caching;

@@ -1,6 +1,6 @@
 namespace LibraryMS.Domain.Shared.Enums;
 
-/// <summary>Book copy availability status</summary>
+// Book copy availability status
 public enum CopyStatus
 {
     Available = 1,

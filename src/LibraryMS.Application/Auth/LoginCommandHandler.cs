@@ -1,7 +1,11 @@
 using LibraryMS.Application.Contracts.Auth;
+using LibraryMS.Application.Contracts.Services;
 using LibraryMS.Application.Contracts.DTOs.Auth;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.IdentityManagement;
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+using LibraryMS.Domain.IdentityManagement.Entities;
+using LibraryMS.Domain.IdentityManagement.Services;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -36,6 +40,8 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResp
 
     public async Task<AuthResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Attempting login for identifier: {UsernameOrEmail}", request.Username);
+
         // Support login with either username or email
         var user = await _userRepository.GetByUsernameAsync(request.Username, cancellationToken)
                    ?? await _userRepository.GetByEmailAsync(request.Username, cancellationToken);
@@ -57,7 +63,7 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResp
 
         await _userRepository.AddRefreshTokenAsync(refreshTokenEntity, cancellationToken);
 
-        _logger.LogInformation("User {Username} logged in successfully", user.Username);
+        _logger.LogInformation("User {Username} logged in successfully.", user.Username);
 
         return new AuthResponse
         {
@@ -68,3 +74,4 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResp
         };
     }
 }
+

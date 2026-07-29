@@ -1,6 +1,13 @@
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
+using LibraryMS.Domain.BookManagement.Services;
 using LibraryMS.Domain.BorrowManagement;
+using LibraryMS.Domain.BorrowManagement.AggregateRoots;
+using LibraryMS.Domain.BorrowManagement.Services;
 using LibraryMS.Domain.MemberManagement;
+using LibraryMS.Domain.MemberManagement.AggregateRoots;
+using LibraryMS.Domain.MemberManagement.Services;
 using LibraryMS.Domain.Shared.Exceptions;
 using LibraryMS.Domain.Shared.Enums;
 using LibraryMS.TestBase;
@@ -105,3 +112,6 @@ public class BorrowManagerTests
             .WithMessage("*maximum of 5 active borrows*");
     }
 }
+
+
+

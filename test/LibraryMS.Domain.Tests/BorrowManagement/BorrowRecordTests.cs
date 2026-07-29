@@ -1,4 +1,6 @@
 using LibraryMS.Domain.BorrowManagement;
+using LibraryMS.Domain.BorrowManagement.AggregateRoots;
+using LibraryMS.Domain.BorrowManagement.Services;
 using LibraryMS.Domain.Shared.Exceptions;
 using LibraryMS.Domain.Shared.Enums;
 using FluentAssertions;
@@ -101,3 +103,4 @@ public class BorrowRecordTests
         borrow.IsOverdue.Should().BeFalse();
     }
 }
+

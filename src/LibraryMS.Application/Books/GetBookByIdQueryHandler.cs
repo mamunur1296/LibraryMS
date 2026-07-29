@@ -2,6 +2,9 @@ using LibraryMS.Application.Mapping;
 using LibraryMS.Application.Contracts.Books;
 using LibraryMS.Application.Contracts.DTOs.Book;
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
+using LibraryMS.Domain.BookManagement.Services;
 using MediatR;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,3 +26,4 @@ public sealed class GetBookByIdQueryHandler : IRequestHandler<GetBookByIdQuery, 
         return book?.ToDto();
     }
 }
+

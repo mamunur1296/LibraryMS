@@ -1,4 +1,5 @@
 using LibraryMS.Domain.ReservationManagement;
+using LibraryMS.Domain.ReservationManagement.AggregateRoots;
 using LibraryMS.Domain.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -67,3 +68,4 @@ public sealed class ReservationRepository : BaseRepository<Reservation>, IReserv
         return (items, total);
     }
 }
+

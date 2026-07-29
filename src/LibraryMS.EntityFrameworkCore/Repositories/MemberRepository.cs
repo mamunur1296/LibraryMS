@@ -1,4 +1,5 @@
 using LibraryMS.Domain.MemberManagement;
+using LibraryMS.Domain.MemberManagement.AggregateRoots;
 using LibraryMS.Domain.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +20,7 @@ public sealed class MemberRepository : BaseRepository<Member>, IMemberRepository
     }
 
     public async Task<(List<Member> Items, int TotalCount)> SearchAsync(
-        string? searchTerm, string? status, 
+        string? searchTerm, string? status,
         int page, int pageSize, CancellationToken cancellationToken = default)
     {
         var query = DbSet.AsNoTracking().AsQueryable();
@@ -27,8 +28,8 @@ public sealed class MemberRepository : BaseRepository<Member>, IMemberRepository
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             searchTerm = searchTerm.ToLower();
-            query = query.Where(m => 
-                m.FirstName.ToLower().Contains(searchTerm) || 
+            query = query.Where(m =>
+                m.FirstName.ToLower().Contains(searchTerm) ||
                 m.LastName.ToLower().Contains(searchTerm) ||
                 m.Email.ToLower().Contains(searchTerm) ||
                 m.MembershipNumber.ToLower().Contains(searchTerm));
@@ -52,7 +53,7 @@ public sealed class MemberRepository : BaseRepository<Member>, IMemberRepository
         var query = DbSet.Where(m => m.Email.ToLower() == email.ToLower());
         if (excludeId.HasValue)
             query = query.Where(m => m.Id != excludeId.Value);
-            
+
         return await query.AnyAsync(cancellationToken);
     }
 
@@ -63,10 +64,11 @@ public sealed class MemberRepository : BaseRepository<Member>, IMemberRepository
 
     public async Task<int> GetActiveBorrowCountAsync(Guid memberId, CancellationToken cancellationToken = default)
     {
-        return await DbContext.BorrowRecords.CountAsync(r => 
-            r.MemberId == memberId && 
-            (r.Status == BorrowStatus.Active || 
-             r.Status == BorrowStatus.Overdue), 
+        return await DbContext.BorrowRecords.CountAsync(r =>
+            r.MemberId == memberId &&
+            (r.Status == BorrowStatus.Active ||
+             r.Status == BorrowStatus.Overdue),
             cancellationToken);
     }
 }
+

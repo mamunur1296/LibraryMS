@@ -1,9 +1,7 @@
 namespace LibraryMS.Domain.Shared.Exceptions;
 
-/// <summary>
-/// Base exception for all domain business rule violations.
-/// Maps to HTTP 400 Bad Request.
-/// </summary>
+// Base exception for all domain business rule violations.
+// Maps to HTTP 400 Bad Request.
 public class DomainException : Exception
 {
     public string Code { get; }

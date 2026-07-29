@@ -1,6 +1,6 @@
 namespace LibraryMS.Domain.Shared.Enums;
 
-/// <summary>Reservation queue item status</summary>
+// Reservation queue item status
 public enum ReservationStatus
 {
     Pending = 1,

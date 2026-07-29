@@ -1,6 +1,9 @@
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
+
 namespace LibraryMS.Domain.BookManagement;
 
-/// <summary>Repository contract for Book aggregate.</summary>
+// Repository contract for Book aggregate.
 public interface IBookRepository
 {
     Task<Book?> GetByIdAsync(Guid id, CancellationToken ct = default);

@@ -1,6 +1,8 @@
+using LibraryMS.Domain.BranchManagement.AggregateRoots;
+
 namespace LibraryMS.Domain.BranchManagement;
 
-/// <summary>Repository contract for Branch aggregate — defined in Domain, implemented in Infrastructure.</summary>
+// Repository contract for Branch aggregate — defined in Domain, implemented in Infrastructure.
 public interface IBranchRepository
 {
     Task<Branch?> GetByIdAsync(Guid id, CancellationToken ct = default);
