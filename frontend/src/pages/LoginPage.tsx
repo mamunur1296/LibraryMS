@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, LoginFormData } from '@/lib/validations/auth.schema';
@@ -97,6 +97,15 @@ export default function LoginPage() {
               ) : null}
               {isSubmitting ? 'Signing in...' : 'Sign In'}
             </button>
+          </div>
+
+          <div className="text-center mt-4">
+            <p className="text-sm text-slate-400">
+              Don't have an account?{' '}
+              <Link to="/register" className="text-indigo-400 hover:text-indigo-300 font-medium">
+                Create one
+              </Link>
+            </p>
           </div>
         </form>
       </div>

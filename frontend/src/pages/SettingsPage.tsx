@@ -20,27 +20,26 @@ type PasswordFormData = z.infer<typeof passwordSchema>;
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'users'>('profile');
-  const { user: authUser, refreshUser } = useAuth();
+  const { user: authUser, isLoading: authLoading, refreshUser } = useAuth();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
-
   const { register: registerPwd, handleSubmit: handlePwdSubmit, formState: { errors: pwdErrors, isSubmitting: isPwdSubmitting }, reset: resetPwd } = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
   });
-  const [pwdMessage, setPwdMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
-    if (authUser) {
-      setCurrentUser(authUser);
-      setUsername(authUser.username);
-      setEmail(authUser.email);
+    if (!authLoading) {
+      if (authUser) {
+        setCurrentUser(authUser);
+        setUsername(authUser.username);
+        setEmail(authUser.email);
+      }
       setLoading(false);
     }
-  }, [authUser]);
+  }, [authUser, authLoading]);
   useEffect(() => { if (activeTab === 'users' && currentUser?.role === 'Admin') { void fetchUsers(); } }, [activeTab, currentUser]);
 
 
@@ -51,34 +50,50 @@ export default function SettingsPage() {
 
   const onUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setProfileMessage({ type: '', text: '' });
     if (!currentUser) return;
     try {
-      if (username !== currentUser.username) { await userService.changeUsername({ userId: currentUser.id, newUsername: username }); }
-      if (email !== currentUser.email) { await userService.changeEmail({ userId: currentUser.id, newEmail: email }); }
-      setProfileMessage({ type: 'success', text: 'Profile updated successfully.' });
+      if (username !== currentUser.username) {
+        await userService.changeUsername({ userId: currentUser.id, newUsername: username });
+      }
+      if (email !== currentUser.email) {
+        await userService.changeEmail({ userId: currentUser.id, newEmail: email });
+      }
+      toast.success('Profile updated successfully.');
       await refreshUser();
     } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : 'Failed to update profile.';
-      setProfileMessage({ type: 'error', text: msg });
+      const axiosErr = error as { response?: { data?: { message?: string } }; message?: string };
+      const msg = axiosErr.response?.data?.message || axiosErr.message || 'Failed to update profile.';
+      toast.error(msg);
     }
   };
 
   const onChangePassword = async (data: PasswordFormData) => {
-    setPwdMessage({ type: '', text: '' });
     if (!currentUser) return;
     try {
-      await userService.changePassword({ userId: currentUser.id, currentPassword: data.currentPassword, newPassword: data.newPassword });
-      setPwdMessage({ type: 'success', text: 'Password changed successfully.' });
+      await userService.changePassword({
+        userId: currentUser.id,
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword
+      });
+      toast.success('Password changed successfully.');
       resetPwd();
-    } catch (error: any) {
-      setPwdMessage({ type: 'error', text: error.response?.data?.message || 'Failed to change password.' });
+    } catch (error: unknown) {
+      const axiosErr = error as { response?: { data?: { message?: string } }; message?: string };
+      const msg = axiosErr.response?.data?.message || axiosErr.message || 'Failed to change password.';
+      toast.error(msg);
     }
   };
 
   const onChangeRole = async (userId: string, newRole: string) => {
-    try { await userService.changeRole(userId, newRole); void fetchUsers(); }
-    catch { toast.error('Failed to change role.'); }
+    try {
+      await userService.changeRole(userId, newRole);
+      toast.success('User role updated successfully.');
+      void fetchUsers();
+    } catch (error: unknown) {
+      const axiosErr = error as { response?: { data?: { message?: string } }; message?: string };
+      const msg = axiosErr.response?.data?.message || axiosErr.message || 'Failed to change role.';
+      toast.error(msg);
+    }
   };
 
   if (loading) return <div className="p-8 text-slate-400">Loading...</div>;
@@ -106,9 +121,6 @@ export default function SettingsPage() {
           {activeTab === 'profile' && (
             <div className="max-w-xl">
               <h2 className="text-xl font-bold text-white mb-6">Profile Details</h2>
-              {profileMessage.text && (
-                <div className={`p-4 rounded-xl mb-6 ${profileMessage.type === 'error' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>{profileMessage.text}</div>
-              )}
               <form onSubmit={onUpdateProfile} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Username</label>
@@ -126,9 +138,6 @@ export default function SettingsPage() {
           {activeTab === 'security' && (
             <div className="max-w-xl">
               <h2 className="text-xl font-bold text-white mb-6">Change Password</h2>
-              {pwdMessage.text && (
-                <div className={`p-4 rounded-xl mb-6 ${pwdMessage.type === 'error' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}`}>{pwdMessage.text}</div>
-              )}
               <form onSubmit={handlePwdSubmit(onChangePassword)} className="space-y-6">
                 {(['currentPassword', 'newPassword', 'confirmPassword'] as const).map((field) => (
                   <div key={field}>

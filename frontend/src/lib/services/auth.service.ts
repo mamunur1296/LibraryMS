@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/api-client";
 import { AuthResponse } from "@/types/auth.types";
-import { LoginFormData } from "@/lib/validations/auth.schema";
+import { LoginFormData, RegisterFormData } from "@/lib/validations/auth.schema";
 
 export const authService = {
   async login(credentials: LoginFormData): Promise<AuthResponse> {
@@ -8,12 +8,23 @@ export const authService = {
     return response.data;
   },
 
-  async register(data: unknown): Promise<string> {
+  async register(data: RegisterFormData): Promise<string> {
+    // Backend API registration endpoint returns status/id
     const response = await apiClient.post<string>("/api/Auth/register", data);
     return response.data;
   },
 
-  logout() {
+  async logout(): Promise<void> {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (refreshToken) {
+      try {
+        // Call revoke API on backend to invalidate token session
+        await apiClient.post("/api/Auth/revoke", { refreshToken });
+      } catch (e) {
+        // Fail silently and clear client side storage
+        console.error("Failed to revoke session on server:", e);
+      }
+    }
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
   },
