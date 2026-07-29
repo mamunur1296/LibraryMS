@@ -1,13 +1,10 @@
-using LibraryMS.Application.Mapping;
 using LibraryMS.Application.Contracts.Books;
 using LibraryMS.Application.Contracts.DTOs.Book;
+using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BookManagement;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace LibraryMS.Application.Books;
 
@@ -30,8 +27,6 @@ public sealed class CreateCategoryCommandHandler : IRequestHandler<CreateCategor
 
         var category = new Category(Guid.NewGuid(), request.Name, request.Description);
         var dbFailed = false;
-        var innerMsg = string.Empty;
-
         try
         {
             await _repository.AddCategoryAsync(category, cancellationToken);
@@ -40,10 +35,9 @@ public sealed class CreateCategoryCommandHandler : IRequestHandler<CreateCategor
         {
             _logger.LogError(ex, "Failed to save category {Name} to database.", request.Name);
             dbFailed = true;
-            innerMsg = ex.InnerException?.Message ?? ex.Message;
         }
 
-        Ensure.Against(dbFailed, $"Failed to save category. Error: {innerMsg}", "DB_UPDATE_ERROR");
+        Ensure.Against(dbFailed, "An error occurred while saving the category to the database.", "DB_UPDATE_ERROR");
 
         _logger.LogInformation("Category '{Name}' created successfully with ID {CategoryId}", category.Name, category.Id);
 

@@ -30,7 +30,6 @@ public sealed class CreateAuthorCommandHandler : IRequestHandler<CreateAuthorCom
 
         var author = _authorManager.Create(request.Name, request.Biography);
         var dbFailed = false;
-        var innerMsg = string.Empty;
         try
         {
             await _repository.AddAuthorAsync(author, cancellationToken);
@@ -39,10 +38,9 @@ public sealed class CreateAuthorCommandHandler : IRequestHandler<CreateAuthorCom
         {
             _logger.LogError(ex, "Failed to persist author {Name} to database.", request.Name);
             dbFailed = true;
-            innerMsg = ex.InnerException?.Message ?? ex.Message;
         }
 
-        Ensure.Against(dbFailed, $"Failed to save author. Error: {innerMsg}", "DB_UPDATE_ERROR");
+        Ensure.Against(dbFailed, "An error occurred while saving the author to the database.", "DB_UPDATE_ERROR");
 
         _logger.LogInformation("Author '{Name}' created successfully with ID {AuthorId}", author.Name, author.Id);
 

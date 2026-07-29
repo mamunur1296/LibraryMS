@@ -1,15 +1,11 @@
-using LibraryMS.Domain.Shared;
-using LibraryMS.Application.Mapping;
 using LibraryMS.Application.Contracts.Books;
 using LibraryMS.Application.Contracts.DTOs.Book;
+using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BookManagement;
-using LibraryMS.Domain.Shared.Exceptions;
+using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace LibraryMS.Application.Books;
 
@@ -47,7 +43,6 @@ public sealed class CreateBookCommandHandler : IRequestHandler<CreateBookCommand
             _manager.AddCopyToBranch(book, request.BranchId);
 
         var dbFailed = false;
-        var innerMsg = string.Empty;
         try
         {
             await _repository.AddAsync(book, cancellationToken);
@@ -57,10 +52,9 @@ public sealed class CreateBookCommandHandler : IRequestHandler<CreateBookCommand
         {
             _logger.LogError(ex, "Database constraint violation while creating book '{Title}'.", request.Title);
             dbFailed = true;
-            innerMsg = ex.InnerException?.Message ?? ex.Message;
         }
 
-        Ensure.Against(dbFailed, $"Failed to save book to database. Error: {innerMsg}", "DB_UPDATE_ERROR");
+        Ensure.Against(dbFailed, "An error occurred while saving the book to the database.", "DB_UPDATE_ERROR");
 
         _logger.LogInformation("Book '{Title}' (ISBN: {ISBN}) created successfully with {Copies} copies",
             book.Title, book.ISBN.Value, request.InitialCopies);
