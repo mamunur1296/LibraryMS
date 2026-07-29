@@ -1,5 +1,8 @@
 using LibraryMS.Application.Contracts.Users;
 using LibraryMS.Domain.IdentityManagement;
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+using LibraryMS.Domain.IdentityManagement.Entities;
+using LibraryMS.Domain.IdentityManagement.Services;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Enums;
 using LibraryMS.Domain.Shared.Guards;
@@ -53,3 +56,4 @@ public sealed class ChangeUserRoleCommandHandler : IRequestHandler<ChangeUserRol
         _logger.LogInformation("Role of User {TargetUserId} successfully changed to {NewRole}", request.TargetUserId, request.NewRole);
     }
 }
+

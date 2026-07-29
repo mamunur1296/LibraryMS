@@ -1,5 +1,6 @@
 using LibraryMS.Application.Contracts.Reservations;
 using LibraryMS.Domain.ReservationManagement;
+using LibraryMS.Domain.ReservationManagement.AggregateRoots;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Exceptions;
 using LibraryMS.Domain.Shared.Guards;
@@ -73,3 +74,4 @@ public sealed class CancelReservationCommandHandler : IRequestHandler<CancelRese
         _logger.LogInformation("Reservation {Id} cancelled by member {MemberId}", request.Id, request.RequestingMemberId);
     }
 }
+

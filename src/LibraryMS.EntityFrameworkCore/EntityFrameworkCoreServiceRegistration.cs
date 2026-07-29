@@ -5,9 +5,17 @@ using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.BorrowManagement.AggregateRoots;
 using LibraryMS.Domain.BorrowManagement.Services;
 using LibraryMS.Domain.BranchManagement;
+using LibraryMS.Domain.BranchManagement.AggregateRoots;
+using LibraryMS.Domain.BranchManagement.Services;
 using LibraryMS.Domain.IdentityManagement;
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+using LibraryMS.Domain.IdentityManagement.Entities;
+using LibraryMS.Domain.IdentityManagement.Services;
 using LibraryMS.Domain.MemberManagement;
+using LibraryMS.Domain.MemberManagement.AggregateRoots;
+using LibraryMS.Domain.MemberManagement.Services;
 using LibraryMS.Domain.ReservationManagement;
+using LibraryMS.Domain.ReservationManagement.AggregateRoots;
 using LibraryMS.EntityFrameworkCore.Interceptors;
 using LibraryMS.EntityFrameworkCore.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -48,4 +56,5 @@ public static class EntityFrameworkCoreServiceRegistration
         return services;
     }
 }
+
 

@@ -1,4 +1,6 @@
 using LibraryMS.Domain.BranchManagement;
+using LibraryMS.Domain.BranchManagement.AggregateRoots;
+using LibraryMS.Domain.BranchManagement.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryMS.EntityFrameworkCore.Repositories;
@@ -21,3 +23,4 @@ public sealed class BranchRepository : BaseRepository<Branch>, IBranchRepository
         return await query.AnyAsync(cancellationToken);
     }
 }
+

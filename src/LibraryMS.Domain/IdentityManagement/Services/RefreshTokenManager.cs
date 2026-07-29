@@ -1,6 +1,8 @@
 using System;
 
-namespace LibraryMS.Domain.IdentityManagement;
+using LibraryMS.Domain.IdentityManagement.Entities;
+
+namespace LibraryMS.Domain.IdentityManagement.Services;
 
 public sealed class RefreshTokenManager
 {

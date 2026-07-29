@@ -1,8 +1,8 @@
 using LibraryMS.Domain.Common;
 
-namespace LibraryMS.Domain.IdentityManagement;
+namespace LibraryMS.Domain.IdentityManagement.Entities;
 
-/// <summary>Refresh token entity for JWT rotation.</summary>
+// Refresh token entity for JWT rotation.
 public sealed class RefreshToken : Entity<Guid>
 {
     public Guid UserId { get; private set; }

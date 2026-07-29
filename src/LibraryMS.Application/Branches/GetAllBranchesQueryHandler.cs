@@ -2,6 +2,8 @@ using LibraryMS.Application.Contracts.Branches;
 using LibraryMS.Application.Contracts.DTOs.Branch;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BranchManagement;
+using LibraryMS.Domain.BranchManagement.AggregateRoots;
+using LibraryMS.Domain.BranchManagement.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -32,3 +34,4 @@ public sealed class GetAllBranchesQueryHandler : IRequestHandler<GetAllBranchesQ
         return result.Select(b => b.ToDto()).ToList();
     }
 }
+

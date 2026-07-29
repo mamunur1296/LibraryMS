@@ -1,4 +1,7 @@
 using LibraryMS.Domain.IdentityManagement;
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+using LibraryMS.Domain.IdentityManagement.Entities;
+using LibraryMS.Domain.IdentityManagement.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryMS.EntityFrameworkCore.Repositories;
@@ -69,3 +72,4 @@ public sealed class UserRepository : BaseRepository<User>, IUserRepository
         return await DbSet.ToListAsync(cancellationToken);
     }
 }
+

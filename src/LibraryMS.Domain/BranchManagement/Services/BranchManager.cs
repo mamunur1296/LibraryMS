@@ -1,12 +1,10 @@
-using LibraryMS.Domain.Common;
-using LibraryMS.Domain.Shared.Exceptions;
+using LibraryMS.Domain.BranchManagement.AggregateRoots;
+using LibraryMS.Domain.Shared.Guards;
 
-namespace LibraryMS.Domain.BranchManagement;
+namespace LibraryMS.Domain.BranchManagement.Services;
 
-/// <summary>
-/// Domain service for creating and managing Branch aggregates.
-/// Enforces uniqueness and business rules that require repository access.
-/// </summary>
+// Domain service for creating and managing Branch aggregates.
+// Enforces uniqueness and business rules that require repository access.
 public sealed class BranchManager
 {
     private readonly IBranchRepository _repository;
@@ -36,7 +34,6 @@ public sealed class BranchManager
     private async Task EnsureNameUniqueAsync(string name, Guid? excludeId, CancellationToken ct)
     {
         var exists = await _repository.ExistsWithNameAsync(name, excludeId, ct);
-        if (exists)
-            throw new DomainException($"A branch named '{name}' already exists.", "BRANCH_DUPLICATE_NAME");
+        Ensure.Against(exists, $"A branch named '{name}' already exists.", "BRANCH_DUPLICATE_NAME");
     }
 }

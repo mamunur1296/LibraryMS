@@ -1,17 +1,11 @@
 using LibraryMS.Domain.Common;
 using LibraryMS.Domain.ReservationManagement.Events;
 using LibraryMS.Domain.Shared.Enums;
-using LibraryMS.Domain.Shared.Exceptions;
+using LibraryMS.Domain.Shared.Guards;
 
-namespace LibraryMS.Domain.ReservationManagement;
+namespace LibraryMS.Domain.ReservationManagement.AggregateRoots;
 
-/// <summary>
-/// Reservation — a queue entry for a book at a specific branch.
-/// Business Rules:
-///   - Queue position maintained (FIFO)
-///   - Cannot reserve if a copy is available
-///   - Expires 3 days after notification
-/// </summary>
+// Reservation — a queue entry for a book at a specific branch.
 public sealed class Reservation : AggregateRoot<Guid>
 {
     public const int ExpiryDaysAfterNotification = 3;
@@ -42,11 +36,10 @@ public sealed class Reservation : AggregateRoot<Guid>
         AddDomainEvent(new ReservationCreatedEvent(id, memberId, bookId, queuePosition));
     }
 
-    /// <summary>Called when a copy becomes available for this reservation.</summary>
+    // Called when a copy becomes available for this reservation.
     internal void NotifyAvailable()
     {
-        if (Status != ReservationStatus.Pending)
-            throw new DomainException("Only pending reservations can be notified.", "RESERVATION_INVALID_STATE");
+        Ensure.Against(Status != ReservationStatus.Pending, "Only pending reservations can be notified.", "RESERVATION_INVALID_STATE");
 
         Status = ReservationStatus.Available;
         NotifiedAt = DateTime.UtcNow;
@@ -55,41 +48,38 @@ public sealed class Reservation : AggregateRoot<Guid>
         AddDomainEvent(new ReservationAvailableEvent(Id, MemberId, BookId, ExpiresAt.Value));
     }
 
-    /// <summary>Member picked up the book — reservation fulfilled.</summary>
+    // Member picked up the book — reservation fulfilled.
     internal void Fulfill()
     {
-        if (Status != ReservationStatus.Available)
-            throw new DomainException("Only available reservations can be fulfilled.", "RESERVATION_INVALID_STATE");
+        Ensure.Against(Status != ReservationStatus.Available, "Only available reservations can be fulfilled.", "RESERVATION_INVALID_STATE");
 
         Status = ReservationStatus.Fulfilled;
         FulfilledAt = DateTime.UtcNow;
     }
 
-    /// <summary>Member cancelled the reservation.</summary>
+    // Member cancelled the reservation.
     internal void Cancel()
     {
-        if (Status == ReservationStatus.Fulfilled || Status == ReservationStatus.Cancelled)
-            throw new DomainException("Reservation cannot be cancelled in its current state.", "RESERVATION_INVALID_STATE");
+        Ensure.Against(Status == ReservationStatus.Fulfilled || Status == ReservationStatus.Cancelled, "Reservation cannot be cancelled in its current state.", "RESERVATION_INVALID_STATE");
 
         Status = ReservationStatus.Cancelled;
         CancelledAt = DateTime.UtcNow;
         AddDomainEvent(new ReservationCancelledEvent(Id, MemberId, BookId));
     }
 
-    /// <summary>Reservation expired — member didn't pick up in time.</summary>
+    // Reservation expired — member didn't pick up in time.
     internal void Expire()
     {
-        if (Status != ReservationStatus.Available)
-            throw new DomainException("Only available reservations can expire.", "RESERVATION_INVALID_STATE");
+        Ensure.Against(Status != ReservationStatus.Available, "Only available reservations can expire.", "RESERVATION_INVALID_STATE");
 
         Status = ReservationStatus.Expired;
         AddDomainEvent(new ReservationExpiredEvent(Id, MemberId, BookId));
     }
 
+    // Update queue position.
     internal void UpdateQueuePosition(int newPosition)
     {
-        if (newPosition < 1)
-            throw new DomainException("Queue position must be at least 1.", "RESERVATION_INVALID_POSITION");
+        Ensure.Against(newPosition < 1, "Queue position must be at least 1.", "RESERVATION_INVALID_POSITION");
         QueuePosition = newPosition;
     }
 

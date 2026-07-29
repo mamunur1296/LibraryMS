@@ -1,12 +1,10 @@
-using LibraryMS.Domain.Common;
-using LibraryMS.Domain.Shared.Exceptions;
 using LibraryMS.Domain.BranchManagement.Events;
+using LibraryMS.Domain.Common;
+using LibraryMS.Domain.Shared.Guards;
 
-namespace LibraryMS.Domain.BranchManagement;
+namespace LibraryMS.Domain.BranchManagement.AggregateRoots;
 
-/// <summary>
-/// Branch — a physical library location that holds book copies.
-/// </summary>
+// Branch — a physical library location that holds book copies.
 public sealed class Branch : AggregateRoot<Guid>
 {
     public string Name { get; private set; } = default!;
@@ -40,8 +38,7 @@ public sealed class Branch : AggregateRoot<Guid>
 
     internal void Deactivate()
     {
-        if (!IsActive)
-            throw new DomainException("Branch is already inactive.", "BRANCH_ALREADY_INACTIVE");
+        Ensure.Against(!IsActive, "Branch is already inactive.", "BRANCH_ALREADY_INACTIVE");
 
         IsActive = false;
         LastModifiedAt = DateTime.UtcNow;
@@ -49,8 +46,7 @@ public sealed class Branch : AggregateRoot<Guid>
 
     internal void Activate()
     {
-        if (IsActive)
-            throw new DomainException("Branch is already active.", "BRANCH_ALREADY_ACTIVE");
+        Ensure.Against(IsActive, "Branch is already active.", "BRANCH_ALREADY_ACTIVE");
 
         IsActive = true;
         LastModifiedAt = DateTime.UtcNow;
@@ -58,31 +54,26 @@ public sealed class Branch : AggregateRoot<Guid>
 
     private void SetName(string name)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("Branch name cannot be empty.", "BRANCH_NAME_EMPTY");
-        if (name.Length > 200)
-            throw new DomainException("Branch name cannot exceed 200 characters.", "BRANCH_NAME_TOO_LONG");
+        Ensure.Against(string.IsNullOrWhiteSpace(name), "Branch name cannot be empty.", "BRANCH_NAME_EMPTY");
+        Ensure.Against(name.Length > 200, "Branch name cannot exceed 200 characters.", "BRANCH_NAME_TOO_LONG");
         Name = name.Trim();
     }
 
     private void SetAddress(string address)
     {
-        if (string.IsNullOrWhiteSpace(address))
-            throw new DomainException("Branch address cannot be empty.", "BRANCH_ADDRESS_EMPTY");
+        Ensure.Against(string.IsNullOrWhiteSpace(address), "Branch address cannot be empty.", "BRANCH_ADDRESS_EMPTY");
         Address = address.Trim();
     }
 
     private void SetPhone(string phone)
     {
-        if (string.IsNullOrWhiteSpace(phone))
-            throw new DomainException("Branch phone cannot be empty.", "BRANCH_PHONE_EMPTY");
+        Ensure.Against(string.IsNullOrWhiteSpace(phone), "Branch phone cannot be empty.", "BRANCH_PHONE_EMPTY");
         Phone = phone.Trim();
     }
 
     private void SetEmail(string email)
     {
-        if (string.IsNullOrWhiteSpace(email))
-            throw new DomainException("Branch email cannot be empty.", "BRANCH_EMAIL_EMPTY");
+        Ensure.Against(string.IsNullOrWhiteSpace(email), "Branch email cannot be empty.", "BRANCH_EMAIL_EMPTY");
         Email = email.Trim().ToLowerInvariant();
     }
 }

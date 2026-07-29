@@ -2,6 +2,8 @@ using LibraryMS.Domain.BookManagement;
 using LibraryMS.Domain.BookManagement.AggregateRoots;
 using LibraryMS.Domain.BorrowManagement.AggregateRoots;
 using LibraryMS.Domain.MemberManagement;
+using LibraryMS.Domain.MemberManagement.AggregateRoots;
+using LibraryMS.Domain.MemberManagement.Services;
 using LibraryMS.Domain.Shared.Guards;
 
 namespace LibraryMS.Domain.BorrowManagement.Services;
@@ -80,3 +82,4 @@ public sealed class BorrowManager
         return borrow;
     }
 }
+

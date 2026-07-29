@@ -2,6 +2,9 @@ using LibraryMS.Application.Contracts.DTOs.Auth;
 using LibraryMS.Application.Contracts.Users;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.IdentityManagement;
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+using LibraryMS.Domain.IdentityManagement.Entities;
+using LibraryMS.Domain.IdentityManagement.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -29,3 +32,4 @@ public sealed class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, 
         return users.Select(u => u.ToDto()).ToList();
     }
 }
+

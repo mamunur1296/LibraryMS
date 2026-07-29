@@ -1,13 +1,11 @@
 using LibraryMS.Domain.Common;
 using LibraryMS.Domain.IdentityManagement.Events;
 using LibraryMS.Domain.Shared.Enums;
-using LibraryMS.Domain.Shared.Exceptions;
+using LibraryMS.Domain.Shared.Guards;
 
-namespace LibraryMS.Domain.IdentityManagement;
+namespace LibraryMS.Domain.IdentityManagement.AggregateRoots;
 
-/// <summary>
-/// User — system user for authentication (Admin/Librarian/Member roles).
-/// </summary>
+// User — system user for authentication (Admin/Librarian/Member roles).
 public sealed class User : AggregateRoot<Guid>
 {
     public string Username { get; private set; } = default!;
@@ -51,15 +49,13 @@ public sealed class User : AggregateRoot<Guid>
 
     internal void Deactivate()
     {
-        if (!IsActive)
-            throw new DomainException("User is already inactive.", "USER_ALREADY_INACTIVE");
+        Ensure.Against(!IsActive, "User is already inactive.", "USER_ALREADY_INACTIVE");
         IsActive = false;
     }
 
     internal void Activate()
     {
-        if (IsActive)
-            throw new DomainException("User is already active.", "USER_ALREADY_ACTIVE");
+        Ensure.Against(IsActive, "User is already active.", "USER_ALREADY_ACTIVE");
         IsActive = true;
     }
 
@@ -80,17 +76,14 @@ public sealed class User : AggregateRoot<Guid>
 
     private void SetUsername(string username)
     {
-        if (string.IsNullOrWhiteSpace(username))
-            throw new DomainException("Username cannot be empty.", "USER_USERNAME_EMPTY");
-        if (username.Length < 3 || username.Length > 50)
-            throw new DomainException("Username must be between 3 and 50 characters.", "USER_USERNAME_LENGTH");
+        Ensure.Against(string.IsNullOrWhiteSpace(username), "Username cannot be empty.", "USER_USERNAME_EMPTY");
+        Ensure.Against(username.Length < 3 || username.Length > 50, "Username must be between 3 and 50 characters.", "USER_USERNAME_LENGTH");
         Username = username.Trim().ToLowerInvariant();
     }
 
     private void SetEmail(string email)
     {
-        if (string.IsNullOrWhiteSpace(email))
-            throw new DomainException("Email cannot be empty.", "USER_EMAIL_EMPTY");
+        Ensure.Against(string.IsNullOrWhiteSpace(email), "Email cannot be empty.", "USER_EMAIL_EMPTY");
         Email = email.Trim().ToLowerInvariant();
     }
 }

@@ -1,5 +1,8 @@
 using LibraryMS.Application.Contracts.Users;
 using LibraryMS.Domain.IdentityManagement;
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+using LibraryMS.Domain.IdentityManagement.Entities;
+using LibraryMS.Domain.IdentityManagement.Services;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
@@ -52,3 +55,4 @@ public sealed class ChangeEmailCommandHandler : IRequestHandler<ChangeEmailComma
         _logger.LogInformation("Email for User {UserId} successfully changed to {NewEmail}", request.UserId, request.NewEmail);
     }
 }
+

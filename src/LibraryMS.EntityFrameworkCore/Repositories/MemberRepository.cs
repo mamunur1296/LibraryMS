@@ -1,4 +1,6 @@
 using LibraryMS.Domain.MemberManagement;
+using LibraryMS.Domain.MemberManagement.AggregateRoots;
+using LibraryMS.Domain.MemberManagement.Services;
 using LibraryMS.Domain.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,3 +72,4 @@ public sealed class MemberRepository : BaseRepository<Member>, IMemberRepository
             cancellationToken);
     }
 }
+

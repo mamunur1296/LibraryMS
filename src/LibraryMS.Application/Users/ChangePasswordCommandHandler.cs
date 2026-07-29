@@ -1,6 +1,9 @@
 using LibraryMS.Application.Contracts.Services;
 using LibraryMS.Application.Contracts.Users;
 using LibraryMS.Domain.IdentityManagement;
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+using LibraryMS.Domain.IdentityManagement.Entities;
+using LibraryMS.Domain.IdentityManagement.Services;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
@@ -58,3 +61,4 @@ public sealed class ChangePasswordCommandHandler : IRequestHandler<ChangePasswor
         _logger.LogInformation("Password for User {UserId} successfully changed.", request.UserId);
     }
 }
+

@@ -1,6 +1,9 @@
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+using LibraryMS.Domain.IdentityManagement.Entities;
+
 namespace LibraryMS.Domain.IdentityManagement;
 
-/// <summary>Repository contract for User aggregate.</summary>
+// Repository contract for User aggregate.
 public interface IUserRepository
 {
     Task<User?> GetByIdAsync(Guid id, CancellationToken ct = default);

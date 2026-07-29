@@ -1,6 +1,9 @@
 using LibraryMS.Application.Contracts.Auth;
 using LibraryMS.Application.Contracts.Services;
 using LibraryMS.Domain.IdentityManagement;
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+using LibraryMS.Domain.IdentityManagement.Entities;
+using LibraryMS.Domain.IdentityManagement.Services;
 using LibraryMS.Domain.Shared.Enums;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
@@ -51,3 +54,4 @@ public sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserCom
         return user.Id;
     }
 }
+

@@ -1,9 +1,9 @@
-using LibraryMS.Domain.Shared.Exceptions;
-using LibraryMS.Domain.Shared.Enums;
+using LibraryMS.Domain.MemberManagement.AggregateRoots;
+using LibraryMS.Domain.Shared.Guards;
 
-namespace LibraryMS.Domain.MemberManagement;
+namespace LibraryMS.Domain.MemberManagement.Services;
 
-/// <summary>Domain service for creating and managing Member aggregates.</summary>
+// Domain service for creating and managing Member aggregates.
 public sealed class MemberManager
 {
     private readonly IMemberRepository _repository;
@@ -34,8 +34,7 @@ public sealed class MemberManager
     public void SuspendMember(Member member, DateTime until, string reason)
     {
         ArgumentNullException.ThrowIfNull(member);
-        if (string.IsNullOrWhiteSpace(reason))
-            throw new DomainException("Suspension reason is required.", "MEMBER_SUSPENSION_NO_REASON");
+        Ensure.Against(string.IsNullOrWhiteSpace(reason), "Suspension reason is required.", "MEMBER_SUSPENSION_NO_REASON");
 
         member.Suspend(until, reason);
     }
@@ -49,8 +48,7 @@ public sealed class MemberManager
     private async Task EnsureEmailUniqueAsync(string email, Guid? excludeId, CancellationToken ct)
     {
         var exists = await _repository.EmailExistsAsync(email, excludeId, ct);
-        if (exists)
-            throw new DomainException($"A member with email '{email}' already exists.", "MEMBER_DUPLICATE_EMAIL");
+        Ensure.Against(exists, $"A member with email '{email}' already exists.", "MEMBER_DUPLICATE_EMAIL");
     }
 
     private async Task<string> GenerateMembershipNumberAsync(CancellationToken ct)
@@ -69,6 +67,7 @@ public sealed class MemberManager
                 return number;
         }
 
-        throw new DomainException("Failed to generate a unique membership number.", "MEMBER_NUMBER_GENERATION_FAILED");
+        Ensure.Against(true, "Failed to generate a unique membership number.", "MEMBER_NUMBER_GENERATION_FAILED");
+        return null!;
     }
 }

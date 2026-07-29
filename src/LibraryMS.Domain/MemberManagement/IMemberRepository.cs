@@ -1,6 +1,8 @@
+using LibraryMS.Domain.MemberManagement.AggregateRoots;
+
 namespace LibraryMS.Domain.MemberManagement;
 
-/// <summary>Repository contract for Member aggregate.</summary>
+// Repository contract for Member aggregate.
 public interface IMemberRepository
 {
     Task<Member?> GetByIdAsync(Guid id, CancellationToken ct = default);

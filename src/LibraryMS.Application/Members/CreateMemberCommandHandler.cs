@@ -2,6 +2,8 @@ using LibraryMS.Application.Contracts.DTOs.Member;
 using LibraryMS.Application.Contracts.Members;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.MemberManagement;
+using LibraryMS.Domain.MemberManagement.AggregateRoots;
+using LibraryMS.Domain.MemberManagement.Services;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
@@ -56,3 +58,4 @@ public sealed class CreateMemberCommandHandler : IRequestHandler<CreateMemberCom
         return member.ToDto();
     }
 }
+

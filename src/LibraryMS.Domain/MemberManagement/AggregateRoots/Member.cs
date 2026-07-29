@@ -1,13 +1,11 @@
 using LibraryMS.Domain.Common;
 using LibraryMS.Domain.MemberManagement.Events;
 using LibraryMS.Domain.Shared.Enums;
-using LibraryMS.Domain.Shared.Exceptions;
+using LibraryMS.Domain.Shared.Guards;
 
-namespace LibraryMS.Domain.MemberManagement;
+namespace LibraryMS.Domain.MemberManagement.AggregateRoots;
 
-/// <summary>
-/// Member — a registered library member who can borrow and reserve books.
-/// </summary>
+// Member — a registered library member who can borrow and reserve books.
 public sealed class Member : AggregateRoot<Guid>
 {
     public string FirstName { get; private set; } = default!;
@@ -55,8 +53,7 @@ public sealed class Member : AggregateRoot<Guid>
 
     internal void Suspend(DateTime until, string reason)
     {
-        if (Status == MemberStatus.Suspended)
-            throw new DomainException("Member is already suspended.", "MEMBER_ALREADY_SUSPENDED");
+        Ensure.Against(Status == MemberStatus.Suspended, "Member is already suspended.", "MEMBER_ALREADY_SUSPENDED");
 
         Status = MemberStatus.Suspended;
         SuspendedUntil = until;
@@ -67,15 +64,14 @@ public sealed class Member : AggregateRoot<Guid>
 
     internal void Activate()
     {
-        if (Status == MemberStatus.Active)
-            throw new DomainException("Member is already active.", "MEMBER_ALREADY_ACTIVE");
+        Ensure.Against(Status == MemberStatus.Active, "Member is already active.", "MEMBER_ALREADY_ACTIVE");
 
         Status = MemberStatus.Active;
         SuspendedUntil = null;
         LastModifiedAt = DateTime.UtcNow;
     }
 
-    /// <summary>Checks if the member can borrow a book (not suspended, not overdue-blocked).</summary>
+    // Checks if the member can borrow a book (not suspended, not overdue-blocked).
     public bool CanBorrow()
     {
         if (Status == MemberStatus.Suspended)
@@ -94,29 +90,25 @@ public sealed class Member : AggregateRoot<Guid>
 
     private void SetFirstName(string name)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("First name cannot be empty.", "MEMBER_FIRSTNAME_EMPTY");
+        Ensure.Against(string.IsNullOrWhiteSpace(name), "First name cannot be empty.", "MEMBER_FIRSTNAME_EMPTY");
         FirstName = name.Trim();
     }
 
     private void SetLastName(string name)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new DomainException("Last name cannot be empty.", "MEMBER_LASTNAME_EMPTY");
+        Ensure.Against(string.IsNullOrWhiteSpace(name), "Last name cannot be empty.", "MEMBER_LASTNAME_EMPTY");
         LastName = name.Trim();
     }
 
     private void SetEmail(string email)
     {
-        if (string.IsNullOrWhiteSpace(email))
-            throw new DomainException("Email cannot be empty.", "MEMBER_EMAIL_EMPTY");
+        Ensure.Against(string.IsNullOrWhiteSpace(email), "Email cannot be empty.", "MEMBER_EMAIL_EMPTY");
         Email = email.Trim().ToLowerInvariant();
     }
 
     private void SetPhone(string phone)
     {
-        if (string.IsNullOrWhiteSpace(phone))
-            throw new DomainException("Phone cannot be empty.", "MEMBER_PHONE_EMPTY");
+        Ensure.Against(string.IsNullOrWhiteSpace(phone), "Phone cannot be empty.", "MEMBER_PHONE_EMPTY");
         Phone = phone.Trim();
     }
 }

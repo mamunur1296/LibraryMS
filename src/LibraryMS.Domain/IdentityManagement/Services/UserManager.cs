@@ -1,7 +1,9 @@
 using LibraryMS.Domain.Common;
 using LibraryMS.Domain.Shared.Enums;
 
-namespace LibraryMS.Domain.IdentityManagement;
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+
+namespace LibraryMS.Domain.IdentityManagement.Services;
 
 public sealed class UserManager
 {
