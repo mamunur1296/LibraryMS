@@ -1,4 +1,3 @@
-using LibraryMS.Application.Contracts.Auth;
 using LibraryMS.Domain.BranchManagement;
 using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.Shared.Enums;
@@ -7,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using LibraryMS.Application.Contracts.Auth.Interfaces;
 
 namespace LibraryMS.DbMigrator;
 

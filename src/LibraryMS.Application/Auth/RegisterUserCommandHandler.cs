@@ -1,4 +1,5 @@
 using LibraryMS.Application.Contracts.Auth;
+using LibraryMS.Application.Contracts.Auth.Interfaces;
 using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.Shared.Enums;
 using LibraryMS.Domain.Shared.Guards;
