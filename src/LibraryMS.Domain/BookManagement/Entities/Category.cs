@@ -1,8 +1,8 @@
 using LibraryMS.Domain.Common;
 
-namespace LibraryMS.Domain.BookManagement;
+namespace LibraryMS.Domain.BookManagement.Entities;
 
-/// <summary>Category entity for book classification.</summary>
+// Category entity for book classification.
 public sealed class Category : Entity<Guid>
 {
     public string Name { get; private set; } = default!;

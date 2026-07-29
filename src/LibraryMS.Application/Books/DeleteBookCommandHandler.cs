@@ -1,6 +1,9 @@
 using LibraryMS.Domain.Shared;
 using LibraryMS.Application.Contracts.Books;
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
+using LibraryMS.Domain.BookManagement.Services;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -38,3 +41,4 @@ public sealed class DeleteBookCommandHandler : IRequestHandler<DeleteBookCommand
         _logger.LogInformation("Book with ID {BookId} ('{Title}') deleted successfully.", request.Id, book!.Title);
     }
 }
+

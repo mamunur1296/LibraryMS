@@ -1,6 +1,8 @@
 using LibraryMS.Application.Contracts.DTOs.Report;
 using LibraryMS.Application.Contracts.Reports;
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
 using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.BranchManagement;
 using LibraryMS.Domain.MemberManagement;

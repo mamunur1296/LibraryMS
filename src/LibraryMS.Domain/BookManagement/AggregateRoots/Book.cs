@@ -1,14 +1,13 @@
-using LibraryMS.Domain.Common;
+using LibraryMS.Domain.BookManagement.Entities;
 using LibraryMS.Domain.BookManagement.Events;
 using LibraryMS.Domain.BookManagement.VOs;
-using LibraryMS.Domain.Shared.Exceptions;
+using LibraryMS.Domain.Common;
+using LibraryMS.Domain.Shared.Guards;
 
-namespace LibraryMS.Domain.BookManagement;
+namespace LibraryMS.Domain.BookManagement.AggregateRoots;
 
-/// <summary>
-/// Book — Aggregate Root for the Book Management bounded context.
-/// Owns BookCopy entities. Controls copy lifecycle.
-/// </summary>
+// Book — Aggregate Root for the Book Management bounded context.
+// Owns BookCopy entities. Controls copy lifecycle.
 public sealed class Book : AggregateRoot<Guid>
 {
     public string Title { get; private set; } = default!;
@@ -62,7 +61,7 @@ public sealed class Book : AggregateRoot<Guid>
         LastModifiedAt = DateTime.UtcNow;
     }
 
-    /// <summary>Adds a new physical copy of this book to a branch.</summary>
+    // Adds a new physical copy of this book to a branch.
     internal BookCopy AddCopy(Guid branchId)
     {
         return AddCopy(Guid.NewGuid(), branchId);
@@ -77,7 +76,7 @@ public sealed class Book : AggregateRoot<Guid>
         return copy;
     }
 
-    /// <summary>Marks a specific copy as borrowed — called by BorrowManager.</summary>
+    // Marks a specific copy as borrowed — called by BorrowManager.
     internal BookCopy BorrowCopy(Guid copyId)
     {
         var copy = GetCopyOrThrow(copyId);
@@ -85,7 +84,7 @@ public sealed class Book : AggregateRoot<Guid>
         return copy;
     }
 
-    /// <summary>Marks a specific copy as returned (available).</summary>
+    // Marks a specific copy as returned (available).
     internal BookCopy ReturnCopy(Guid copyId)
     {
         var copy = GetCopyOrThrow(copyId);
@@ -93,7 +92,7 @@ public sealed class Book : AggregateRoot<Guid>
         return copy;
     }
 
-    /// <summary>Returns the first available copy in a specific branch.</summary>
+    // Returns the first available copy in a specific branch.
     internal BookCopy? GetAvailableCopyInBranch(Guid branchId)
         => _copies.FirstOrDefault(c => c.BranchId == branchId && c.IsAvailable);
 
@@ -101,8 +100,11 @@ public sealed class Book : AggregateRoot<Guid>
     public int AvailableCopies => _copies.Count(c => c.IsAvailable);
 
     private BookCopy GetCopyOrThrow(Guid copyId)
-        => _copies.FirstOrDefault(c => c.Id == copyId)
-           ?? throw new NotFoundException(nameof(BookCopy), copyId);
+    {
+        var copy = _copies.FirstOrDefault(c => c.Id == copyId);
+        Ensure.Found(copy, nameof(BookCopy), copyId);
+        return copy!;
+    }
 
     private string GenerateCopyNumber(Guid branchId)
     {
@@ -112,17 +114,14 @@ public sealed class Book : AggregateRoot<Guid>
 
     private void SetTitle(string title)
     {
-        if (string.IsNullOrWhiteSpace(title))
-            throw new DomainException("Book title cannot be empty.", "BOOK_TITLE_EMPTY");
-        if (title.Length > 300)
-            throw new DomainException("Book title cannot exceed 300 characters.", "BOOK_TITLE_TOO_LONG");
+        Ensure.Against(string.IsNullOrWhiteSpace(title), "Book title cannot be empty.", "BOOK_TITLE_EMPTY");
+        Ensure.Against(title.Length > 300, "Book title cannot exceed 300 characters.", "BOOK_TITLE_TOO_LONG");
         Title = title.Trim();
     }
 
     private void SetPublicationYear(int year)
     {
-        if (year < 1000 || year > DateTime.UtcNow.Year + 1)
-            throw new DomainException($"Invalid publication year: {year}.", "BOOK_INVALID_YEAR");
+        Ensure.Against(year < 1000 || year > DateTime.UtcNow.Year + 1, $"Invalid publication year: {year}.", "BOOK_INVALID_YEAR");
         PublicationYear = year;
     }
 }

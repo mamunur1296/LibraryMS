@@ -5,6 +5,8 @@ using LibraryMS.Application.Contracts.DTOs.Borrow;
 using LibraryMS.Application.Contracts.DTOs.Member;
 using LibraryMS.Application.Contracts.DTOs.Reservation;
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
 using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.MemberManagement;

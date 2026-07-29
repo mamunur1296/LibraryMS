@@ -1,21 +1,20 @@
 using LibraryMS.Domain.Common;
-using System;
-
 using LibraryMS.Domain.BookManagement.Entities;
+using System;
 
 namespace LibraryMS.Domain.BookManagement.Services;
 
-public sealed class AuthorManager
+public sealed class CategoryManager
 {
     private readonly IGuidGenerator _guidGenerator;
 
-    public AuthorManager(IGuidGenerator guidGenerator)
+    public CategoryManager(IGuidGenerator guidGenerator)
     {
         _guidGenerator = guidGenerator;
     }
 
-    public Author Create(string name, string? biography = null)
+    public Category Create(string name, string? description = null)
     {
-        return new Author(_guidGenerator.Create(), name, biography);
+        return new Category(_guidGenerator.Create(), name, description);
     }
 }

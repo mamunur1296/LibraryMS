@@ -1,13 +1,12 @@
+using LibraryMS.Domain.BookManagement.AggregateRoots;
 using LibraryMS.Domain.Common;
 using LibraryMS.Domain.Shared.Enums;
-using LibraryMS.Domain.Shared.Exceptions;
+using LibraryMS.Domain.Shared.Guards;
 
-namespace LibraryMS.Domain.BookManagement;
+namespace LibraryMS.Domain.BookManagement.Entities;
 
-/// <summary>
-/// Represents a physical copy of a Book located in a specific Branch.
-/// Status tracks availability for borrow/reservation.
-/// </summary>
+// Represents a physical copy of a Book located in a specific Branch.
+// Status tracks availability for borrow/reservation.
 public sealed class BookCopy : Entity<Guid>
 {
     public Guid BookId { get; private set; }
@@ -32,9 +31,7 @@ public sealed class BookCopy : Entity<Guid>
 
     internal void MarkAsBorrowed()
     {
-        if (Status != CopyStatus.Available)
-            throw new DomainException($"Copy '{CopyNumber}' is not available for borrowing. Current status: {Status}",
-                "COPY_NOT_AVAILABLE");
+        Ensure.Against(Status != CopyStatus.Available, $"Copy '{CopyNumber}' is not available for borrowing. Current status: {Status}", "COPY_NOT_AVAILABLE");
         Status = CopyStatus.Borrowed;
         LastModifiedAt = DateTime.UtcNow;
     }
@@ -47,9 +44,7 @@ public sealed class BookCopy : Entity<Guid>
 
     internal void MarkAsReserved()
     {
-        if (Status != CopyStatus.Available)
-            throw new DomainException($"Copy '{CopyNumber}' cannot be reserved. Current status: {Status}",
-                "COPY_NOT_RESERVABLE");
+        Ensure.Against(Status != CopyStatus.Available, $"Copy '{CopyNumber}' cannot be reserved. Current status: {Status}", "COPY_NOT_RESERVABLE");
         Status = CopyStatus.Reserved;
         LastModifiedAt = DateTime.UtcNow;
     }

@@ -2,6 +2,9 @@ using LibraryMS.Application.Mapping;
 using LibraryMS.Application.Contracts.Books;
 using LibraryMS.Application.Contracts.DTOs.Book;
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
+using LibraryMS.Domain.BookManagement.Services;
 using MediatR;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,3 +28,4 @@ public sealed class GetAllAuthorsQueryHandler : IRequestHandler<GetAllAuthorsQue
         return authors.Select(a => a.ToDto()).ToList();
     }
 }
+

@@ -1,8 +1,8 @@
 using LibraryMS.Domain.Common;
 
-namespace LibraryMS.Domain.BookManagement;
+namespace LibraryMS.Domain.BookManagement.Entities;
 
-/// <summary>Author entity — belongs to Book aggregate via navigation.</summary>
+// Author entity — belongs to Book aggregate via navigation.
 public sealed class Author : Entity<Guid>
 {
     public string Name { get; private set; } = default!;

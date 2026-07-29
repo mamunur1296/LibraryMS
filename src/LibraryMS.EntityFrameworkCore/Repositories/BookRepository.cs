@@ -1,5 +1,7 @@
 using LibraryMS.Application.Contracts.Common;
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryMS.EntityFrameworkCore.Repositories;

@@ -2,6 +2,9 @@ using LibraryMS.Application.Contracts.Books;
 using LibraryMS.Application.Contracts.DTOs.Book;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
+using LibraryMS.Domain.BookManagement.Services;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
@@ -12,17 +15,20 @@ namespace LibraryMS.Application.Books;
 public sealed class CreateBookCommandHandler : IRequestHandler<CreateBookCommand, BookDto>
 {
     private readonly BookManager _manager;
+    private readonly BookCopyManager _copyManager;
     private readonly IBookRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateBookCommandHandler> _logger;
 
     public CreateBookCommandHandler(
         BookManager manager,
+        BookCopyManager copyManager,
         IBookRepository repository,
         IUnitOfWork unitOfWork,
         ILogger<CreateBookCommandHandler> logger)
     {
         _manager = manager;
+        _copyManager = copyManager;
         _repository = repository;
         _unitOfWork = unitOfWork;
         _logger = logger;
@@ -40,7 +46,7 @@ public sealed class CreateBookCommandHandler : IRequestHandler<CreateBookCommand
 
         // Add initial copies to the specified branch
         for (int i = 0; i < request.InitialCopies; i++)
-            _manager.AddCopyToBranch(book, request.BranchId);
+            _copyManager.AddCopyToBranch(book, request.BranchId);
 
         var dbFailed = false;
         try
@@ -62,3 +68,4 @@ public sealed class CreateBookCommandHandler : IRequestHandler<CreateBookCommand
         return book.ToDto();
     }
 }
+

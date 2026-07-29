@@ -2,6 +2,8 @@ using LibraryMS.Application.Contracts.DTOs.Reservation;
 using LibraryMS.Application.Contracts.Reservations;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
 using LibraryMS.Domain.MemberManagement;
 using LibraryMS.Domain.ReservationManagement;
 using LibraryMS.Domain.Shared;

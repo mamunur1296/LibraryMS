@@ -4,7 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System;
 
-namespace LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
+
+namespace LibraryMS.Domain.BookManagement.Services;
 
 /// <summary>Domain service for creating and managing Book aggregates.</summary>
 public sealed class BookManager
@@ -35,12 +38,6 @@ public sealed class BookManager
     {
         book.Update(title, description, publicationYear, categoryId, authorId, language);
         return book;
-    }
-
-    public BookCopy AddCopyToBranch(Book book, Guid branchId)
-    {
-        ArgumentNullException.ThrowIfNull(book);
-        return book.AddCopy(_guidGenerator.Create(), branchId);
     }
 
     private async Task EnsureIsbnUniqueAsync(string isbn, Guid? excludeId, CancellationToken ct)

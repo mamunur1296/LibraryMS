@@ -41,6 +41,17 @@ public static class Ensure
     }
 
     /// <summary>
+    /// Throws NotFoundException if the requested entity was not found (is null).
+    /// </summary>
+    public static void Found<T>(T? entity, string entityName, object key)
+    {
+        if (entity is null)
+        {
+            throw new NotFoundException(entityName, key);
+        }
+    }
+
+    /// <summary>
     /// Throws DomainException if a specific business rule is violated.
     /// </summary>
     public static void Against(bool ruleViolated, string message, string errorCode)

@@ -1,4 +1,6 @@
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
 using LibraryMS.Domain.MemberManagement;
 using LibraryMS.Domain.Shared.Exceptions;
 

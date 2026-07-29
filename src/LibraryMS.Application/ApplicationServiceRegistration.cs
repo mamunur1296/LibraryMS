@@ -2,6 +2,7 @@ using FluentValidation;
 using LibraryMS.Application.Behaviours;
 using LibraryMS.Application.Contracts.Common;
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.Services;
 using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.BranchManagement;
 using LibraryMS.Domain.Common;
@@ -38,6 +39,8 @@ public static class ApplicationServiceRegistration
         // Domain Services
         services.AddScoped<BookManager>();
         services.AddScoped<AuthorManager>();
+        services.AddScoped<CategoryManager>();
+        services.AddScoped<BookCopyManager>();
         services.AddScoped<BranchManager>();
         services.AddScoped<MemberManager>();
         services.AddScoped<BorrowManager>();

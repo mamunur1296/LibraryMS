@@ -1,4 +1,3 @@
-using System;
 using LibraryMS.Domain.Common;
 
 namespace LibraryMS.Domain.BookManagement.Events;

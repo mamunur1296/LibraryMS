@@ -3,6 +3,9 @@ using LibraryMS.Application.Contracts.Common;
 using LibraryMS.Application.Contracts.DTOs.Book;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
+using LibraryMS.Domain.BookManagement.Services;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -37,3 +40,4 @@ public sealed class SearchBooksQueryHandler : IRequestHandler<SearchBooksQuery, 
             total, request.Page, request.PageSize);
     }
 }
+
