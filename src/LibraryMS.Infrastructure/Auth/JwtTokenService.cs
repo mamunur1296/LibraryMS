@@ -30,7 +30,8 @@ public class JwtTokenService : IJwtTokenService
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
-            new Claim("MemberId", user.MemberId?.ToString() ?? string.Empty)
+            new Claim("MemberId", user.MemberId?.ToString() ?? string.Empty),
+            new Claim("memberId", user.MemberId?.ToString() ?? string.Empty)
         };
 
         var expirationMinutes = int.Parse(jwtSettings["AccessTokenExpirationMinutes"] ?? "60");

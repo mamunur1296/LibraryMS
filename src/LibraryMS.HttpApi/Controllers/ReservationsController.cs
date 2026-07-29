@@ -26,7 +26,7 @@ public class ReservationsController : BaseController
         var result = await Mediator.Send(new GetReservationByIdQuery(id), cancellationToken);
         if (result is null) return NotFound();
         
-        if (User.IsInRole("Member") && result.MemberId.ToString() != User.Claims.FirstOrDefault(c => c.Type == "memberId")?.Value)
+        if (User.IsInRole("Member") && result.MemberId.ToString() != User.Claims.FirstOrDefault(c => c.Type.Equals("memberId", StringComparison.OrdinalIgnoreCase))?.Value)
             return Forbid();
             
         return Ok(result);
@@ -36,7 +36,7 @@ public class ReservationsController : BaseController
     [Authorize(Roles = "Member")]
     public async Task<ActionResult<List<ReservationDto>>> GetMyReservations(CancellationToken cancellationToken)
     {
-        var memberIdString = User.Claims.FirstOrDefault(c => c.Type == "memberId")?.Value;
+        var memberIdString = User.Claims.FirstOrDefault(c => c.Type.Equals("memberId", StringComparison.OrdinalIgnoreCase))?.Value;
         if (!Guid.TryParse(memberIdString, out var memberId)) return Unauthorized();
 
         var result = await Mediator.Send(new GetMemberReservationsQuery(memberId), cancellationToken);
@@ -54,7 +54,7 @@ public class ReservationsController : BaseController
     [HttpPost]
     public async Task<ActionResult<ReservationDto>> Create([FromBody] CreateReservationCommand command, CancellationToken cancellationToken)
     {
-        if (User.IsInRole("Member") && command.MemberId.ToString() != User.Claims.FirstOrDefault(c => c.Type == "memberId")?.Value)
+        if (User.IsInRole("Member") && command.MemberId.ToString() != User.Claims.FirstOrDefault(c => c.Type.Equals("memberId", StringComparison.OrdinalIgnoreCase))?.Value)
             return Forbid();
             
         var result = await Mediator.Send(command, cancellationToken);
@@ -67,7 +67,7 @@ public class ReservationsController : BaseController
         var requestingMemberId = Guid.Empty;
         if (User.IsInRole("Member"))
         {
-            var memberIdString = User.Claims.FirstOrDefault(c => c.Type == "memberId")?.Value;
+            var memberIdString = User.Claims.FirstOrDefault(c => c.Type.Equals("memberId", StringComparison.OrdinalIgnoreCase))?.Value;
             Guid.TryParse(memberIdString, out requestingMemberId);
         }
 

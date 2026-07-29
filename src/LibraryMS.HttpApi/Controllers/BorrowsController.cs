@@ -27,7 +27,7 @@ public class BorrowsController : BaseController
         if (result is null) return NotFound();
         
         // Members can only view their own borrows
-        if (User.IsInRole("Member") && result.MemberId.ToString() != User.Claims.FirstOrDefault(c => c.Type == "memberId")?.Value)
+        if (User.IsInRole("Member") && result.MemberId.ToString() != User.Claims.FirstOrDefault(c => c.Type.Equals("memberId", StringComparison.OrdinalIgnoreCase))?.Value)
             return Forbid();
             
         return Ok(result);
@@ -37,7 +37,7 @@ public class BorrowsController : BaseController
     [Authorize(Roles = "Member")]
     public async Task<ActionResult<List<BorrowDto>>> GetMyActiveBorrows(CancellationToken cancellationToken)
     {
-        var memberIdString = User.Claims.FirstOrDefault(c => c.Type == "memberId")?.Value;
+        var memberIdString = User.Claims.FirstOrDefault(c => c.Type.Equals("memberId", StringComparison.OrdinalIgnoreCase))?.Value;
         if (!Guid.TryParse(memberIdString, out var memberId)) return Unauthorized();
 
         var result = await Mediator.Send(new GetActiveBorrowsByMemberQuery(memberId), cancellationToken);
