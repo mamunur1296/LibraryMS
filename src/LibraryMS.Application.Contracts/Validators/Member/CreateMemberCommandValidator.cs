@@ -42,28 +42,3 @@ public sealed class CreateMemberCommandValidator : AbstractValidator<CreateMembe
         });
     }
 }
-
-public sealed class UpdateMemberCommandValidator : AbstractValidator<UpdateMemberCommand>
-{
-    public UpdateMemberCommandValidator()
-    {
-        RuleFor(x => x.Id).NotEmpty();
-        RuleFor(x => x.FirstName).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.LastName).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.Phone).NotEmpty().Matches(@"^[\d\s\+\-\(\)]{7,20}$");
-        RuleFor(x => x.Address).MaximumLength(500).When(x => x.Address is not null);
-    }
-}
-
-public sealed class SuspendMemberCommandValidator : AbstractValidator<SuspendMemberCommand>
-{
-    public SuspendMemberCommandValidator()
-    {
-        RuleFor(x => x.Id).NotEmpty();
-        RuleFor(x => x.SuspendedUntil)
-            .GreaterThan(DateTime.UtcNow).WithMessage("Suspension end date must be in the future.");
-        RuleFor(x => x.Reason)
-            .NotEmpty().WithMessage("Suspension reason is required.")
-            .MaximumLength(500);
-    }
-}

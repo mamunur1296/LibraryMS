@@ -44,30 +44,3 @@ public sealed class CreateBookCommandValidator : AbstractValidator<CreateBookCom
         return (cleaned.Length == 10 || cleaned.Length == 13) && cleaned.All(char.IsDigit);
     }
 }
-
-public sealed class UpdateBookCommandValidator : AbstractValidator<UpdateBookCommand>
-{
-    public UpdateBookCommandValidator()
-    {
-        RuleFor(x => x.Id).NotEmpty();
-        RuleFor(x => x.Title).NotEmpty().MaximumLength(300);
-        RuleFor(x => x.PublicationYear)
-            .GreaterThanOrEqualTo(1000)
-            .LessThanOrEqualTo(DateTime.UtcNow.Year + 1);
-        RuleFor(x => x.CategoryId).NotEmpty();
-        RuleFor(x => x.AuthorId).NotEmpty();
-        RuleFor(x => x.Language).NotEmpty().MaximumLength(50);
-    }
-}
-
-public sealed class AddBookCopiesCommandValidator : AbstractValidator<AddBookCopiesCommand>
-{
-    public AddBookCopiesCommandValidator()
-    {
-        RuleFor(x => x.BookId).NotEmpty();
-        RuleFor(x => x.BranchId).NotEmpty();
-        RuleFor(x => x.Quantity)
-            .GreaterThan(0).WithMessage("Quantity must be at least 1.")
-            .LessThanOrEqualTo(50).WithMessage("Cannot add more than 50 copies at once.");
-    }
-}
