@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { borrowService } from "@/lib/services/borrow.service";
+import { authService } from "@/lib/services/auth.service";
 import { BorrowDto, PagedResult } from "@/types/borrow.types";
 import { BorrowFormModal } from "@/components/borrows/BorrowFormModal";
 import { ReturnBookModal } from "@/components/borrows/ReturnBookModal";
@@ -15,6 +16,9 @@ export default function BorrowsPage() {
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
   const [borrowToManage, setBorrowToManage] = useState<BorrowDto | null>(null);
   const [finePayTarget, setFinePayTarget] = useState<BorrowDto | null>(null);
+
+  const userRole = authService.getUserRole();
+  const isLibrarianOrAdmin = userRole === "Librarian" || userRole === "Admin";
 
   const fetchBorrows = useCallback(async () => {
     setLoading(true);
@@ -51,10 +55,12 @@ export default function BorrowsPage() {
           <h1 className="text-2xl font-bold tracking-tight text-white">Borrow &amp; Return</h1>
           <p className="text-sm text-slate-400 mt-1">Issue books, process returns, and manage fines.</p>
         </div>
-        <button onClick={() => { setIsFormModalOpen(true); }} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow-lg shadow-indigo-500/20 text-sm font-medium transition-all flex items-center gap-2">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-          Issue Book
-        </button>
+        {isLibrarianOrAdmin && (
+          <button onClick={() => { setIsFormModalOpen(true); }} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow-lg shadow-indigo-500/20 text-sm font-medium transition-all flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+            Issue Book
+          </button>
+        )}
       </div>
 
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col">
@@ -111,11 +117,17 @@ export default function BorrowsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
-                      {borrow.status === "Active" && (
-                        <button onClick={() => { setBorrowToManage(borrow); setIsReturnModalOpen(true); }} className="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded text-xs font-medium">Process Return</button>
-                      )}
-                      {borrow.lateFine > 0 && !borrow.isFinePaid && (
-                        <button onClick={() => { setFinePayTarget(borrow); }} className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded text-xs font-medium">Pay Fine</button>
+                      {isLibrarianOrAdmin ? (
+                        <>
+                          {borrow.status === "Active" && (
+                            <button onClick={() => { setBorrowToManage(borrow); setIsReturnModalOpen(true); }} className="px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 rounded text-xs font-medium">Process Return</button>
+                          )}
+                          {borrow.lateFine > 0 && !borrow.isFinePaid && (
+                            <button onClick={() => { setFinePayTarget(borrow); }} className="px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded text-xs font-medium">Pay Fine</button>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-slate-500 text-xs italic">View Only</span>
                       )}
                     </td>
                   </tr>
