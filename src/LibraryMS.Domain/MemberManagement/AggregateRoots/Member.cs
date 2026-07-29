@@ -2,6 +2,7 @@ using LibraryMS.Domain.Common;
 using LibraryMS.Domain.MemberManagement.Events;
 using LibraryMS.Domain.Shared.Enums;
 using LibraryMS.Domain.Shared.Guards;
+using LibraryMS.Domain.Shared.Constants;
 
 namespace LibraryMS.Domain.MemberManagement.AggregateRoots;
 
@@ -91,24 +92,28 @@ public sealed class Member : AggregateRoot<Guid>
     private void SetFirstName(string name)
     {
         Ensure.Against(string.IsNullOrWhiteSpace(name), "First name cannot be empty.", "MEMBER_FIRSTNAME_EMPTY");
+        Ensure.Against(name.Length > MemberConsts.MaxFirstNameLength, $"First name cannot exceed {MemberConsts.MaxFirstNameLength} characters.", "MEMBER_FIRSTNAME_TOO_LONG");
         FirstName = name.Trim();
     }
 
     private void SetLastName(string name)
     {
         Ensure.Against(string.IsNullOrWhiteSpace(name), "Last name cannot be empty.", "MEMBER_LASTNAME_EMPTY");
+        Ensure.Against(name.Length > MemberConsts.MaxLastNameLength, $"Last name cannot exceed {MemberConsts.MaxLastNameLength} characters.", "MEMBER_LASTNAME_TOO_LONG");
         LastName = name.Trim();
     }
 
     private void SetEmail(string email)
     {
         Ensure.Against(string.IsNullOrWhiteSpace(email), "Email cannot be empty.", "MEMBER_EMAIL_EMPTY");
+        Ensure.Against(email.Length > MemberConsts.MaxEmailLength, $"Email cannot exceed {MemberConsts.MaxEmailLength} characters.", "MEMBER_EMAIL_TOO_LONG");
         Email = email.Trim().ToLowerInvariant();
     }
 
     private void SetPhone(string phone)
     {
         Ensure.Against(string.IsNullOrWhiteSpace(phone), "Phone cannot be empty.", "MEMBER_PHONE_EMPTY");
+        Ensure.Against(phone.Length > MemberConsts.MaxPhoneLength, $"Phone number cannot exceed {MemberConsts.MaxPhoneLength} characters.", "MEMBER_PHONE_TOO_LONG");
         Phone = phone.Trim();
     }
 }

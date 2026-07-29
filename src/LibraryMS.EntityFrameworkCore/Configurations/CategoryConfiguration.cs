@@ -1,4 +1,5 @@
 using LibraryMS.Domain.BookManagement.Entities;
+using LibraryMS.Domain.Shared.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,8 +11,8 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
     {
         builder.ToTable("Categories");
         builder.HasKey(c => c.Id);
-        builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
+        builder.Property(c => c.Name).IsRequired().HasMaxLength(CategoryConsts.MaxNameLength);
         builder.HasIndex(c => c.Name).IsUnique();
-        builder.Property(c => c.Description).HasMaxLength(500);
+        builder.Property(c => c.Description).HasMaxLength(CategoryConsts.MaxDescriptionLength);
     }
 }

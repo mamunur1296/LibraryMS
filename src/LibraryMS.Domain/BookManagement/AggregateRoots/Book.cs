@@ -3,6 +3,7 @@ using LibraryMS.Domain.BookManagement.Events;
 using LibraryMS.Domain.BookManagement.VOs;
 using LibraryMS.Domain.Common;
 using LibraryMS.Domain.Shared.Guards;
+using LibraryMS.Domain.Shared.Constants;
 
 namespace LibraryMS.Domain.BookManagement.AggregateRoots;
 
@@ -57,6 +58,7 @@ public sealed class Book : AggregateRoot<Guid>
 
     internal void SetCoverImage(string? url)
     {
+        Ensure.Against(url != null && url.Length > BookConsts.MaxCoverImageUrlLength, $"Cover image URL cannot exceed {BookConsts.MaxCoverImageUrlLength} characters.", "BOOK_COVER_IMAGE_URL_TOO_LONG");
         CoverImageUrl = url;
         LastModifiedAt = DateTime.UtcNow;
     }
@@ -115,7 +117,7 @@ public sealed class Book : AggregateRoot<Guid>
     private void SetTitle(string title)
     {
         Ensure.Against(string.IsNullOrWhiteSpace(title), "Book title cannot be empty.", "BOOK_TITLE_EMPTY");
-        Ensure.Against(title.Length > 300, "Book title cannot exceed 300 characters.", "BOOK_TITLE_TOO_LONG");
+        Ensure.Against(title.Length > BookConsts.MaxTitleLength, $"Book title cannot exceed {BookConsts.MaxTitleLength} characters.", "BOOK_TITLE_TOO_LONG");
         Title = title.Trim();
     }
 

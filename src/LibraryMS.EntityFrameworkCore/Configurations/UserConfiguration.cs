@@ -1,5 +1,6 @@
 using LibraryMS.Domain.IdentityManagement.AggregateRoots;
 using LibraryMS.Domain.MemberManagement.AggregateRoots;
+using LibraryMS.Domain.Shared.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,11 +13,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.ToTable("Users");
         builder.HasKey(u => u.Id);
 
-        builder.Property(u => u.Username).IsRequired().HasMaxLength(50);
-        builder.Property(u => u.Email).IsRequired().HasMaxLength(100);
-        builder.Property(u => u.PasswordHash).IsRequired().HasMaxLength(250);
-        builder.Property(u => u.PasswordSalt).IsRequired().HasMaxLength(250);
-        builder.Property(u => u.Role).HasConversion<string>().HasMaxLength(20);
+        builder.Property(u => u.Username).IsRequired().HasMaxLength(UserConsts.MaxUsernameLength);
+        builder.Property(u => u.Email).IsRequired().HasMaxLength(UserConsts.MaxEmailLength);
+        builder.Property(u => u.PasswordHash).IsRequired().HasMaxLength(UserConsts.MaxPasswordHashLength);
+        builder.Property(u => u.PasswordSalt).IsRequired().HasMaxLength(UserConsts.MaxPasswordSaltLength);
+        builder.Property(u => u.Role).HasConversion<string>().HasMaxLength(UserConsts.MaxRoleLength);
 
         builder.HasIndex(u => u.Username).IsUnique();
         builder.HasIndex(u => u.Email).IsUnique();

@@ -1,4 +1,5 @@
 using LibraryMS.Domain.MemberManagement.AggregateRoots;
+using LibraryMS.Domain.Shared.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,12 +12,12 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
         builder.ToTable("Members");
         builder.HasKey(m => m.Id);
 
-        builder.Property(m => m.FirstName).IsRequired().HasMaxLength(50);
-        builder.Property(m => m.LastName).IsRequired().HasMaxLength(50);
-        builder.Property(m => m.Email).IsRequired().HasMaxLength(100);
-        builder.Property(m => m.Phone).IsRequired().HasMaxLength(20);
-        builder.Property(m => m.MembershipNumber).IsRequired().HasMaxLength(20);
-        builder.Property(m => m.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(m => m.FirstName).IsRequired().HasMaxLength(MemberConsts.MaxFirstNameLength);
+        builder.Property(m => m.LastName).IsRequired().HasMaxLength(MemberConsts.MaxLastNameLength);
+        builder.Property(m => m.Email).IsRequired().HasMaxLength(MemberConsts.MaxEmailLength);
+        builder.Property(m => m.Phone).IsRequired().HasMaxLength(MemberConsts.MaxPhoneLength);
+        builder.Property(m => m.MembershipNumber).IsRequired().HasMaxLength(MemberConsts.MaxMembershipNumberLength);
+        builder.Property(m => m.Status).HasConversion<string>().HasMaxLength(MemberConsts.MaxStatusLength);
 
         builder.HasIndex(m => m.Email).IsUnique();
         builder.HasIndex(m => m.MembershipNumber).IsUnique();

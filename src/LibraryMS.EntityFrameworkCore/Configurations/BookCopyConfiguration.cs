@@ -1,6 +1,7 @@
 using LibraryMS.Domain.BookManagement.AggregateRoots;
 using LibraryMS.Domain.BookManagement.Entities;
 using LibraryMS.Domain.BranchManagement.AggregateRoots;
+using LibraryMS.Domain.Shared.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,8 +14,8 @@ public class BookCopyConfiguration : IEntityTypeConfiguration<BookCopy>
         builder.ToTable("BookCopies");
         builder.HasKey(c => c.Id);
 
-        builder.Property(c => c.CopyNumber).IsRequired().HasMaxLength(50);
-        builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(20);
+        builder.Property(c => c.CopyNumber).IsRequired().HasMaxLength(BookCopyConsts.MaxCopyNumberLength);
+        builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(BookCopyConsts.MaxStatusLength);
 
         builder.HasOne<Book>().WithMany(b => b.Copies).HasForeignKey(c => c.BookId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne<Branch>().WithMany().HasForeignKey(c => c.BranchId).OnDelete(DeleteBehavior.Restrict);

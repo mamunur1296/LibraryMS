@@ -1,5 +1,6 @@
 using LibraryMS.Domain.BookManagement.AggregateRoots;
 using LibraryMS.Domain.BookManagement.Entities;
+using LibraryMS.Domain.Shared.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,16 +13,16 @@ public class BookConfiguration : IEntityTypeConfiguration<Book>
         builder.ToTable("Books");
         builder.HasKey(b => b.Id);
 
-        builder.Property(b => b.Title).IsRequired().HasMaxLength(200);
+        builder.Property(b => b.Title).IsRequired().HasMaxLength(BookConsts.MaxTitleLength);
         builder.OwnsOne(b => b.ISBN, isbn =>
         {
-            isbn.Property(i => i.Value).HasColumnName("ISBN").HasMaxLength(13).IsRequired();
+            isbn.Property(i => i.Value).HasColumnName("ISBN").HasMaxLength(BookConsts.ISBNLength).IsRequired();
             isbn.HasIndex(i => i.Value).IsUnique();
         });
         
-        builder.Property(b => b.Description).HasMaxLength(2000);
-        builder.Property(b => b.Language).HasMaxLength(50);
-        builder.Property(b => b.CoverImageUrl).HasMaxLength(500);
+        builder.Property(b => b.Description).HasMaxLength(BookConsts.MaxDescriptionLength);
+        builder.Property(b => b.Language).HasMaxLength(BookConsts.MaxLanguageLength);
+        builder.Property(b => b.CoverImageUrl).HasMaxLength(BookConsts.MaxCoverImageUrlLength);
         
         // Relationships
         builder.HasOne<Category>().WithMany().HasForeignKey(b => b.CategoryId).OnDelete(DeleteBehavior.Restrict);

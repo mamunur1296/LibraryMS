@@ -1,4 +1,5 @@
 using LibraryMS.Domain.BookManagement.Entities;
+using LibraryMS.Domain.Shared.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,7 +11,7 @@ public class AuthorConfiguration : IEntityTypeConfiguration<Author>
     {
         builder.ToTable("Authors");
         builder.HasKey(a => a.Id);
-        builder.Property(a => a.Name).IsRequired().HasMaxLength(150);
-        builder.Property(a => a.Biography).HasMaxLength(2000);
+        builder.Property(a => a.Name).IsRequired().HasMaxLength(AuthorConsts.MaxNameLength);
+        builder.Property(a => a.Biography).HasMaxLength(AuthorConsts.MaxBiographyLength);
     }
 }

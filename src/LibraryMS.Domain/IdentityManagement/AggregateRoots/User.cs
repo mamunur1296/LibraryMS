@@ -2,6 +2,7 @@ using LibraryMS.Domain.Common;
 using LibraryMS.Domain.IdentityManagement.Events;
 using LibraryMS.Domain.Shared.Enums;
 using LibraryMS.Domain.Shared.Guards;
+using LibraryMS.Domain.Shared.Constants;
 
 namespace LibraryMS.Domain.IdentityManagement.AggregateRoots;
 
@@ -77,13 +78,14 @@ public sealed class User : AggregateRoot<Guid>
     private void SetUsername(string username)
     {
         Ensure.Against(string.IsNullOrWhiteSpace(username), "Username cannot be empty.", "USER_USERNAME_EMPTY");
-        Ensure.Against(username.Length < 3 || username.Length > 50, "Username must be between 3 and 50 characters.", "USER_USERNAME_LENGTH");
+        Ensure.Against(username.Length < 3 || username.Length > UserConsts.MaxUsernameLength, $"Username must be between 3 and {UserConsts.MaxUsernameLength} characters.", "USER_USERNAME_LENGTH");
         Username = username.Trim().ToLowerInvariant();
     }
 
     private void SetEmail(string email)
     {
         Ensure.Against(string.IsNullOrWhiteSpace(email), "Email cannot be empty.", "USER_EMAIL_EMPTY");
+        Ensure.Against(email.Length > UserConsts.MaxEmailLength, $"Email cannot exceed {UserConsts.MaxEmailLength} characters.", "USER_EMAIL_TOO_LONG");
         Email = email.Trim().ToLowerInvariant();
     }
 }

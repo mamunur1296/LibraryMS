@@ -1,5 +1,6 @@
 using LibraryMS.Domain.IdentityManagement.AggregateRoots;
 using LibraryMS.Domain.IdentityManagement.Entities;
+using LibraryMS.Domain.Shared.Constants;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,7 +13,7 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.ToTable("RefreshTokens");
         builder.HasKey(r => r.Id);
 
-        builder.Property(r => r.Token).IsRequired().HasMaxLength(250);
+        builder.Property(r => r.Token).IsRequired().HasMaxLength(RefreshTokenConsts.MaxTokenLength);
 
         builder.HasIndex(r => r.Token).IsUnique();
 
