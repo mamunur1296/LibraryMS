@@ -1,8 +1,6 @@
-using LibraryMS.Domain.Shared.Exceptions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System.Text.Json;
 using LibraryMS.Application.Contracts.Common;
+using LibraryMS.Domain.Shared.Exceptions;
+using System.Text.Json;
 
 namespace LibraryMS.HttpApi.Host.Middleware;
 

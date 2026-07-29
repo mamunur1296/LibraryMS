@@ -1,4 +1,3 @@
-using LibraryMS.Application.Contracts.Auth;
 using LibraryMS.Application.Contracts.DTOs.Auth;
 using LibraryMS.Application.Contracts.Users;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +11,7 @@ public class UsersController : BaseController
     [Authorize]
     public async Task<ActionResult<UserDto>> GetCurrentUser(CancellationToken cancellationToken)
     {
-        var userIdString = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value 
+        var userIdString = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value
                            ?? User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
         if (!Guid.TryParse(userIdString, out var userId))
@@ -36,9 +35,9 @@ public class UsersController : BaseController
     [Authorize]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command, CancellationToken cancellationToken)
     {
-        var userIdString = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value 
+        var userIdString = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value
                            ?? User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        
+
         if (!Guid.TryParse(userIdString, out var userId) || command.UserId != userId)
             return Forbid();
 
@@ -50,9 +49,9 @@ public class UsersController : BaseController
     [Authorize]
     public async Task<IActionResult> ChangeUsername([FromBody] ChangeUsernameCommand command, CancellationToken cancellationToken)
     {
-        var userIdString = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value 
+        var userIdString = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value
                            ?? User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        
+
         if (!Guid.TryParse(userIdString, out var userId) || command.UserId != userId)
             return Forbid();
 
@@ -64,9 +63,9 @@ public class UsersController : BaseController
     [Authorize]
     public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailCommand command, CancellationToken cancellationToken)
     {
-        var userIdString = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value 
+        var userIdString = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value
                            ?? User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        
+
         if (!Guid.TryParse(userIdString, out var userId) || command.UserId != userId)
             return Forbid();
 

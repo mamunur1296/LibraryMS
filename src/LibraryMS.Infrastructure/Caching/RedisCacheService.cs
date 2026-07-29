@@ -1,5 +1,4 @@
 using LibraryMS.Application.Contracts.Services;
-using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 using System.Text.Json;
 

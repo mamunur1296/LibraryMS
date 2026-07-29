@@ -1,6 +1,6 @@
+using LibraryMS.Domain.Common;
 using LibraryMS.EntityFrameworkCore;
 using LibraryMS.EntityFrameworkCore.Outbox;
-using LibraryMS.Domain.Common;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -8,14 +8,7 @@ using System.Text.Json;
 
 namespace LibraryMS.Infrastructure.Jobs;
 
-/// <summary>
-/// Hangfire recurring job that implements the Outbox Processor.
-/// Polls OutboxMessages table, deserializes domain events, and publishes
-/// them via MediatR. Implements the Retry Mechanism:
-///   - On success: marks message as ProcessedOn = UtcNow
-///   - On failure: increments RetryCount, saves error
-///   - Dead letters (RetryCount >= MaxRetries) are skipped permanently
-/// </summary>
+// Hangfire recurring job that implements the Outbox Processor.
 public sealed class OutboxProcessorJob
 {
     private readonly LibraryDbContext _dbContext;
@@ -32,10 +25,8 @@ public sealed class OutboxProcessorJob
         _logger = logger;
     }
 
-    /// <summary>
-    /// Entry point called by Hangfire every 30 seconds.
-    /// Fetches all eligible (unprocessed, non-dead) outbox messages and processes them.
-    /// </summary>
+    // Entry point called by Hangfire every 30 seconds.
+    // Fetches all eligible (unprocessed, non-dead) outbox messages and processes them.
     public async Task ProcessAsync(CancellationToken cancellationToken = default)
     {
         var messages = await _dbContext.OutboxMessages

@@ -1,14 +1,11 @@
+using LibraryMS.Application.Contracts.Services;
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using LibraryMS.Application.Contracts.Services;
-using LibraryMS.Domain.IdentityManagement;
-using LibraryMS.Domain.IdentityManagement.AggregateRoots;
-using LibraryMS.Domain.IdentityManagement.Entities;
-using LibraryMS.Domain.IdentityManagement.Services;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 
 namespace LibraryMS.Infrastructure.Auth;
 

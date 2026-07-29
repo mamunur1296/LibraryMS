@@ -18,10 +18,8 @@ public sealed class SmtpOptions
     public bool EnableSsl { get; init; } = true;
 }
 
-/// <summary>
-/// Adapter Pattern: Wraps MailKit into our IEmailService abstraction.
-/// Application layer never imports MailKit directly.
-/// </summary>
+// Adapter Pattern: Wraps MailKit into our IEmailService abstraction.
+// Application layer never imports MailKit directly.
 public sealed class MailKitEmailService : IEmailService
 {
     private readonly SmtpOptions _options;
