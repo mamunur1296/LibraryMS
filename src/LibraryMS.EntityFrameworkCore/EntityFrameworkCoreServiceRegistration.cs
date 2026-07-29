@@ -2,6 +2,8 @@ using LibraryMS.Application;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.BookManagement;
 using LibraryMS.Domain.BorrowManagement;
+using LibraryMS.Domain.BorrowManagement.AggregateRoots;
+using LibraryMS.Domain.BorrowManagement.Services;
 using LibraryMS.Domain.BranchManagement;
 using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.MemberManagement;
@@ -46,3 +48,4 @@ public static class EntityFrameworkCoreServiceRegistration
         return services;
     }
 }
+

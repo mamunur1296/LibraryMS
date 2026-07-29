@@ -4,6 +4,8 @@ using LibraryMS.Application.Contracts.Common;
 using LibraryMS.Domain.BookManagement;
 using LibraryMS.Domain.BookManagement.Services;
 using LibraryMS.Domain.BorrowManagement;
+using LibraryMS.Domain.BorrowManagement.AggregateRoots;
+using LibraryMS.Domain.BorrowManagement.Services;
 using LibraryMS.Domain.BranchManagement;
 using LibraryMS.Domain.Common;
 using LibraryMS.Domain.IdentityManagement;
@@ -55,3 +57,4 @@ public static class ApplicationServiceRegistration
         return services;
     }
 }
+

@@ -2,6 +2,8 @@ using LibraryMS.Domain.BookManagement;
 using LibraryMS.Domain.BookManagement.AggregateRoots;
 using LibraryMS.Domain.BookManagement.Entities;
 using LibraryMS.Domain.BorrowManagement;
+using LibraryMS.Domain.BorrowManagement.AggregateRoots;
+using LibraryMS.Domain.BorrowManagement.Services;
 using LibraryMS.Domain.BranchManagement;
 using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.MemberManagement;
@@ -186,3 +188,4 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.HasOne<User>().WithMany().HasForeignKey(r => r.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }
+

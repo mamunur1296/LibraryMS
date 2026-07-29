@@ -1,4 +1,6 @@
 using LibraryMS.Domain.BorrowManagement;
+using LibraryMS.Domain.BorrowManagement.AggregateRoots;
+using LibraryMS.Domain.BorrowManagement.Services;
 using LibraryMS.Domain.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -62,3 +64,4 @@ public sealed class BorrowRepository : BaseRepository<BorrowRecord>, IBorrowRepo
             cancellationToken);
     }
 }
+

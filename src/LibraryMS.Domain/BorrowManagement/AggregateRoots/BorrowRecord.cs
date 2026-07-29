@@ -1,18 +1,11 @@
-using LibraryMS.Domain.Common;
 using LibraryMS.Domain.BorrowManagement.Events;
+using LibraryMS.Domain.Common;
 using LibraryMS.Domain.Shared.Enums;
-using LibraryMS.Domain.Shared.Exceptions;
+using LibraryMS.Domain.Shared.Guards;
 
-namespace LibraryMS.Domain.BorrowManagement;
+namespace LibraryMS.Domain.BorrowManagement.AggregateRoots;
 
-/// <summary>
-/// BorrowRecord — Aggregate Root for the borrow-return transaction.
-/// Core business rules:
-///   - Max 5 active borrows per member
-///   - Default 14-day borrow duration
-///   - Late fine: ৳2 per day overdue
-///   - Suspended members cannot borrow
-/// </summary>
+// BorrowRecord — Aggregate Root for the borrow-return transaction.
 public sealed class BorrowRecord : AggregateRoot<Guid>
 {
     public const int MaxBorrowDays = 14;
@@ -33,10 +26,6 @@ public sealed class BorrowRecord : AggregateRoot<Guid>
 
     private BorrowRecord() { }
 
-    /// <summary>
-    /// Creates a new borrow transaction.
-    /// Constructor is internal — only BorrowManager can create instances.
-    /// </summary>
     internal BorrowRecord(Guid id, Guid memberId, Guid bookCopyId, Guid bookId,
         Guid branchId, int borrowDays = MaxBorrowDays)
         : base(id)
@@ -54,14 +43,9 @@ public sealed class BorrowRecord : AggregateRoot<Guid>
         AddDomainEvent(new BookBorrowedEvent(id, memberId, bookCopyId, bookId, DueDate));
     }
 
-    /// <summary>
-    /// Processes the return of a borrowed book.
-    /// Calculates late fine automatically.
-    /// </summary>
     internal void Return(string? notes = null)
     {
-        if (Status == BorrowStatus.Returned)
-            throw new DomainException("This book has already been returned.", "BORROW_ALREADY_RETURNED");
+        Ensure.Against(Status == BorrowStatus.Returned, "This book has already been returned.", "BORROW_ALREADY_RETURNED");
 
         ReturnDate = DateTime.UtcNow;
         Status = BorrowStatus.Returned;
@@ -71,7 +55,7 @@ public sealed class BorrowRecord : AggregateRoot<Guid>
         AddDomainEvent(new BookReturnedEvent(Id, MemberId, BookCopyId, BookId, LateFine));
     }
 
-    /// <summary>Marks the borrow as overdue. Called by background job.</summary>
+    // Marks the borrow as overdue. Called by background job.
     internal void MarkAsOverdue()
     {
         if (Status == BorrowStatus.Active && DateTime.UtcNow > DueDate)
@@ -84,12 +68,11 @@ public sealed class BorrowRecord : AggregateRoot<Guid>
 
     internal void PayFine()
     {
-        if (LateFine <= 0)
-            throw new DomainException("No fine to pay.", "BORROW_NO_FINE");
+        Ensure.Against(LateFine <= 0, "No fine to pay.", "BORROW_NO_FINE");
         IsFinePaid = true;
     }
 
-    /// <summary>Calculates the late fine based on days overdue.</summary>
+    // Calculates the late fine based on days overdue.
     private decimal CalculateLateFine()
     {
         var referenceDate = ReturnDate ?? DateTime.UtcNow;

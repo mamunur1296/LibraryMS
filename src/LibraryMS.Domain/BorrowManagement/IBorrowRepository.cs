@@ -1,6 +1,8 @@
+using LibraryMS.Domain.BorrowManagement.AggregateRoots;
+
 namespace LibraryMS.Domain.BorrowManagement;
 
-/// <summary>Repository contract for BorrowRecord aggregate.</summary>
+// Repository contract for BorrowRecord aggregate.
 public interface IBorrowRepository
 {
     Task<BorrowRecord?> GetByIdAsync(Guid id, CancellationToken ct = default);
