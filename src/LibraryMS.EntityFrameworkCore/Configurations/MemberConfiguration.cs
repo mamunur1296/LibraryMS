@@ -22,6 +22,6 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
         builder.HasIndex(m => m.Email).IsUnique();
         builder.HasIndex(m => m.MembershipNumber).IsUnique();
 
-        builder.Property(m => m.RowVersion).IsRowVersion();
+        builder.Property(m => m.RowVersion).IsConcurrencyToken();
     }
 }

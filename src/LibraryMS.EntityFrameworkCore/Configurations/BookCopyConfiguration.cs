@@ -17,7 +17,7 @@ public class BookCopyConfiguration : IEntityTypeConfiguration<BookCopy>
         builder.Property(c => c.CopyNumber).IsRequired().HasMaxLength(BookCopyConsts.MaxCopyNumberLength);
         builder.Property(c => c.Status).HasConversion<string>().HasMaxLength(BookCopyConsts.MaxStatusLength);
 
-        builder.HasOne<Book>().WithMany(b => b.Copies).HasForeignKey(c => c.BookId).OnDelete(DeleteBehavior.Cascade);
+        builder.HasOne(c => c.Book).WithMany(b => b.Copies).HasForeignKey(c => c.BookId).OnDelete(DeleteBehavior.Cascade);
         builder.HasOne<Branch>().WithMany().HasForeignKey(c => c.BranchId).OnDelete(DeleteBehavior.Restrict);
 
         builder.HasIndex(c => new { c.BookId, c.CopyNumber }).IsUnique();

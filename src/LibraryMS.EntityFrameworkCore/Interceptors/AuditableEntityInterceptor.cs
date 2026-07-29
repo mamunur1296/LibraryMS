@@ -46,5 +46,18 @@ public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
                 entry.Entity.DeletedAt = DateTime.UtcNow;
             }
         }
+
+        // Generate client-side concurrency tokens for PostgreSQL RowVersion columns
+        foreach (var entry in context.ChangeTracker.Entries())
+        {
+            if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
+            {
+                var rowVersionProp = entry.Metadata.FindProperty("RowVersion");
+                if (rowVersionProp != null && rowVersionProp.ClrType == typeof(byte[]))
+                {
+                    entry.Property("RowVersion").CurrentValue = Guid.NewGuid().ToByteArray();
+                }
+            }
+        }
     }
 }

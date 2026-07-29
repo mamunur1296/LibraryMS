@@ -34,6 +34,7 @@ public class GlobalExceptionMiddleware
 
         var (statusCode, message, errors, errorCode) = exception switch
         {
+            ValidationException ve => (400, "Validation Error", new Dictionary<string, string[]>(ve.Errors), "VALIDATION_ERROR"),
             FluentValidation.ValidationException ve => (400, "Validation Error", ve.Errors?.ToDictionary(e => e.PropertyName, e => new[] { e.ErrorMessage }) ?? new Dictionary<string, string[]>(), "VALIDATION_ERROR"),
             DomainException de => (400, de.Message, new Dictionary<string, string[]>(), "DOMAIN_ERROR"),
             NotFoundException ne => (404, ne.Message, new Dictionary<string, string[]>(), "NOT_FOUND"),

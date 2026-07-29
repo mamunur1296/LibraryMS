@@ -19,8 +19,8 @@ public sealed class UserManager
         user.RecordLogin();
     }
 
-    public User Create(string username, string email, string passwordHash, string salt, UserRole role)
+    public User Create(string username, string email, string passwordHash, string salt, UserRole role, Guid? memberId = null)
     {
-        return new User(_guidGenerator.Create(), username, email, passwordHash, salt, role);
+        return new User(_guidGenerator.Create(), username, email, passwordHash, salt, role, memberId);
     }
 }

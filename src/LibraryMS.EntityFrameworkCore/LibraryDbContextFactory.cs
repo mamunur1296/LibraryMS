@@ -12,8 +12,26 @@ public sealed class LibraryDbContextFactory : IDesignTimeDbContextFactory<Librar
 {
     public LibraryDbContext CreateDbContext(string[] args)
     {
+        var basePath = Directory.GetCurrentDirectory();
+        if (!File.Exists(Path.Combine(basePath, "appsettings.json")))
+        {
+            var candidate = Path.Combine(basePath, "src", "LibraryMS.HttpApi.Host");
+            if (Directory.Exists(candidate))
+            {
+                basePath = candidate;
+            }
+            else
+            {
+                candidate = Path.Combine(basePath, "..", "LibraryMS.HttpApi.Host");
+                if (Directory.Exists(candidate))
+                {
+                    basePath = Path.GetFullPath(candidate);
+                }
+            }
+        }
+
         var configuration = new ConfigurationBuilder()
-            .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "src", "LibraryMS.HttpApi.Host"))
+            .SetBasePath(basePath)
             .AddJsonFile("appsettings.json")
             .Build();
 

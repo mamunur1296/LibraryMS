@@ -3,6 +3,7 @@ using System;
 using LibraryMS.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LibraryMS.EntityFrameworkCore.Migrations
 {
     [DbContext(typeof(LibraryDbContext))]
-    partial class LibraryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260729180712_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -140,6 +143,9 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
                     b.Property<Guid>("BookId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("BookId1")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("BranchId")
                         .HasColumnType("uuid");
 
@@ -175,6 +181,8 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
                         .HasColumnType("character varying(20)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BookId1");
 
                     b.HasIndex("BranchId");
 
@@ -721,9 +729,15 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
 
             modelBuilder.Entity("LibraryMS.Domain.BookManagement.Entities.BookCopy", b =>
                 {
-                    b.HasOne("LibraryMS.Domain.BookManagement.AggregateRoots.Book", "Book")
+                    b.HasOne("LibraryMS.Domain.BookManagement.AggregateRoots.Book", null)
                         .WithMany("Copies")
                         .HasForeignKey("BookId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LibraryMS.Domain.BookManagement.AggregateRoots.Book", "Book")
+                        .WithMany()
+                        .HasForeignKey("BookId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

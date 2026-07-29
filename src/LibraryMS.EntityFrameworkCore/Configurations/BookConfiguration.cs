@@ -28,6 +28,6 @@ public class BookConfiguration : IEntityTypeConfiguration<Book>
         builder.HasOne<Category>().WithMany().HasForeignKey(b => b.CategoryId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Author>().WithMany().HasForeignKey(b => b.AuthorId).OnDelete(DeleteBehavior.Restrict);
         
-        builder.Property(b => b.RowVersion).IsRowVersion();
+        builder.Property(b => b.RowVersion).IsConcurrencyToken();
     }
 }

@@ -31,6 +31,7 @@ export function BookFormModal({ isOpen, onClose, onSuccess, bookToEdit }: BookFo
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<BookFormData>({
     resolver: zodResolver(bookSchema),
@@ -103,7 +104,18 @@ export function BookFormModal({ isOpen, onClose, onSuccess, bookToEdit }: BookFo
       onSuccess();
       onClose();
     } catch (err: any) {
-      alert(err.response?.data?.message || "Something went wrong.");
+      const apiErrors = err.response?.data?.errors;
+      if (apiErrors && typeof apiErrors === "object") {
+        Object.keys(apiErrors).forEach((key) => {
+          const fieldName = (key.charAt(0).toLowerCase() + key.slice(1)) as keyof BookFormData;
+          setError(fieldName, {
+            type: "server",
+            message: apiErrors[key][0],
+          });
+        });
+      } else {
+        alert(err.response?.data?.message || "Something went wrong.");
+      }
     }
   };
 
