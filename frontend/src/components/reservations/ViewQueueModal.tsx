@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { reservationService } from "@/lib/services/reservation.service";
 import { ReservationQueueDto } from "@/types/reservation.types";
