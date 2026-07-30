@@ -41,6 +41,11 @@ export const bookService = {
     return response.data;
   },
 
+  async addCopies(id: string, data: { branchId: string; quantity: number }): Promise<any[]> {
+    const response = await apiClient.post<any[]>(`/api/Books/${id}/copies`, { bookId: id, ...data });
+    return response.data;
+  },
+
   async delete(id: string): Promise<void> {
     await apiClient.delete(`/api/Books/${id}`);
   },

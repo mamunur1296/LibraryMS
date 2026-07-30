@@ -14,6 +14,23 @@ public sealed class BookRepository : BaseRepository<Book>, IBookRepository
         return await DbSet.AsNoTracking().Include(b => b.Copies).Where(b => ids.Contains(b.Id)).ToListAsync(cancellationToken);
     }
 
+    public Task AddCopiesAsync(IEnumerable<BookCopy> copies, CancellationToken ct = default)
+    {
+        DbContext.Set<BookCopy>().AddRange(copies);
+        
+        var bookId = copies.FirstOrDefault()?.BookId;
+        if (bookId != null)
+        {
+            var entry = DbContext.ChangeTracker.Entries<Book>().FirstOrDefault(e => e.Entity.Id == bookId);
+            if (entry != null && entry.State == EntityState.Modified)
+            {
+                entry.State = EntityState.Unchanged;
+            }
+        }
+        
+        return Task.CompletedTask;
+    }
+
     public async Task<Book?> GetByIdWithCopiesAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await DbSet
@@ -32,7 +49,9 @@ public sealed class BookRepository : BaseRepository<Book>, IBookRepository
         string? searchTerm, Guid? categoryId, Guid? authorId, Guid? branchId,
         int page, int pageSize, CancellationToken cancellationToken = default)
     {
-        var query = DbSet.AsNoTracking().AsQueryable();
+        var query = DbSet.AsNoTracking()
+            .Include(b => b.Copies)
+            .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -51,7 +70,7 @@ public sealed class BookRepository : BaseRepository<Book>, IBookRepository
 
         var total = await query.CountAsync(cancellationToken);
 
-        var items = await query
+        var items = await query.AsNoTracking()
             .OrderByDescending(b => b.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)

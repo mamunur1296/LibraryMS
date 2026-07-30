@@ -105,7 +105,10 @@ export function BookFormModal({ isOpen, onClose, onSuccess, bookToEdit }: BookFo
       const apiErrors = err.response?.data?.errors;
       if (apiErrors && typeof apiErrors === "object") {
         Object.keys(apiErrors).forEach((key) => {
-          const fieldName = (key.charAt(0).toLowerCase() + key.slice(1)) as keyof BookFormData;
+          let fieldName = (key.charAt(0).toLowerCase() + key.slice(1)) as keyof BookFormData;
+          if (key.toUpperCase() === "ISBN") {
+            fieldName = "isbn" as keyof BookFormData;
+          }
           setError(fieldName, {
             type: "server",
             message: apiErrors[key][0],

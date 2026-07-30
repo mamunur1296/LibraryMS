@@ -35,9 +35,17 @@ public sealed class SearchBooksQueryHandler : IRequestHandler<SearchBooksQuery, 
 
         _logger.LogDebug("Search books query returned {Count} items out of {Total} total matches.", items.Count, total);
 
-        return PagedResult<BookDto>.Create(
-            items.Select(i => i.ToDto()).ToList(),
-            total, request.Page, request.PageSize);
+        var authors = await _repository.GetAllAuthorsAsync(cancellationToken);
+        var categories = await _repository.GetAllCategoriesAsync(cancellationToken);
+
+        var dtos = items.Select(book => 
+        {
+            var author = authors.FirstOrDefault(a => a.Id == book.AuthorId);
+            var category = categories.FirstOrDefault(c => c.Id == book.CategoryId);
+            return book.ToDto(category, author);
+        }).ToList();
+
+        return PagedResult<BookDto>.Create(dtos, total, request.Page, request.PageSize);
     }
 }
 

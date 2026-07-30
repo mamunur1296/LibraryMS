@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { bookService } from "@/lib/services/book.service";
 import { BookDto, PagedResult } from "@/types/book.types";
 import { BookFormModal } from "@/components/books/BookFormModal";
+import { AddCopiesModal } from "@/components/books/AddCopiesModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast } from "@/components/ui/Toast";
 
@@ -13,6 +14,7 @@ export default function BooksPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bookToEdit, setBookToEdit] = useState<BookDto | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<BookDto | null>(null);
+  const [addCopiesTarget, setAddCopiesTarget] = useState<BookDto | null>(null);
 
   const fetchBooks = useCallback(async () => {
     setLoading(true);
@@ -39,6 +41,10 @@ export default function BooksPage() {
   const handleEdit = (book: BookDto) => {
     setBookToEdit(book);
     setIsModalOpen(true);
+  };
+
+  const handleAddCopies = (book: BookDto) => {
+    setAddCopiesTarget(book);
   };
 
   const handleDeleteConfirm = async () => {
@@ -127,6 +133,7 @@ export default function BooksPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-slate-400">{book.publicationYear}</td>
                     <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
+                      <button onClick={() => { handleAddCopies(book); }} className="text-emerald-400 hover:text-emerald-300 text-xs font-medium" title="Add Copies">+ Copies</button>
                       <button onClick={() => { handleEdit(book); }} className="text-indigo-400 hover:text-indigo-300 text-xs font-medium">Edit</button>
                       <button onClick={() => { setDeleteTarget(book); }} className="text-red-400 hover:text-red-300 text-xs font-medium">Delete</button>
                     </td>
@@ -157,6 +164,13 @@ export default function BooksPage() {
         onClose={() => { setIsModalOpen(false); }}
         onSuccess={() => { void fetchBooks(); }}
         bookToEdit={bookToEdit}
+      />
+
+      <AddCopiesModal
+        isOpen={addCopiesTarget !== null}
+        onClose={() => { setAddCopiesTarget(null); }}
+        onSuccess={() => { void fetchBooks(); }}
+        book={addCopiesTarget}
       />
 
       <ConfirmDialog

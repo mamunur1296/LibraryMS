@@ -14,6 +14,7 @@ public interface IBookRepository
         string? searchTerm, Guid? categoryId, Guid? authorId, Guid? branchId,
         int page, int pageSize, CancellationToken ct = default);
     Task AddAsync(Book book, CancellationToken ct = default);
+    Task AddCopiesAsync(IEnumerable<BookCopy> copies, CancellationToken ct = default);
     Task UpdateAsync(Book book, CancellationToken ct = default);
     Task DeleteAsync(Book book, CancellationToken ct = default);
     Task<List<Author>> GetAllAuthorsAsync(CancellationToken ct = default);

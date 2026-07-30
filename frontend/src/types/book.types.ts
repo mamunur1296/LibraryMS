@@ -68,3 +68,9 @@ export interface CreateCategoryRequest {
   name: string;
   description?: string;
 }
+
+export interface AddBookCopiesRequest {
+  bookId: string;
+  branchId: string;
+  quantity: number;
+}

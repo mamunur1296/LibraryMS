@@ -2,7 +2,6 @@ using LibraryMS.Application.Contracts.Books;
 using LibraryMS.Application.Contracts.DTOs.Book;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BookManagement;
-using LibraryMS.Domain.BookManagement.AggregateRoots;
 using LibraryMS.Domain.BookManagement.Entities;
 using LibraryMS.Domain.BookManagement.Services;
 using LibraryMS.Domain.Shared;
@@ -45,7 +44,7 @@ public sealed class AddBookCopiesCommandHandler : IRequestHandler<AddBookCopiesC
             addedCopies.Add(copy);
         }
 
-        await _repository.UpdateAsync(book!, cancellationToken);
+        await _repository.AddCopiesAsync(addedCopies, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _logger.LogInformation("Successfully added {Quantity} copies to Book {BookId}", request.Quantity, request.BookId);

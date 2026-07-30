@@ -44,6 +44,11 @@ public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
                 entry.State = EntityState.Modified;
                 entry.Entity.IsDeleted = true;
                 entry.Entity.DeletedAt = DateTime.UtcNow;
+
+                foreach (var referenceEntry in entry.References.Where(r => r.TargetEntry != null && r.TargetEntry.State == EntityState.Deleted))
+                {
+                    referenceEntry.TargetEntry.State = EntityState.Modified;
+                }
             }
         }
 
