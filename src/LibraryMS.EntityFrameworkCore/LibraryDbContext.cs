@@ -7,7 +7,6 @@ using LibraryMS.Domain.IdentityManagement.Entities;
 using LibraryMS.Domain.MemberManagement.AggregateRoots;
 using LibraryMS.Domain.ReservationManagement.AggregateRoots;
 using LibraryMS.Domain.Shared.Interfaces;
-using LibraryMS.EntityFrameworkCore.Interceptors;
 using LibraryMS.EntityFrameworkCore.Outbox;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,17 +14,9 @@ namespace LibraryMS.EntityFrameworkCore;
 
 public sealed class LibraryDbContext : DbContext
 {
-    private readonly AuditableEntityInterceptor _auditableInterceptor;
-    private readonly DomainEventToOutboxInterceptor _domainEventInterceptor;
-
-    public LibraryDbContext(
-        DbContextOptions<LibraryDbContext> options,
-        AuditableEntityInterceptor auditableInterceptor,
-        DomainEventToOutboxInterceptor domainEventInterceptor)
+    public LibraryDbContext(DbContextOptions<LibraryDbContext> options)
         : base(options)
     {
-        _auditableInterceptor = auditableInterceptor;
-        _domainEventInterceptor = domainEventInterceptor;
     }
 
     public DbSet<Book> Books => Set<Book>();
@@ -49,7 +40,6 @@ public sealed class LibraryDbContext : DbContext
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LibraryDbContext).Assembly);
 
-        // Apply Global Query Filter for Soft Delete
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
@@ -62,12 +52,4 @@ public sealed class LibraryDbContext : DbContext
             }
         }
     }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.AddInterceptors(_auditableInterceptor, _domainEventInterceptor);
-        base.OnConfiguring(optionsBuilder);
-    }
 }
-
-

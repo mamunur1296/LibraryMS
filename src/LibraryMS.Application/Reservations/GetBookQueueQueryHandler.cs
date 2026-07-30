@@ -3,12 +3,10 @@ using LibraryMS.Application.Contracts.Reservations;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BookManagement;
 using LibraryMS.Domain.BranchManagement;
+using LibraryMS.Domain.MemberManagement;
 using LibraryMS.Domain.ReservationManagement;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace LibraryMS.Application.Reservations;
 
@@ -17,17 +15,20 @@ public sealed class GetBookQueueQueryHandler : IRequestHandler<GetBookQueueQuery
     private readonly IReservationRepository _reservationRepo;
     private readonly IBookRepository _bookRepo;
     private readonly IBranchRepository _branchRepo;
+    private readonly IMemberRepository _memberRepo;
     private readonly ILogger<GetBookQueueQueryHandler> _logger;
 
     public GetBookQueueQueryHandler(
         IReservationRepository reservationRepo,
         IBookRepository bookRepo,
         IBranchRepository branchRepo,
+        IMemberRepository memberRepo,
         ILogger<GetBookQueueQueryHandler> logger)
     {
         _reservationRepo = reservationRepo;
         _bookRepo = bookRepo;
         _branchRepo = branchRepo;
+        _memberRepo = memberRepo;
         _logger = logger;
     }
 
@@ -40,7 +41,12 @@ public sealed class GetBookQueueQueryHandler : IRequestHandler<GetBookQueueQuery
         var branches = await _branchRepo.GetAllAsync(cancellationToken);
         var branch = branches.FirstOrDefault(b => b.Id == request.BranchId);
 
-        var queueList = queueReservations.Select(r => r.ToDto()).ToList();
+        var memberIds = queueReservations.Select(r => r.MemberId).Distinct().ToList();
+        var members = (await _memberRepo.GetByIdsAsync(memberIds, cancellationToken)).ToDictionary(m => m.Id);
+
+        var queueList = queueReservations.Select(r => r.ToDto(
+            members.GetValueOrDefault(r.MemberId), book, branch
+        )).ToList();
 
         return new ReservationQueueDto
         {

@@ -80,9 +80,9 @@ services:
     depends_on:
       - api
     ports:
-      - "3000:3000"
+      - "3000:80"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - VITE_API_URL=http://localhost:8080
     networks:
       - library_ms_network
 

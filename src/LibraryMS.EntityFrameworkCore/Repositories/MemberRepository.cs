@@ -9,6 +9,11 @@ public sealed class MemberRepository : BaseRepository<Member>, IMemberRepository
 {
     public MemberRepository(LibraryDbContext dbContext) : base(dbContext) { }
 
+    public async Task<List<Member>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        return await DbSet.AsNoTracking().Where(m => ids.Contains(m.Id)).ToListAsync(cancellationToken);
+    }
+
     public async Task<Member?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         return await DbSet.FirstOrDefaultAsync(m => m.Email.ToLower() == email.ToLower(), cancellationToken);

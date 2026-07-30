@@ -7,6 +7,7 @@ namespace LibraryMS.Domain.BookManagement;
 public interface IBookRepository
 {
     Task<Book?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<List<Book>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default);
     Task<Book?> GetByIdWithCopiesAsync(Guid id, CancellationToken ct = default);
     Task<bool> IsbnExistsAsync(string isbn, Guid? excludeId, CancellationToken ct = default);
     Task<(List<Book> Items, int TotalCount)> SearchAsync(

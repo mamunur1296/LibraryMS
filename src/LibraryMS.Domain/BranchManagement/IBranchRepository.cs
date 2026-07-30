@@ -6,6 +6,7 @@ namespace LibraryMS.Domain.BranchManagement;
 public interface IBranchRepository
 {
     Task<Branch?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<List<Branch>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default);
     Task<List<Branch>> GetAllAsync(CancellationToken ct = default);
     Task<bool> ExistsWithNameAsync(string name, Guid? excludeId, CancellationToken ct = default);
     Task AddAsync(Branch branch, CancellationToken ct = default);

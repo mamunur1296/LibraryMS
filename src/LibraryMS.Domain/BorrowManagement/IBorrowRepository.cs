@@ -12,6 +12,8 @@ public interface IBorrowRepository
     Task<(List<BorrowRecord> Items, int TotalCount)> GetPagedAsync(
         Guid? memberId, Guid? bookId, string? status,
         int page, int pageSize, CancellationToken ct = default);
+    Task<decimal> GetTotalLateFinesCollectedAsync(CancellationToken ct = default);
+    Task<decimal> GetPendingLateFinesAsync(CancellationToken ct = default);
     Task AddAsync(BorrowRecord record, CancellationToken ct = default);
     Task UpdateAsync(BorrowRecord record, CancellationToken ct = default);
 }

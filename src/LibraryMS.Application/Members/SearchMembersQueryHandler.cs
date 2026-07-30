@@ -3,8 +3,6 @@ using LibraryMS.Application.Contracts.DTOs.Member;
 using LibraryMS.Application.Contracts.Members;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.MemberManagement;
-using LibraryMS.Domain.MemberManagement.AggregateRoots;
-using LibraryMS.Domain.MemberManagement.Services;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -16,7 +14,9 @@ public sealed class SearchMembersQueryHandler : IRequestHandler<SearchMembersQue
     private readonly IMemberRepository _repository;
     private readonly ILogger<SearchMembersQueryHandler> _logger;
 
-    public SearchMembersQueryHandler(IMemberRepository repository, ILogger<SearchMembersQueryHandler> logger)
+    public SearchMembersQueryHandler(
+        IMemberRepository repository,
+        ILogger<SearchMembersQueryHandler> logger)
     {
         _repository = repository;
         _logger = logger;
@@ -34,11 +34,32 @@ public sealed class SearchMembersQueryHandler : IRequestHandler<SearchMembersQue
             request.SearchTerm, request.Status,
             request.Page, request.PageSize, cancellationToken);
 
+        var activeBorrowCounts = await Task.WhenAll(
+            items.Select(m => _repository.GetActiveBorrowCountAsync(m.Id, cancellationToken)));
+
+        var dtos = items.Select((member, i) =>
+        {
+            var dto = member.ToDto();
+            dto = new MemberDto
+            {
+                Id = dto.Id,
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                FullName = dto.FullName,
+                Email = dto.Email,
+                Phone = dto.Phone,
+                MembershipNumber = dto.MembershipNumber,
+                Address = dto.Address,
+                Status = dto.Status,
+                JoinDate = dto.JoinDate,
+                SuspendedUntil = dto.SuspendedUntil,
+                ActiveBorrows = activeBorrowCounts[i]
+            };
+            return dto;
+        }).ToList();
+
         _logger.LogInformation("Successfully found {Count} members out of {Total} total.", items.Count, total);
 
-        return PagedResult<MemberDto>.Create(
-            items.Select(i => i.ToDto()).ToList(),
-            total, request.Page, request.PageSize);
+        return PagedResult<MemberDto>.Create(dtos, total, request.Page, request.PageSize);
     }
 }
-

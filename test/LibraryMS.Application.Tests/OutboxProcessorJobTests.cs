@@ -1,7 +1,6 @@
 using FluentAssertions;
 using LibraryMS.Domain.Common;
 using LibraryMS.EntityFrameworkCore;
-using LibraryMS.EntityFrameworkCore.Interceptors;
 using LibraryMS.EntityFrameworkCore.Outbox;
 using LibraryMS.Infrastructure.Jobs;
 using MediatR;
@@ -18,7 +17,6 @@ namespace LibraryMS.Application.Tests;
 
 public class OutboxProcessorJobTests
 {
-    // Dummy domain event for outbox serialization/deserialization test
     public record SampleDomainEvent(Guid Id) : IDomainEvent
     {
         public DateTime OccurredOn { get; } = DateTime.UtcNow;
@@ -30,10 +28,7 @@ public class OutboxProcessorJobTests
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        var auditableInterceptor = new AuditableEntityInterceptor();
-        var outboxInterceptor = new DomainEventToOutboxInterceptor();
-
-        return new LibraryDbContext(options, auditableInterceptor, outboxInterceptor);
+        return new LibraryDbContext(options);
     }
 
     [Fact]

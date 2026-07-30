@@ -1,6 +1,6 @@
 # Library Management System (LibraryMS)
 
-Welcome to the **Library Management System (LibraryMS)**. This project is a modern, enterprise-grade, full-stack application built using a clean architecture pattern with .NET 10 on the backend and React/Next.js on the frontend.
+Welcome to the **Library Management System (LibraryMS)**. This project is a modern, enterprise-grade, full-stack application built using a clean architecture pattern with .NET 10 on the backend and React (Vite) on the frontend.
 
 ---
 
@@ -41,7 +41,7 @@ Docker Compose will launch the containers in the correct dependency order:
 2. **`library_ms_redis` (Redis 7)**: Starts up and runs a healthcheck.
 3. **`library_ms_migrator` (DbMigrator)**: Runs database migrations and seeds initial database records (Admin user, seed data) once the database is healthy, then exits.
 4. **`library_ms_api` (Web API Host)**: Starts up once the migrations successfully run. It binds to port `8080` (Hangfire dashboard available at `http://localhost:8080/hangfire`).
-5. **`library_ms_frontend` (Next.js)**: Starts up and serves the React frontend on `http://localhost:3000`.
+5. **`library_ms_frontend` (React/Vite)**: Starts up and serves the React frontend on `http://localhost:3000`.
 
 ---
 
@@ -75,13 +75,13 @@ dotnet run --project src/LibraryMS.HttpApi.Host
 - Hangfire Dashboard: `http://localhost:8080/hangfire`
 
 ### 4. Run Frontend
-Navigate to the `frontend` directory, install packages, and start the Next.js development server:
+Navigate to the `frontend` directory, install packages, and start the Vite development server:
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-- Next.js Client: `http://localhost:3000`
+- Frontend Client: `http://localhost:3000`
 
 ---
 

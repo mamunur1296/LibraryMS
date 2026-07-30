@@ -9,6 +9,11 @@ public sealed class BookRepository : BaseRepository<Book>, IBookRepository
 {
     public BookRepository(LibraryDbContext dbContext) : base(dbContext) { }
 
+    public async Task<List<Book>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        return await DbSet.AsNoTracking().Include(b => b.Copies).Where(b => ids.Contains(b.Id)).ToListAsync(cancellationToken);
+    }
+
     public async Task<Book?> GetByIdWithCopiesAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await DbSet

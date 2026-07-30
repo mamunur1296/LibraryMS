@@ -8,6 +8,11 @@ public sealed class BranchRepository : BaseRepository<Branch>, IBranchRepository
 {
     public BranchRepository(LibraryDbContext dbContext) : base(dbContext) { }
 
+    public async Task<List<Branch>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken = default)
+    {
+        return await DbSet.AsNoTracking().Where(b => ids.Contains(b.Id)).ToListAsync(cancellationToken);
+    }
+
     public async Task<Branch?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
     {
         return await DbSet.FirstOrDefaultAsync(b => b.Name.ToLower() == name.ToLower(), cancellationToken);

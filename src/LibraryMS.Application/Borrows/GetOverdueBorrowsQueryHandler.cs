@@ -3,34 +3,30 @@ using LibraryMS.Application.Contracts.Common;
 using LibraryMS.Application.Contracts.DTOs.Borrow;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BookManagement;
-using LibraryMS.Domain.BookManagement.AggregateRoots;
-using LibraryMS.Domain.BookManagement.Entities;
 using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.BorrowManagement.AggregateRoots;
 using LibraryMS.Domain.BranchManagement;
-using LibraryMS.Domain.BranchManagement.AggregateRoots;
 using LibraryMS.Domain.MemberManagement;
-using LibraryMS.Domain.MemberManagement.AggregateRoots;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace LibraryMS.Application.Borrows;
 
-public sealed class GetBorrowsQueryHandler : IRequestHandler<GetBorrowsQuery, PagedResult<BorrowDto>>
+public sealed class GetOverdueBorrowsQueryHandler : IRequestHandler<GetOverdueBorrowsQuery, PagedResult<BorrowDto>>
 {
     private readonly IBorrowRepository _repository;
     private readonly IMemberRepository _memberRepo;
     private readonly IBookRepository _bookRepo;
     private readonly IBranchRepository _branchRepo;
-    private readonly ILogger<GetBorrowsQueryHandler> _logger;
+    private readonly ILogger<GetOverdueBorrowsQueryHandler> _logger;
 
-    public GetBorrowsQueryHandler(
+    public GetOverdueBorrowsQueryHandler(
         IBorrowRepository repository,
         IMemberRepository memberRepo,
         IBookRepository bookRepo,
         IBranchRepository branchRepo,
-        ILogger<GetBorrowsQueryHandler> logger)
+        ILogger<GetOverdueBorrowsQueryHandler> logger)
     {
         _repository = repository;
         _memberRepo = memberRepo;
@@ -39,21 +35,20 @@ public sealed class GetBorrowsQueryHandler : IRequestHandler<GetBorrowsQuery, Pa
         _logger = logger;
     }
 
-    public async Task<PagedResult<BorrowDto>> Handle(GetBorrowsQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<BorrowDto>> Handle(GetOverdueBorrowsQuery request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Retrieving paged borrow records. MemberId: {MemberId}, BookId: {BookId}, Status: {Status}, Page: {Page}, PageSize: {PageSize}",
-            request.MemberId, request.BookId, request.Status, request.Page, request.PageSize);
+        _logger.LogInformation("Retrieving paged overdue borrows. Page: {Page}, PageSize: {PageSize}",
+            request.Page, request.PageSize);
 
         Ensure.Against(request.Page < 1, "Page number must be greater than or equal to 1.", "INVALID_PAGE");
         Ensure.Against(request.PageSize < 1, "Page size must be greater than or equal to 1.", "INVALID_PAGE_SIZE");
 
         var (items, total) = await _repository.GetPagedAsync(
-            request.MemberId, request.BookId, request.Status,
-            request.Page, request.PageSize, cancellationToken);
+            null, null, "Overdue", request.Page, request.PageSize, cancellationToken);
 
         var dtos = await HydrateNavigationProperties(items, cancellationToken);
 
-        _logger.LogInformation("Successfully retrieved {Count} borrow records out of {Total} total.", items.Count, total);
+        _logger.LogInformation("Successfully retrieved {Count} overdue borrows out of {Total} total.", items.Count, total);
 
         return PagedResult<BorrowDto>.Create(dtos, total, request.Page, request.PageSize);
     }

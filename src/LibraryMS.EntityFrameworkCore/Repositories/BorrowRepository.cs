@@ -56,6 +56,20 @@ public sealed class BorrowRepository : BaseRepository<BorrowRecord>, IBorrowRepo
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<decimal> GetTotalLateFinesCollectedAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Where(r => r.IsFinePaid)
+            .SumAsync(r => r.LateFine, cancellationToken);
+    }
+
+    public async Task<decimal> GetPendingLateFinesAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Where(r => !r.IsFinePaid && r.LateFine > 0)
+            .SumAsync(r => r.LateFine, cancellationToken);
+    }
+
     public async Task<bool> HasActiveBorrowForCopyAsync(Guid bookCopyId, CancellationToken cancellationToken = default)
     {
         return await DbSet.AnyAsync(
