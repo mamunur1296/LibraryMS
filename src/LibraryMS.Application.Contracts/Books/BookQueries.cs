@@ -21,3 +21,5 @@ public sealed record GetAllCategoriesQuery()
 
 public sealed record GetAvailableCopiesQuery(Guid BookId)
     : IRequest<List<BookCopyDto>>;
+
+public sealed record GetBookCopiesQuery(Guid BookId) : IRequest<List<BookCopyDto>>;

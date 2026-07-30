@@ -14,4 +14,5 @@ public sealed class MemberDto
     public DateTime JoinDate { get; init; }
     public DateTime? SuspendedUntil { get; init; }
     public int ActiveBorrows { get; init; }
+    public bool HasAccount { get; init; }
 }

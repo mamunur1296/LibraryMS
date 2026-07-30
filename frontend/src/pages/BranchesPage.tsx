@@ -8,10 +8,16 @@ export default function BranchesPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [branchToEdit, setBranchToEdit] = useState<BranchDto | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 5;
 
   const fetchBranches = async () => {
     setLoading(true);
-    try { const data = await branchService.getAll(true); setBranches(data); }
+    try { 
+      const data = await branchService.getAll(true); 
+      setBranches(data); 
+      setPage(1);
+    }
     catch (error) { console.error('Failed to fetch branches', error); }
     finally { setLoading(false); }
   };
@@ -26,6 +32,12 @@ export default function BranchesPage() {
     } catch { alert('Failed to change status.'); }
   };
 
+  const totalCount = branches.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const hasPreviousPage = page > 1;
+  const hasNextPage = page < totalPages;
+  const paginatedBranches = branches.slice((page - 1) * pageSize, page * pageSize);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -39,7 +51,7 @@ export default function BranchesPage() {
         </button>
       </div>
 
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-300">
             <thead className="text-xs uppercase bg-slate-900 border-b border-slate-800 text-slate-400">
@@ -57,7 +69,7 @@ export default function BranchesPage() {
               ) : branches.length === 0 ? (
                 <tr><td colSpan={5} className="px-6 py-8 text-center text-slate-500">No branches found. Click "Add Branch" to create one.</td></tr>
               ) : (
-                branches.map((branch) => (
+                paginatedBranches.map((branch) => (
                   <tr key={branch.id} className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
                     <td className="px-6 py-4">
                       <div className="font-medium text-white">{branch.name}</div>
@@ -83,6 +95,37 @@ export default function BranchesPage() {
             </tbody>
           </table>
         </div>
+
+        {totalCount > 0 && (
+          <div className="px-6 py-3 border-t border-slate-800 bg-slate-900/50 flex items-center justify-between">
+            <div className="text-sm text-slate-400">
+              Showing <span className="font-medium text-white">{(page - 1) * pageSize + 1}</span> to{" "}
+              <span className="font-medium text-white">{Math.min(page * pageSize, totalCount)}</span> of{" "}
+              <span className="font-medium text-white">{totalCount}</span> results
+            </div>
+            <div className="flex space-x-1 items-center">
+              <button onClick={() => { setPage((p) => Math.max(1, p - 1)); }} disabled={!hasPreviousPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm border border-slate-700">Previous</button>
+              
+              <div className="hidden sm:flex space-x-1 mx-1">
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => setPage(i + 1)}
+                    className={`px-3 py-1 rounded text-sm border ${
+                      page === i + 1 
+                        ? "bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-500/20" 
+                        : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+
+              <button onClick={() => { setPage((p) => Math.min(totalPages, p + 1)); }} disabled={!hasNextPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm border border-slate-700">Next</button>
+            </div>
+          </div>
+        )}
       </div>
 
       <BranchFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSuccess={fetchBranches} branchToEdit={branchToEdit} />

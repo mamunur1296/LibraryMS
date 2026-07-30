@@ -3,6 +3,8 @@ import { memberService } from "@/lib/services/member.service";
 import { MemberDto, PagedResult } from "@/types/member.types";
 import { MemberFormModal } from "@/components/members/MemberFormModal";
 import { SuspendMemberModal } from "@/components/members/SuspendMemberModal";
+import { ResetPasswordModal } from "@/components/members/ResetPasswordModal";
+import { MemberStatsModal } from "@/components/members/MemberStatsModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast } from "@/components/ui/Toast";
 
@@ -14,6 +16,8 @@ export default function MembersPage() {
   const [page, setPage] = useState(1);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [isSuspendModalOpen, setIsSuspendModalOpen] = useState(false);
+  const [isResetPasswordOpen, setIsResetPasswordOpen] = useState(false);
+  const [isStatsOpen, setIsStatsOpen] = useState(false);
   const [memberToManage, setMemberToManage] = useState<MemberDto | null>(null);
   const [activateTarget, setActivateTarget] = useState<MemberDto | null>(null);
 
@@ -120,12 +124,16 @@ export default function MembersPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-slate-400">{new Date(member.joinDate).toLocaleDateString()}</td>
                     <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
+                      <button onClick={() => { setMemberToManage(member); setIsStatsOpen(true); }} className="text-teal-400 hover:text-teal-350 text-xs font-medium">Stats</button>
                       {member.status === "Active" ? (
                         <button onClick={() => { setMemberToManage(member); setIsSuspendModalOpen(true); }} className="text-amber-400 hover:text-amber-300 text-xs font-medium">Suspend</button>
                       ) : (
                         <button onClick={() => { setActivateTarget(member); }} className="text-emerald-400 hover:text-emerald-300 text-xs font-medium">Activate</button>
                       )}
                       <button onClick={() => { setMemberToManage(member); setIsFormModalOpen(true); }} className="text-indigo-400 hover:text-indigo-300 text-xs font-medium">Edit</button>
+                      <button onClick={() => { setMemberToManage(member); setIsResetPasswordOpen(true); }} className={`${member.hasAccount ? "text-rose-450 hover:text-rose-455" : "text-sky-405 hover:text-sky-400"} text-xs font-medium`}>
+                        {member.hasAccount ? "Reset PW" : "Create Account"}
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -168,6 +176,8 @@ export default function MembersPage() {
 
       <MemberFormModal isOpen={isFormModalOpen} onClose={() => { setIsFormModalOpen(false); }} onSuccess={() => { void fetchMembers(); }} memberToEdit={memberToManage} />
       <SuspendMemberModal isOpen={isSuspendModalOpen} onClose={() => { setIsSuspendModalOpen(false); }} onSuccess={() => { void fetchMembers(); }} member={memberToManage} />
+      <ResetPasswordModal isOpen={isResetPasswordOpen} onClose={() => { setIsResetPasswordOpen(false); }} onSuccess={() => { void fetchMembers(); }} member={memberToManage} />
+      <MemberStatsModal isOpen={isStatsOpen} onClose={() => { setIsStatsOpen(false); }} member={memberToManage} />
 
       <ConfirmDialog
         isOpen={activateTarget !== null}

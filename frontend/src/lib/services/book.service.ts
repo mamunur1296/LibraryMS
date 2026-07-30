@@ -1,7 +1,8 @@
 import { apiClient } from "@/lib/api-client";
 import {
   BookDto, PagedResult, AuthorDto, CategoryDto,
-  CreateBookRequest, UpdateBookRequest, CreateAuthorRequest, CreateCategoryRequest
+  CreateBookRequest, UpdateBookRequest, CreateAuthorRequest, CreateCategoryRequest,
+  BookCopy
 } from "@/types/book.types";
 
 export const bookService = {

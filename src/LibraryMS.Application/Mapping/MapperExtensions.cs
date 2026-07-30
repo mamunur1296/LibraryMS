@@ -142,7 +142,8 @@ public static class MapperExtensions
             Status = member.Status.ToString(),
             JoinDate = member.JoinDate,
             SuspendedUntil = member.SuspendedUntil,
-            ActiveBorrows = 0
+            ActiveBorrows = 0,
+            HasAccount = false
         };
     }
 

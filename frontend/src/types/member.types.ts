@@ -13,6 +13,7 @@ export interface MemberDto {
   joinDate: string;
   suspendedUntil: string | null;
   activeBorrows: number;
+  hasAccount: boolean;
 }
 
 export interface CreateMemberRequest {
@@ -37,6 +38,24 @@ export interface SuspendMemberRequest {
   id: string;
   suspendedUntil: string;
   reason: string;
+}
+
+export interface MemberProfileStatsDto {
+  memberId: string;
+  totalBorrows: number;
+  activeBorrows: number;
+  overdueBorrows: number;
+  activeReservations: number;
+  totalFinesDue: number;
+}
+
+export interface ResetMemberPasswordRequest {
+  newPassword: string;
+}
+
+export interface CreateMemberUserRequest {
+  username: string;
+  password?: string;
 }
 
 export type { PagedResult };

@@ -3,6 +3,7 @@ using LibraryMS.Application.Contracts.DTOs.Member;
 using LibraryMS.Application.Contracts.Members;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.MemberManagement;
+using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -12,13 +13,16 @@ namespace LibraryMS.Application.Members;
 public sealed class SearchMembersQueryHandler : IRequestHandler<SearchMembersQuery, PagedResult<MemberDto>>
 {
     private readonly IMemberRepository _repository;
+    private readonly IUserRepository _userRepository;
     private readonly ILogger<SearchMembersQueryHandler> _logger;
 
     public SearchMembersQueryHandler(
         IMemberRepository repository,
+        IUserRepository userRepository,
         ILogger<SearchMembersQueryHandler> logger)
     {
         _repository = repository;
+        _userRepository = userRepository;
         _logger = logger;
     }
 
@@ -35,10 +39,14 @@ public sealed class SearchMembersQueryHandler : IRequestHandler<SearchMembersQue
             request.Page, request.PageSize, cancellationToken);
 
         var activeBorrowCounts = new List<int>();
+        var hasAccountList = new List<bool>();
         foreach (var item in items)
         {
             var count = await _repository.GetActiveBorrowCountAsync(item.Id, cancellationToken);
             activeBorrowCounts.Add(count);
+
+            var user = await _userRepository.GetByMemberIdAsync(item.Id, cancellationToken);
+            hasAccountList.Add(user != null);
         }
 
         var dtos = items.Select((member, i) =>
@@ -57,7 +65,8 @@ public sealed class SearchMembersQueryHandler : IRequestHandler<SearchMembersQue
                 Status = dto.Status,
                 JoinDate = dto.JoinDate,
                 SuspendedUntil = dto.SuspendedUntil,
-                ActiveBorrows = activeBorrowCounts[i]
+                ActiveBorrows = activeBorrowCounts[i],
+                HasAccount = hasAccountList[i]
             };
             return dto;
         }).ToList();

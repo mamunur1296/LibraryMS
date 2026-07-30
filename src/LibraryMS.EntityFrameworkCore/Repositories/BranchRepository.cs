@@ -26,5 +26,14 @@ public sealed class BranchRepository : BaseRepository<Branch>, IBranchRepository
 
         return await query.AnyAsync(cancellationToken);
     }
+
+    public async Task<bool> ExistsWithEmailAsync(string email, Guid? excludeId = null, CancellationToken cancellationToken = default)
+    {
+        var query = DbSet.Where(b => b.Email.ToLower() == email.ToLower());
+        if (excludeId.HasValue)
+            query = query.Where(b => b.Id != excludeId.Value);
+
+        return await query.AnyAsync(cancellationToken);
+    }
 }
 

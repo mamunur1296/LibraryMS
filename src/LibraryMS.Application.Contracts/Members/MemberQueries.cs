@@ -11,3 +11,4 @@ public sealed record GetMemberByIdQuery(Guid Id)
 public sealed record SearchMembersQuery(
     string? SearchTerm, string? Status, int Page, int PageSize)
     : IRequest<PagedResult<MemberDto>>;
+public sealed record GetMemberProfileStatsQuery(Guid MemberId) : IRequest<MemberProfileStatsDto>;

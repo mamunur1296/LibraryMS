@@ -4,6 +4,7 @@ import { branchSchema, BranchFormData } from "@/lib/validations/branch.schema";
 import { branchService } from "@/lib/services/branch.service";
 import { BranchDto } from "@/types/branch.types";
 import { useEffect } from "react";
+import { toast } from "@/components/ui/Toast";
 
 interface BranchFormModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export function BranchFormModal({ isOpen, onClose, onSuccess, branchToEdit }: Br
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<BranchFormData>({
     resolver: zodResolver(branchSchema),
@@ -52,14 +54,49 @@ export function BranchFormModal({ isOpen, onClose, onSuccess, branchToEdit }: Br
     try {
       if (branchToEdit) {
         await branchService.update(branchToEdit.id, data);
+        toast.success("Branch updated successfully.");
       } else {
         await branchService.create(data);
+        toast.success("Branch created successfully.");
       }
       reset();
       onSuccess();
       onClose();
     } catch (err: any) {
-      alert(err.response?.data?.message || "Something went wrong.");
+      const apiErrors = err.response?.data?.errors;
+      const message = err.response?.data?.message || "Something went wrong.";
+
+      if (apiErrors && typeof apiErrors === "object" && Object.keys(apiErrors).length > 0) {
+        Object.keys(apiErrors).forEach((key) => {
+          const fieldName = (key.charAt(0).toLowerCase() + key.slice(1)) as keyof BranchFormData;
+          setError(fieldName, {
+            type: "server",
+            message: apiErrors[key][0],
+          });
+        });
+      } else if (message.toLowerCase().includes("branch name") || message.toLowerCase().includes("named")) {
+        setError("name", {
+          type: "server",
+          message: message,
+        });
+      } else if (message.toLowerCase().includes("email")) {
+        setError("email", {
+          type: "server",
+          message: message,
+        });
+      } else if (message.toLowerCase().includes("phone")) {
+        setError("phone", {
+          type: "server",
+          message: message,
+        });
+      } else if (message.toLowerCase().includes("address")) {
+        setError("address", {
+          type: "server",
+          message: message,
+        });
+      } else {
+        toast.error(message);
+      }
     }
   };
 

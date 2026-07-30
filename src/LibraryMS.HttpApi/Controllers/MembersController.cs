@@ -27,6 +27,13 @@ public class MembersController : BaseController
         return Ok(result);
     }
 
+    [HttpGet("{id}/stats")]
+    public async Task<ActionResult<MemberProfileStatsDto>> GetStats(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(new GetMemberProfileStatsQuery(id), cancellationToken);
+        return Ok(result);
+    }
+
     [HttpPost]
     public async Task<ActionResult<MemberDto>> Create([FromBody] CreateMemberCommand command, CancellationToken cancellationToken)
     {
@@ -63,5 +70,21 @@ public class MembersController : BaseController
     {
         var result = await Mediator.Send(new ActivateMemberCommand(id), cancellationToken);
         return Ok(result);
+    }
+
+    [HttpPost("{id}/reset-password")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ResetPassword(Guid id, [FromBody] ResetMemberPasswordRequest request, CancellationToken cancellationToken)
+    {
+        await Mediator.Send(new ResetMemberPasswordCommand(id, request.NewPassword), cancellationToken);
+        return Ok(new { Message = "Password reset successfully." });
+    }
+
+    [HttpPost("{id}/create-account")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateAccount(Guid id, [FromBody] CreateMemberUserRequest request, CancellationToken cancellationToken)
+    {
+        await Mediator.Send(new CreateMemberUserCommand(id, request.Username, request.Password), cancellationToken);
+        return Ok(new { Message = "Account created successfully." });
     }
 }

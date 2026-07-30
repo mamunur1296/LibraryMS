@@ -17,6 +17,7 @@ public sealed class BranchManager
         CancellationToken ct = default)
     {
         await EnsureNameUniqueAsync(name, excludeId: null, ct);
+        await EnsureEmailUniqueAsync(email, excludeId: null, ct);
 
         return new Branch(Guid.NewGuid(), name, address, phone, email);
     }
@@ -26,6 +27,7 @@ public sealed class BranchManager
         CancellationToken ct = default)
     {
         await EnsureNameUniqueAsync(name, excludeId: branch.Id, ct);
+        await EnsureEmailUniqueAsync(email, excludeId: branch.Id, ct);
 
         branch.Update(name, address, phone, email);
         return branch;
@@ -35,5 +37,11 @@ public sealed class BranchManager
     {
         var exists = await _repository.ExistsWithNameAsync(name, excludeId, ct);
         Ensure.Against(exists, $"A branch named '{name}' already exists.", "BRANCH_DUPLICATE_NAME");
+    }
+
+    private async Task EnsureEmailUniqueAsync(string email, Guid? excludeId, CancellationToken ct)
+    {
+        var exists = await _repository.ExistsWithEmailAsync(email, excludeId, ct);
+        Ensure.Against(exists, $"A branch with email '{email}' already exists.", "BRANCH_DUPLICATE_EMAIL");
     }
 }
