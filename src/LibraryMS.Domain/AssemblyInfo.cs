@@ -7,3 +7,4 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("LibraryMS.Domain.Tests")]
 [assembly: InternalsVisibleTo("LibraryMS.Application.Tests")]
 [assembly: InternalsVisibleTo("LibraryMS.TestBase")]
+[assembly: InternalsVisibleTo("LibraryMS.DbMigrator")]
