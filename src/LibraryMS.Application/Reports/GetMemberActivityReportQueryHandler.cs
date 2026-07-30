@@ -2,14 +2,12 @@ using LibraryMS.Application.Contracts.Common;
 using LibraryMS.Application.Contracts.DTOs.Report;
 using LibraryMS.Application.Contracts.Reports;
 using LibraryMS.Domain.BorrowManagement;
+using LibraryMS.Domain.BorrowManagement.AggregateRoots;
 using LibraryMS.Domain.MemberManagement;
+using LibraryMS.Domain.MemberManagement.AggregateRoots;
+using LibraryMS.Domain.Shared.Enums;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace LibraryMS.Application.Reports;
 
@@ -36,34 +34,28 @@ public sealed class GetMemberActivityReportQueryHandler : IRequestHandler<GetMem
         var (members, totalCount) = await _memberRepo.SearchAsync(
             null, null, request.Page, request.PageSize, cancellationToken);
 
-        var items = new List<MemberActivityDto>();
+        var memberIds = members.Select(m => m.Id).ToList();
+        var allBorrows = memberIds.Count > 0
+            ? await _borrowRepo.GetByMemberIdsAsync(memberIds, request.FromDate, request.ToDate, cancellationToken)
+            : new List<BorrowRecord>();
 
-        foreach (var m in members)
+        var borrowsByMember = allBorrows.GroupBy(b => b.MemberId).ToDictionary(g => g.Key, g => g.ToList());
+
+        var items = members.Select(m =>
         {
-            var (borrows, _) = await _borrowRepo.GetPagedAsync(
-                m.Id, null, null, 1, int.MaxValue, cancellationToken);
+            var memberBorrows = borrowsByMember.GetValueOrDefault(m.Id, new List<BorrowRecord>());
 
-            var query = borrows.AsQueryable();
-
-            if (request.FromDate.HasValue)
-                query = query.Where(b => b.BorrowDate >= request.FromDate.Value);
-
-            if (request.ToDate.HasValue)
-                query = query.Where(b => b.BorrowDate <= request.ToDate.Value);
-
-            var filteredBorrows = query.ToList();
-
-            items.Add(new MemberActivityDto
+            return new MemberActivityDto
             {
                 MemberId = m.Id,
                 FullName = $"{m.FirstName} {m.LastName}",
                 MembershipNumber = m.MembershipNumber,
-                TotalBorrows = filteredBorrows.Count,
-                ActiveBorrows = filteredBorrows.Count(b => b.Status == Domain.Shared.Enums.BorrowStatus.Active),
-                OverdueBorrows = filteredBorrows.Count(b => b.Status == Domain.Shared.Enums.BorrowStatus.Overdue),
-                TotalFinesPaid = filteredBorrows.Where(b => b.IsFinePaid).Sum(b => b.LateFine)
-            });
-        }
+                TotalBorrows = memberBorrows.Count,
+                ActiveBorrows = memberBorrows.Count(b => b.Status == BorrowStatus.Active),
+                OverdueBorrows = memberBorrows.Count(b => b.Status == BorrowStatus.Overdue),
+                TotalFinesPaid = memberBorrows.Where(b => b.IsFinePaid).Sum(b => b.LateFine)
+            };
+        }).ToList();
 
         return PagedResult<MemberActivityDto>.Create(items, totalCount, request.Page, request.PageSize);
     }

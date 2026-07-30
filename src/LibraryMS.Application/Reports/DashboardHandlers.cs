@@ -40,8 +40,8 @@ public sealed class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboa
     {
         _logger.LogInformation("Retrieving dashboard summary counts.");
 
-        var activeBorrows = await _borrowRepo.GetPagedAsync(null, null, "Active", 1, int.MaxValue, cancellationToken);
-        var overdueBorrows = await _borrowRepo.GetPagedAsync(null, null, "Overdue", 1, int.MaxValue, cancellationToken);
+        var activeBorrows = await _borrowRepo.GetPagedAsync(null, null, "Active", 1, 1, cancellationToken);
+        var overdueBorrows = await _borrowRepo.GetPagedAsync(null, null, "Overdue", 1, 1, cancellationToken);
         var books = await _bookRepo.SearchAsync(null, null, null, null, 1, 1, cancellationToken);
         var members = await _memberRepo.SearchAsync(null, null, 1, 1, cancellationToken);
         var branches = await _branchRepo.GetAllAsync(cancellationToken);
