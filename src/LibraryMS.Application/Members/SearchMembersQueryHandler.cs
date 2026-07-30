@@ -34,8 +34,12 @@ public sealed class SearchMembersQueryHandler : IRequestHandler<SearchMembersQue
             request.SearchTerm, request.Status,
             request.Page, request.PageSize, cancellationToken);
 
-        var activeBorrowCounts = await Task.WhenAll(
-            items.Select(m => _repository.GetActiveBorrowCountAsync(m.Id, cancellationToken)));
+        var activeBorrowCounts = new List<int>();
+        foreach (var item in items)
+        {
+            var count = await _repository.GetActiveBorrowCountAsync(item.Id, cancellationToken);
+            activeBorrowCounts.Add(count);
+        }
 
         var dtos = items.Select((member, i) =>
         {

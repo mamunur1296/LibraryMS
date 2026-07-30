@@ -60,6 +60,13 @@ public class BooksController : BaseController
         return Ok(result);
     }
 
+    [HttpGet("{id}/copies")]
+    public async Task<ActionResult<List<BookCopyDto>>> GetCopies(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(new GetBookCopiesQuery(id), cancellationToken);
+        return Ok(result);
+    }
+
     [HttpGet("{id}/available-copies")]
     public async Task<ActionResult<List<BookCopyDto>>> GetAvailableCopies(Guid id, CancellationToken cancellationToken)
     {

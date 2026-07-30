@@ -37,6 +37,14 @@ export interface CategoryDto {
   description: string | null;
 }
 
+export interface BookCopy {
+  id: string;
+  copyNumber: string;
+  status: string;
+  branchId: string;
+  branchName: string;
+}
+
 export interface CreateBookRequest {
   title: string;
   isbn: string;

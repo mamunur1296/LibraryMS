@@ -12,6 +12,10 @@ interface SuspendMemberModalProps {
 }
 
 export function SuspendMemberModal({ isOpen, onClose, onSuccess, member }: SuspendMemberModalProps) {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const defaultDate = tomorrow.toISOString().split('T')[0];
+
   const {
     register,
     handleSubmit,
@@ -19,6 +23,10 @@ export function SuspendMemberModal({ isOpen, onClose, onSuccess, member }: Suspe
     formState: { errors, isSubmitting },
   } = useForm<SuspendMemberFormData>({
     resolver: zodResolver(suspendMemberSchema),
+    defaultValues: {
+      suspendedUntil: defaultDate,
+      reason: ""
+    }
   });
 
   if (!isOpen || !member) return null;

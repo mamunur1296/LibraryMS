@@ -70,5 +70,10 @@ export const bookService = {
   async createCategory(data: CreateCategoryRequest): Promise<CategoryDto> {
     const response = await apiClient.post<CategoryDto>("/api/Books/categories", data);
     return response.data;
+  },
+
+  async getBookCopies(id: string): Promise<BookCopy[]> {
+    const { data } = await apiClient.get<BookCopy[]>(`/api/Books/${id}/copies`);
+    return data;
   }
 };

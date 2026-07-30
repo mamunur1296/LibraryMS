@@ -71,12 +71,20 @@ public class JwtTokenService : IJwtTokenService
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
-        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
-
-        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
-            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+        ClaimsPrincipal principal;
+        try
         {
-            throw new SecurityTokenException("Invalid token");
+            principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+
+            if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new SecurityTokenException("Invalid token");
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new SecurityTokenException("Invalid token", ex);
         }
 
         return principal;
