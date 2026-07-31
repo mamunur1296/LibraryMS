@@ -92,7 +92,8 @@ builder.Services.AddApiVersioning(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Library Management System API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Library Management System API v1", Version = "v1" });
+    c.SwaggerDoc("v2", new OpenApiInfo { Title = "Library Management System API v2", Version = "v2" });
     
     // Add JWT support in Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -125,7 +126,11 @@ app.UseMiddleware<RequestLoggingMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "LibraryMS API v1"));
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "LibraryMS API v1");
+        c.SwaggerEndpoint("/swagger/v2/swagger.json", "LibraryMS API v2");
+    });
 }
 
 app.UseCors("DefaultPolicy");
