@@ -25,29 +25,50 @@ graph TD
 
 ---
 
-## 📑 Step-by-Step Business Lifecycle Story
+## 📑 Step-by-Step Business Lifecycle Story (Core Modules)
 
-Here is how a book's life and member actions flow through the LibraryMS ecosystem:
+Here is how a book's life and member actions flow through the LibraryMS ecosystem, mapped directly to the **7 required functional modules** of the assessment:
 
 ```
-[Member Registration] ──> [Browse Catalog] ──> [Borrow Book] ──> [Return Book] ──> [Queue Reservation]
-          │                                         │                  │                   │
-    (JWT Sign In)                             (Limit checks)     (Overdue Fine)     (3-day notification)
+ [1. Auth (JWT)] ──> [2. Branch CRUD] ──> [3. Book Catalog] ──> [4. Member Onboard]
+                                                                        │
+ [7. Reports & Analytics] <── [6. Reservation Queue] <── [5. Borrow & Return Engine]
 ```
 
-1.  **Onboarding:** A new user registers via `api/v1/auth/register` (automatically assigned the `Member` role) or an Administrator onboards a new Librarian, assigning them to a specific physical Branch.
-2.  **Catalog Search:** Public or registered users search and filter the catalog via `api/public/books`. Users can filter by branch to see which books have physical copies available locally.
-3.  **Borrowing Validation:** A member attempts to borrow a book copy. The system evaluates the business constraints:
-    *   Does the member have an active, non-expired membership?
-    *   Does the member have more than 5 active borrows? (`MaxActiveBorrows = 5`)
-    *   Does the member have any unpaid overdue fines? (Fines block new borrowing).
-    *   Is there a copy of the book available in the selected branch?
-4.  **Returning & Fine Accumulation:** When returning a book:
-    *   If returned past the 14-day limit (`MaxBorrowDays = 14`), the system calculates a fine at `$2.00` per day (`LateFinePerDay = 2`).
-    *   Members can pay their fine at the counter (Librarian waives or processes cash payment).
-5.  **Reservation Queue:** If a member wants a book that is completely checked out, they register a reservation. They are placed in a Queue.
-    *   When the book is returned, the next member in the queue is notified via email.
-    *   The member has **3 days** (`ReservationExpiry = 3`) to borrow it, after which the reservation expires and the next member in the queue is promoted.
+All modules support **standard CRUD operations**, **advanced paginated search/filtering**, and **strict domain validations**:
+
+### 1. Authentication (JWT) & Role-based Authorization
+*   **Onboarding & Access:** Secure entry point via `api/v1/auth/register` (for public users seeking membership) and `api/v1/auth/login`.
+*   **Roles & Security:** Exposes distinct access policies for `Admin` (system-wide operations), `Librarian` (branch-specific management), and `Member` (self-service book dashboard).
+*   **Access Control:** All API endpoints are protected using JWT token authorization filters, ensuring secure data retrieval.
+
+### 2. Branch Management
+*   **Physical Infrastructure:** Admin handles CRUD operations on library branches (e.g., dhanmondi branch, central branch) via `api/v1/branches`.
+*   **Librarian Allocation:** Admins onboard and assign librarians to specific physical branches. All librarian commands are automatically validated and scoped to their assigned branch.
+
+### 3. Book Management
+*   **Inventory Cataloging:** Supports comprehensive CRUD operations for books, copies, authors, and categories. 
+*   **Dynamic Search:** Book query APIs support debounced search, filtering by branch availability, and categorization filters with complete pagination support.
+*   **Availability Tracking:** Tracks individual physical copies (`BookCopy`) and evaluates real-time availability states across branches.
+
+### 4. Member Management
+*   **Member Profiles:** Librarians or Admins manage member details, view statistical dashboards (active borrows, fine history), reset passwords, and suspend/activate memberships.
+*   **Membership Expiry:** Automatic validation blocks borrowing operations for users with expired memberships. Renewal endpoints allow extending membership durations.
+
+### 5. Borrow & Return Management
+*   **Checkout Validation:** When borrowing a copy, the system validates the business invariants:
+    *   *Limit Check:* Member cannot exceed 5 active borrows (`MaxActiveBorrows = 5`).
+    *   *Block Check:* Member cannot borrow if they have any outstanding unpaid overdue fines.
+    *   *Availability Check:* Evaluates copy availability.
+*   **Return & Fines:** Processes returns via `api/v1/borrows/return`. If returned past the 14-day limit (`MaxBorrowDays = 14`), a late fine is calculated at `$2.00` per day (`LateFinePerDay = 2`) and added to the member's account.
+
+### 6. Reservation Queue
+*   **Hold Requests:** If a book copy is fully checked out in a branch, members can join the reservation queue for that book.
+*   **FIFO Queue Promotion:** When a copy is returned, the system promotes the first member in the queue and alerts them via email. The copy is held for **3 days** (`ReservationExpiry = 3`) before the reservation expires and rolls over to the next member in the queue.
+
+### 7. Reports
+*   **Analytical Dashboards:** Provides branch statistics (total members, copies, active loans, overdue metrics) for Librarians, and system-wide comparison statistics for Admins.
+*   **Export Engine:** Strategy patterns allow exporting custom overdue lists, revenue summaries, and activity reports to **Excel** or **PDF** formats.
 
 ---
 
