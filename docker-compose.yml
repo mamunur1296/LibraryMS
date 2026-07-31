@@ -34,7 +34,7 @@ services:
   db-migrator:
     build:
       context: .
-      dockerfile: Dockerfile.migrator
+      dockerfile: src/LibraryMS.DbMigrator/Dockerfile
     container_name: library_ms_migrator
     depends_on:
       postgres:
@@ -47,7 +47,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: src/LibraryMS.HttpApi.Host/Dockerfile
     container_name: library_ms_api
     depends_on:
       postgres:
@@ -69,20 +69,6 @@ services:
       - Smtp__EnableSsl=true
     ports:
       - "8080:8080"
-    networks:
-      - library_ms_network
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: library_ms_frontend
-    depends_on:
-      - api
-    ports:
-      - "3000:80"
-    environment:
-      - VITE_API_URL=http://localhost:8080
     networks:
       - library_ms_network
 

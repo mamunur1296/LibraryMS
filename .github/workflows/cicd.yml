@@ -1,0 +1,156 @@
+name: CI/CD - Library Management System
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+  workflow_dispatch:
+
+concurrency:
+  group: library-ms-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+  IMAGE_WEB: ${{ secrets.DOCKERHUB_USERNAME }}/library-ms-api
+  IMAGE_MIGRATOR: ${{ secrets.DOCKERHUB_USERNAME }}/library-ms-migrator
+  DEPLOY_DIR: /home/deployment/backend/library-ms
+  COMPOSE_FILE: docker-compose.yml
+
+jobs:
+  build-test-push:
+    name: Build, Test & Push Images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore NuGet Packages
+        run: dotnet restore LibraryMS.slnx
+
+      - name: Build Solution
+        run: dotnet build LibraryMS.slnx --no-restore -c Release
+
+      - name: Run Unit Tests
+        run: dotnet test LibraryMS.slnx --no-build -c Release --verbosity normal
+
+      # Docker Login & Push steps only trigger on branch push (not on Pull Requests)
+      - name: Login to Docker Hub
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set Image Metadata
+        if: github.event_name == 'push'
+        id: meta
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "short_sha=$SHORT_SHA" >> "$GITHUB_OUTPUT"
+          echo "web_image=${IMAGE_WEB}:${{ github.ref_name }}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "migrator_image=${IMAGE_MIGRATOR}:${{ github.ref_name }}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and Push API Image
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/LibraryMS.HttpApi.Host/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_WEB }}:${{ github.ref_name }}
+            ${{ steps.meta.outputs.web_image }}
+
+      - name: Build and Push Migrator Image
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: src/LibraryMS.DbMigrator/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_MIGRATOR }}:${{ github.ref_name }}
+            ${{ steps.meta.outputs.migrator_image }}
+
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+    needs: build-test-push
+    if: github.event_name == 'push'
+    steps:
+      - name: Add Server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H -p "${{ secrets.SSH_PORT || '22' }}" "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT || '22' }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+            COMPOSE_DIR="${{ env.DEPLOY_DIR }}"
+            COMPOSE_FILE="${{ env.COMPOSE_FILE }}"
+            cd "$COMPOSE_DIR"
+
+            echo "Logging into Docker Hub..."
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+            echo "Validating compose configuration..."
+            docker compose -p library-ms -f "$COMPOSE_FILE" config --quiet
+
+            echo "Pulling latest images..."
+            docker compose -p library-ms -f "$COMPOSE_FILE" pull api db-migrator
+
+            echo "Running database migrations..."
+            docker compose -p library-ms -f "$COMPOSE_FILE" run --rm db-migrator
+
+            LEGACY_CONTAINER="library_ms_api"
+            LEGACY_WAS_RUNNING="false"
+            if docker inspect "$LEGACY_CONTAINER" >/dev/null 2>&1; then
+              LEGACY_WAS_RUNNING="$(docker inspect -f '{{.State.Running}}' "$LEGACY_CONTAINER" 2>/dev/null || echo false)"
+            fi
+
+            rollback_legacy() {
+              status=$?
+              if [ "$status" -ne 0 ] && [ "$LEGACY_WAS_RUNNING" = "true" ]; then
+                echo "Deployment failed; restarting legacy container $LEGACY_CONTAINER for rollback..."
+                docker start "$LEGACY_CONTAINER" || true
+              fi
+              exit "$status"
+            }
+            trap rollback_legacy EXIT
+
+            if [ "$LEGACY_WAS_RUNNING" = "true" ]; then
+              echo "Stopping legacy container $LEGACY_CONTAINER to release port 8080..."
+              docker stop "$LEGACY_CONTAINER"
+            fi
+
+            echo "Updating API container only..."
+            docker compose -p library-ms -f "$COMPOSE_FILE" up -d --no-deps api
+
+            echo "Waiting for API health..."
+            for i in $(seq 1 30); do
+              if curl -fsS http://127.0.0.1:8080/health; then
+                echo "Deployment healthy"
+                trap - EXIT
+                exit 0
+              fi
+              docker compose -p library-ms -f "$COMPOSE_FILE" ps api
+              sleep 5
+            done
+
+            echo "API did not become healthy. Recent logs:"
+            docker compose -p library-ms -f "$COMPOSE_FILE" logs --tail=160 api
+            exit 1

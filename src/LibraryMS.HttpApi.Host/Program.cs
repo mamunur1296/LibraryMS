@@ -70,7 +70,9 @@ builder.Services.AddCors(options =>
 });
 
 // Add Health Checks
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+    .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty, name: "PostgreSQL")
+    .AddRedis(builder.Configuration["Redis:Configuration"] ?? string.Empty, name: "Redis");
 
 // 5. Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
