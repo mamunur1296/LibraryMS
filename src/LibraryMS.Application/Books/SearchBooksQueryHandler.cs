@@ -1,13 +1,10 @@
 using LibraryMS.Application.Contracts.Books;
 using LibraryMS.Application.Contracts.Common;
 using LibraryMS.Application.Contracts.DTOs.Book;
+using LibraryMS.Application.Contracts.Services;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BookManagement;
-using LibraryMS.Domain.BookManagement.AggregateRoots;
-using LibraryMS.Domain.BookManagement.Entities;
-using LibraryMS.Domain.BookManagement.Services;
 using MediatR;
-using LibraryMS.Application.Contracts.Services;
 using Microsoft.Extensions.Logging;
 
 namespace LibraryMS.Application.Books;
@@ -51,7 +48,7 @@ public sealed class SearchBooksQueryHandler : IRequestHandler<SearchBooksQuery, 
         var authors = await _repository.GetAllAuthorsAsync(cancellationToken);
         var categories = await _repository.GetAllCategoriesAsync(cancellationToken);
 
-        var dtos = items.Select(book => 
+        var dtos = items.Select(book =>
         {
             var author = authors.FirstOrDefault(a => a.Id == book.AuthorId);
             var category = categories.FirstOrDefault(c => c.Id == book.CategoryId);
@@ -59,7 +56,7 @@ public sealed class SearchBooksQueryHandler : IRequestHandler<SearchBooksQuery, 
         }).ToList();
 
         var result = PagedResult<BookDto>.Create(dtos, total, request.Page, request.PageSize);
-        
+
         await _cache.SetAsync(cacheKey, result, TimeSpan.FromMinutes(5), cancellationToken);
 
         return result;

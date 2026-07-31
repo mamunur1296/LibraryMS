@@ -2,8 +2,6 @@ using LibraryMS.Application.Contracts.Books;
 using LibraryMS.Application.Contracts.DTOs.Book;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BookManagement;
-using LibraryMS.Domain.BookManagement.AggregateRoots;
-using LibraryMS.Domain.BookManagement.Entities;
 using LibraryMS.Domain.BookManagement.Services;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Guards;

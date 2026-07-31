@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
 namespace LibraryMS.Application.Behaviours;
 
@@ -17,7 +18,7 @@ public sealed class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRe
         var requestName = typeof(TRequest).Name;
         _logger.LogInformation("Processing request {RequestName}", requestName);
 
-        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var sw = Stopwatch.StartNew();
         var response = await next(cancellationToken);
         sw.Stop();
 
