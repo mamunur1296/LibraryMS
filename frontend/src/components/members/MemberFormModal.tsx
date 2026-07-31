@@ -1,5 +1,3 @@
-"use client";
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { memberSchema, MemberFormData } from "@/lib/validations/member.schema";
@@ -20,6 +18,7 @@ export function MemberFormModal({ isOpen, onClose, onSuccess, memberToEdit }: Me
     handleSubmit,
     reset,
     watch,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<MemberFormData>({
     resolver: zodResolver(memberSchema),
@@ -70,7 +69,18 @@ export function MemberFormModal({ isOpen, onClose, onSuccess, memberToEdit }: Me
       onSuccess();
       onClose();
     } catch (err: any) {
-      alert(err.response?.data?.message || "Something went wrong.");
+      const apiErrors = err.response?.data?.errors;
+      if (apiErrors && typeof apiErrors === "object") {
+        Object.keys(apiErrors).forEach((key) => {
+          const fieldName = (key.charAt(0).toLowerCase() + key.slice(1)) as keyof MemberFormData;
+          setError(fieldName, {
+            type: "server",
+            message: apiErrors[key][0],
+          });
+        });
+      } else {
+        alert(err.response?.data?.message || "Something went wrong.");
+      }
     }
   };
 

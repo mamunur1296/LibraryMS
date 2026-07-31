@@ -1,6 +1,6 @@
 namespace LibraryMS.Application.Contracts.Common;
 
-/// <summary>Standard paginated response wrapper.</summary>
+// Standard paginated response wrapper.
 public sealed class PagedResult<T>
 {
     public List<T> Items { get; init; } = [];

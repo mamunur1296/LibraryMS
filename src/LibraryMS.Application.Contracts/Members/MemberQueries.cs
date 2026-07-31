@@ -1,0 +1,19 @@
+using LibraryMS.Application.Contracts.Common;
+using LibraryMS.Application.Contracts.DTOs.Borrow;
+using LibraryMS.Application.Contracts.DTOs.Member;
+using MediatR;
+
+namespace LibraryMS.Application.Contracts.Members;
+
+// ──── Queries ────
+public sealed record GetMemberByIdQuery(Guid Id)
+    : IRequest<MemberDto?>;
+
+public sealed record SearchMembersQuery(
+    string? SearchTerm, string? Status, int Page, int PageSize)
+    : IRequest<PagedResult<MemberDto>>;
+    
+public sealed record GetMemberProfileStatsQuery(Guid MemberId) : IRequest<MemberProfileStatsDto>;
+
+public sealed record GetMemberActiveBorrowsQuery(Guid MemberId) : IRequest<List<BorrowDto>>;
+public sealed record GetMemberFineHistoryQuery(Guid MemberId) : IRequest<List<BorrowDto>>;

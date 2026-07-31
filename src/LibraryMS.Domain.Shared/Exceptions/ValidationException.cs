@@ -2,10 +2,8 @@ using FluentValidation.Results;
 
 namespace LibraryMS.Domain.Shared.Exceptions;
 
-/// <summary>
-/// Thrown when FluentValidation detects invalid input.
-/// Returns HTTP 400 with structured error details.
-/// </summary>
+// Thrown when FluentValidation detects invalid input.
+// Returns HTTP 400 with structured error details.
 public sealed class ValidationException : Exception
 {
     public IDictionary<string, string[]> Errors { get; }
@@ -14,6 +12,15 @@ public sealed class ValidationException : Exception
         : base("One or more validation failures have occurred.")
     {
         Errors = new Dictionary<string, string[]>();
+    }
+
+    public ValidationException(string message)
+        : base(message)
+    {
+        Errors = new Dictionary<string, string[]>
+        {
+            { string.Empty, new[] { message } }
+        };
     }
 
     public ValidationException(IEnumerable<ValidationFailure> failures)

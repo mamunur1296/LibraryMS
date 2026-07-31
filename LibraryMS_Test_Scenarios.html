@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LibraryMS — Complete Test Scenarios</title>
+<style>
+  @page { size: A4; margin: 20mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #1a1a2e; padding: 20px; }
+  h1 { font-size: 22pt; color: #1a1a2e; border-bottom: 3px solid #4f46e5; padding-bottom: 8px; margin-bottom: 20px; }
+  h2 { font-size: 16pt; color: #4f46e5; margin-top: 28px; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; }
+  h3 { font-size: 13pt; color: #1e293b; margin-top: 18px; margin-bottom: 8px; }
+  h4 { font-size: 11pt; color: #475569; margin-top: 12px; margin-bottom: 4px; }
+  p { margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: 9.5pt; }
+  th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: top; }
+  th { background: #4f46e5; color: #fff; font-weight: 600; }
+  tr:nth-child(even) { background: #f8fafc; }
+  code { background: #f1f5f9; padding: 1px 5px; border-radius: 3px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 9.5pt; color: #dc2626; }
+  pre { background: #1e293b; color: #e2e8f0; padding: 12px 16px; border-radius: 6px; overflow-x: auto; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 9pt; margin: 8px 0 14px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 8pt; font-weight: 700; margin-right: 4px; }
+  .admin { background: #7c3aed; color: #fff; }
+  .librarian { background: #0891b2; color: #fff; }
+  .member { background: #059669; color: #fff; }
+  .public { background: #78716c; color: #fff; }
+  .note { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px 14px; margin: 12px 0; border-radius: 4px; font-size: 10pt; }
+  .warn { background: #fee2e2; border-left: 4px solid #dc2626; padding: 10px 14px; margin: 12px 0; border-radius: 4px; font-size: 10pt; }
+  .success { background: #d1fae5; border-left: 4px solid #059669; padding: 10px 14px; margin: 12px 0; border-radius: 4px; }
+  .tag { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 8pt; font-weight: 600; }
+  .get { background: #dbeafe; color: #2563eb; }
+  .post { background: #d1fae5; color: #059669; }
+  .put { background: #fef3c7; color: #d97706; }
+  .del { background: #fee2e2; color: #dc2626; }
+  .toc { background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px 20px; border-radius: 6px; margin-bottom: 20px; }
+  .toc a { color: #4f46e5; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ul { padding-left: 20px; }
+  .page-break { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<h1>LibraryMS — Complete Test Scenarios</h1>
+<p style="color:#64748b;font-size:10pt;">
+  Document generated: July 30, 2026 &nbsp;|&nbsp; Role-based acceptance test cases covering all 3 user roles
+</p>
+
+<div class="toc">
+<h3 style="margin-top:0;">Table of Contents</h3>
+<ul>
+  <li><a href="#arch">1. System Architecture Overview</a></li>
+  <li><a href="#roles">2. Role Matrix</a></li>
+  <li><a href="#admin">3. Admin — Full Control</a></li>
+  <li><a href="#lib">4. Librarian — Circulation Operations</a></li>
+  <li><a href="#member">5. Member — Self-Service</a></li>
+  <li><a href="#flows">6. End-to-End Business Flows</a></li>
+  <li><a href="#bg">7. Background Job Tests</a></li>
+  <li><a href="#security">8. Security Boundary Tests</a></li>
+  <li><a href="#perf">9. Performance &amp; Error Handling</a></li>
+  <li><a href="#env">10. Environment &amp; Deployment</a></li>
+</ul>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="arch">1. System Architecture Overview</h2>
+
+<pre>
+┌─────────────────────────────────────────────────────────┐
+│               Frontend (React/Vite/Tailwind)             │
+│  Port: 3000 (Dev), 80 (Docker)   ENV: VITE_API_URL       │
+└───────────────┬─────────────────────────────────────────┘
+                │  JWT Bearer Token
+┌───────────────▼─────────────────────────────────────────┐
+│          .NET 10 Web API (Clean Architecture)            │
+│  Port: 5252 (Dev), 8080 (Docker)                        │
+│  Pipeline: GlobalException → Logging → Auth → Controller │
+├─────────────────────────────────────────────────────────┤
+│  CQRS: MediatR  │  DDD Domain  │  FluentValidation       │
+│  Repositories: EF Core + PostgreSQL 17                   │
+│  Cache: Redis (optional, NullCacheService fallback)      │
+│  Jobs: Hangfire (Outbox, OverdueCheck, ReservationExpiry)│
+└─────────────────────────────────────────────────────────┘
+</pre>
+
+<h3>Background Jobs (Hangfire)</h3>
+<table>
+<tr><th>Job</th><th>Schedule</th><th>Purpose</th></tr>
+<tr><td>OutboxProcessor</td><td>Every 30s</td><td>Publish queued domain events to MediatR</td></tr>
+<tr><td>OverdueCheck</td><td>Daily 02:00 UTC</td><td>Flag borrows past due date as "Overdue"</td></tr>
+<tr><td>ReservationExpiry</td><td>Hourly</td><td>Expire "Available" reservations past 24h window</td></tr>
+</table>
+
+<h3>Standard API Response Envelope</h3>
+<pre>{
+  "success": true|false,
+  "data": { ... },
+  "message": "Success" | error description,
+  "errorCode": null | "VALIDATION_ERROR" | "UNAUTHORIZED" | "INTERNAL_ERROR",
+  "errors": { "FieldName": ["error1", "error2"] },
+  "timestamp": "2026-07-30T12:00:00Z"
+}</pre>
+
+<!-- ============================================================ -->
+<h2 id="roles">2. Role Matrix</h2>
+
+<table>
+<tr><th>Resource / Action</th><th><span class="badge admin">Admin</span></th><th><span class="badge librarian">Librarian</span></th><th><span class="badge member">Member</span></th><th><span class="badge public">Public</span></th></tr>
+<tr><td>Browse books, authors, categories</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Create / update / delete books</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+<tr><td>Add book copies</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+<tr><td>Create / update authors &amp; categories</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+<tr><td>Create / update / suspend / activate members</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+<tr><td>Delete members</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+<tr><td>Create / update / delete branches</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+<tr><td>Activate / deactivate branches</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+<tr><td>Browse all branches</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Issue book / Return / Pay fine</td><td style="color:#dc2626;font-weight:700;">⚠️ 403</td><td>✅</td><td>❌</td><td>❌</td></tr>
+<tr><td>List all borrows + get by ID</td><td>✅</td><td>✅</td><td>own only</td><td>❌</td></tr>
+<tr><td>View own active borrows</td><td>❌</td><td>❌</td><td>✅</td><td>❌</td></tr>
+<tr><td>View all reservations + queue</td><td>✅</td><td>✅</td><td>own + queue</td><td>❌</td></tr>
+<tr><td>Place / cancel reservation</td><td>✅</td><td>✅</td><td>✅ (self)</td><td>❌</td></tr>
+<tr><td>Dashboard + all reports</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+<tr><td>Export reports (Excel / PDF)</td><td>✅</td><td>✅</td><td>❌</td><td>❌</td></tr>
+<tr><td>Change own profile (password, username, email)</td><td>✅</td><td>✅</td><td>✅</td><td>❌</td></tr>
+<tr><td>List all users + change roles</td><td>✅</td><td>❌</td><td>❌</td><td>❌</td></tr>
+<tr><td>Login / Register / Refresh token</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+</table>
+
+<div class="warn">
+<strong>⚠️ Known Gap — Admin vs Borrow Actions:</strong><br>
+The <code>BorrowsController</code> uses <code>[Authorize(Roles = "Librarian")]</code> on POST <code>/api/borrows</code>, <code>/api/borrows/return</code>, and <code>/api/borrows/{id}/pay-fine</code>. The <strong>Admin role is not listed</strong>, so an Admin user receives <strong>403 Forbidden</strong> trying to issue/return/pay fines through the API. The frontend shows the buttons to Admin, but they will fail on the server.
+</div>
+
+<div class="warn">
+<strong>⚠️ Security Gap — Registration Allows Any Role:</strong><br>
+<code>POST /api/auth/register</code> accepts <code>role: "Admin"</code> with no server-side guard. Anyone can register as Admin and gain full system control. Fix: restrict registration to <code>Member</code> only, or allow <code>Member</code>/<code>Librarian</code> at most.
+</div>
+
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h2 id="admin">3. Admin Test Scenarios</h2>
+
+<p><em>Precondition: Login as admin with <code>POST /api/auth/login { username: "admin", password: "Admin123!" }</code></em></p>
+
+<h3>3.1 Branch Management</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>A1</td><td>Create branch</td><td><code>POST /api/branches</code> with name, address, phone, email</td><td>201 Created; branch appears in <code>GET /api/branches</code></td></tr>
+<tr><td>A2</td><td>Update branch</td><td><code>PUT /api/branches/{id}</code> with new name</td><td>200 OK; <code>GET /api/branches/{id}</code> returns updated name</td></tr>
+<tr><td>A3</td><td>Deactivate branch</td><td><code>POST /api/branches/{id}/deactivate</code></td><td>200 OK; branch shows <code>isActive: false</code></td></tr>
+<tr><td>A4</td><td>Activate branch</td><td><code>POST /api/branches/{id}/activate</code></td><td>200 OK; branch shows <code>isActive: true</code></td></tr>
+<tr><td>A5</td><td>Delete branch</td><td><code>DELETE /api/branches/{id}</code></td><td>204 No Content; <code>GET /api/branches/{id}</code> returns 404</td></tr>
+<tr><td>A6</td><td>Unauthorized: Librarian creates branch</td><td>Login as Librarian → <code>POST /api/branches</code></td><td>403 Forbidden</td></tr>
+</table>
+
+<h3>3.2 Member Management</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>A7</td><td>Delete member</td><td><code>DELETE /api/members/{id}</code></td><td>204 No Content (soft-delete); <code>IsDeleted: true</code></td></tr>
+<tr><td>A8</td><td>Unauthorized: Librarian deletes member</td><td>Login as Librarian → <code>DELETE /api/members/{id}</code></td><td>403 Forbidden</td></tr>
+</table>
+
+<h3>3.3 User Administration</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>A9</td><td>List all users</td><td><code>GET /api/users</code></td><td>200 OK; array of all users</td></tr>
+<tr><td>A10</td><td>Change user role</td><td><code>POST /api/users/change-role</code> with <code>{ targetUserId, newRole: "Librarian" }</code></td><td>200 OK; user's role claim updated; next login grants Librarian permissions</td></tr>
+<tr><td>A11</td><td>Unauthorized: Member lists users</td><td>Login as Member → <code>GET /api/users</code></td><td>403 Forbidden</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h2 id="lib">4. Librarian Test Scenarios</h2>
+
+<p><em>Precondition: Login as Librarian. A Member, Book, and BookCopy must exist.</em></p>
+
+<h3>4.1 Book Circulation — Borrow / Return / Pay Fine</h3>
+
+<h4>TC-BORROW-1: Issue a Book</h4>
+<div class="success">
+<strong>Steps:</strong><br>
+1. <code>GET /api/members?search=john</code> → find memberId<br>
+2. <code>GET /api/books?title=clean</code> → find bookId, copyId, branchId<br>
+3. <code>POST /api/borrows { memberId, bookCopyId, bookId, branchId }</code>
+</div>
+<table>
+<tr><th>Assertion</th><th>Expected</th></tr>
+<tr><td>HTTP Status</td><td>201 Created</td></tr>
+<tr><td>Response <code>status</code></td><td><code>"Active"</code></td></tr>
+<tr><td><code>dueDate</code></td><td>borrowDate + 14 days (default)</td></tr>
+<tr><td><code>lateFine</code></td><td>0 (not yet due)</td></tr>
+<tr><td><code>memberName</code></td><td>Populated (not blank)</td></tr>
+<tr><td><code>bookTitle</code></td><td>Populated (not blank)</td></tr>
+<tr><td><code>branchName</code></td><td>Populated (not blank)</td></tr>
+<tr><td><code>GET /api/books/{bookId}</code> available copies</td><td>Decremented by 1</td></tr>
+</table>
+
+<h4>TC-BORROW-2: Return a Book (Before Due Date — No Fine)</h4>
+<div class="success">
+<strong>Steps:</strong><br>
+1. Create a borrow (TC-BORROW-1)<br>
+2. <code>POST /api/borrows/return { borrowId }</code>
+</div>
+<table>
+<tr><th>Assertion</th><th>Expected</th></tr>
+<tr><td>HTTP Status</td><td>200 OK</td></tr>
+<tr><td><code>status</code></td><td><code>"Returned"</code></td></tr>
+<tr><td><code>returnDate</code></td><td>Current UTC timestamp</td></tr>
+<tr><td><code>isFinePaid</code></td><td><code>false</code> (no fine accrued)</td></tr>
+<tr><td><code>lateFine</code></td><td>0</td></tr>
+</table>
+
+<h4>TC-BORROW-3: Return an Overdue Book (With Fine)</h4>
+<div class="success">
+<strong>Steps:</strong><br>
+1. Create a borrow with custom <code>borrowDays: 1</code><br>
+2. Wait 1+ day or advance system clock<br>
+3. <code>POST /api/borrows/return { borrowId }</code>
+</div>
+<table>
+<tr><th>Assertion</th><th>Expected</th></tr>
+<tr><td><code>status</code></td><td><code>"Returned"</code></td></tr>
+<tr><td><code>lateFine</code></td><td>&gt; 0 (overdueDays × $2/day)</td></tr>
+<tr><td><code>isFinePaid</code></td><td><code>false</code></td></tr>
+<tr><td><code>overdueDays</code></td><td>Calculated from dueDate → returnDate</td></tr>
+</table>
+
+<h4>TC-BORROW-4: Pay a Fine</h4>
+<div class="success">
+<strong>Steps:</strong><br>
+1. Create an overdue borrow with fine (TC-BORROW-3)<br>
+2. <code>POST /api/borrows/{borrowId}/pay-fine</code>
+</div>
+<table>
+<tr><th>Assertion</th><th>Expected</th></tr>
+<tr><td>HTTP Status</td><td>200 OK</td></tr>
+<tr><td><code>isFinePaid</code></td><td><code>true</code></td></tr>
+<tr><td><code>GET /api/reports/dashboard</code> → <code>totalLateFinesCollected</code></td><td>Increased by fine amount</td></tr>
+<tr><td><code>pendingLateFines</code></td><td>Decreased by fine amount</td></tr>
+</table>
+
+<h4>TC-BORROW-5: Validation — Invalid Member</h4>
+<div class="warn">
+<strong>Steps:</strong> <code>POST /api/borrows</code> with empty or invalid <code>memberId</code>
+</div>
+<table>
+<tr><th>Assertion</th><th>Expected</th></tr>
+<tr><td>HTTP Status</td><td>400 Bad Request</td></tr>
+<tr><td><code>errorCode</code></td><td><code>"VALIDATION_ERROR"</code></td></tr>
+<tr><td><code>errors.MemberId</code></td><td>Array with "Member ID is required."</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h2 id="member">5. Member Test Scenarios</h2>
+
+<h3>5.1 Registration &amp; Login</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>M1</td><td>Register as Member</td><td><code>POST /api/auth/register { username, email, password, role: "Member" }</code></td><td>200 OK; returns Guid</td></tr>
+<tr><td>M2</td><td>Login as new Member</td><td><code>POST /api/auth/login { username, password }</code></td><td>200; JWT with <code>role: "Member"</code> + refresh token</td></tr>
+<tr><td>M3</td><td>Access protected endpoint</td><td><code>GET /api/users/me</code> with token</td><td>200; returns user profile</td></tr>
+<tr><td>M4</td><td>Access without token</td><td><code>GET /api/users/me</code> (no Authorization header)</td><td>401 Unauthorized</td></tr>
+<tr><td>M5</td><td>Access with expired token</td><td><code>POST /api/auth/refresh { accessToken, refreshToken }</code></td><td>200; new token pair returned</td></tr>
+<tr><td>M6</td><td>Logout (revoke refresh token)</td><td><code>POST /api/auth/revoke { refreshToken }</code></td><td>204; old refresh token invalidated</td></tr>
+</table>
+
+<h3>5.2 Browse Books (No Login Required)</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>M7</td><td>Search books</td><td><code>GET /api/books?searchTerm=clean&page=1&pageSize=10</code></td><td>200; paginated results with <code>totalCount</code>, <code>items</code></td></tr>
+<tr><td>M8</td><td>View book details</td><td><code>GET /api/books/{id}</code></td><td>200; ISBN, title, author, category, available copies</td></tr>
+<tr><td>M9</td><td>List authors</td><td><code>GET /api/books/authors</code></td><td>200; array of authors</td></tr>
+<tr><td>M10</td><td>List categories</td><td><code>GET /api/books/categories</code></td><td>200; array of categories</td></tr>
+</table>
+
+<h3>5.3 Reservations</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>M11</td><td>Place reservation</td><td><code>POST /api/reservations { memberId, bookId, branchId }</code></td><td>201; <code>status: "Pending"</code>, <code>queuePosition: N</code></td></tr>
+<tr><td>M12</td><td>View reservation queue</td><td><code>GET /api/reservations/queue?bookId=X&branchId=Y</code></td><td>200; array with positions, <code>totalAhead</code> count</td></tr>
+<tr><td>M13</td><td>View own reservations</td><td><code>GET /api/reservations/my-reservations</code></td><td>200; only current member's reservations</td></tr>
+<tr><td>M14</td><td>Cancel own reservation</td><td><code>POST /api/reservations/{id}/cancel</code></td><td>200; <code>status: "Cancelled"</code></td></tr>
+<tr><td>M15</td><td>Cancel another's reservation</td><td>Try cancelling a different member's reservation</td><td>403 Forbidden</td></tr>
+</table>
+
+<h3>5.4 Reservation — Full Lifecycle</h3>
+<div class="success">
+<strong>Steps:</strong><br>
+1. Member places reservation on a book with 0 available copies<br>
+2. Reservation is <code style="background:#fef3c7;padding:0 4px;">Pending</code> at queue position N<br>
+3. Librarian returns a copy → system sets reservation to <code style="background:#d1fae5;padding:0 4px;">Available</code> with expiry = now + 24h<br>
+4. Member sees status change on <code>GET /api/reservations/my-reservations</code><br>
+5. Librarian issues the book to the member → reservation → <code style="background:#e0e7ff;padding:0 4px;">Fulfilled</code><br>
+6. If not fulfilled within 24h → reservation → <code style="background:#fee2e2;padding:0 4px;">Expired</code>; next in queue notified
+</div>
+
+<h3>5.5 Active Borrows</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>M16</td><td>View my active borrows</td><td><code>GET /api/borrows/my-active</code></td><td>200; only borrows with <code>status: "Active"</code> or <code>"Overdue"</code></td></tr>
+<tr><td>M17</td><td>View own borrow by ID</td><td><code>GET /api/borrows/{ownBorrowId}</code></td><td>200; full details including book title, due date</td></tr>
+<tr><td>M18</td><td>View another's borrow by ID</td><td><code>GET /api/borrows/{otherBorrowId}</code></td><td>403 Forbidden</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h2 id="flows">6. End-to-End Business Flows</h2>
+
+<h3>6.1 Borrow → Overdue → Return → Pay Fine (Full Cycle)</h3>
+<pre>
+Phase 1: Librarian issues book
+  POST /api/borrows → 201
+  Assert: Status=Active, DueDate=+14d, LateFine=0
+
+Phase 2: Member views active borrows (day 1)
+  GET /api/borrows/my-active → borrow appears
+  Assert: books availability count decremented
+
+Phase 3: Book becomes overdue (after day 14)
+  Hangfire OverdueCheckJob runs (daily 02:00 UTC)
+  OR Manual call → system updates Status=Overdue
+  GET /api/reports/overdue?fromDate=... → borrow appears
+  Assert: OverdueDays > 0, LateFine = OverdueDays × $2
+
+Phase 4: Librarian returns book
+  POST /api/borrows/return { borrowId } → 200
+  Assert: Status=Returned, ReturnDate set, LateFine computed
+  Assert: books availability count incremented
+
+Phase 5: Librarian processes fine payment
+  POST /api/borrows/{id}/pay-fine → 200
+  Assert: IsFinePaid=true
+
+Phase 6: Verify dashboard reflects changes
+  GET /api/reports/dashboard
+  Assert: ActiveBorrows decreased, TotalLateFinesCollected increased,
+          PendingLateFines decreased
+</pre>
+
+<h3>6.2 Reserve → Notify → Fulfill (Full Cycle)</h3>
+<pre>
+Phase 1: Member places reservation (all copies borrowed out)
+  POST /api/reservations → 201
+  Assert: Status=Pending, QueuePosition=1
+
+Phase 2: Librarian returns a copy
+  POST /api/borrows/return → triggers domain event
+  → Reservation notified: Status=Available, ExpiresAt=now+24h
+
+Phase 3: Member sees reservation is available
+  GET /api/reservations/my-reservations
+  Assert: Status=Available
+
+Phase 4: Librarian issues the book to the reserving member
+  POST /api/borrows { memberId, bookCopyId, ... } → 201
+  → Reservation: Status=Fulfilled
+
+Phase 5: Reservation auto-expires if unfulfilled
+  Wait 24h → Hangfire ReservationExpiryJob runs
+  Assert: Status=Expired
+  Next queue position gets notified
+</pre>
+
+<h3>6.3 Member Enrollment + Account Creation</h3>
+<pre>
+Phase 1: Admin/Librarian creates member record
+  POST /api/members { firstName, lastName, email, phone, username, password } → 201
+  Assert: MemberDto returned with MembershipNumber="LIB-{year}-{sequential}"
+
+Phase 2: Member logs in with created credentials
+  POST /api/auth/login { username, password } → JWT
+
+Phase 3: Member updates profile
+  POST /api/users/change-email { newEmail } → 200
+  POST /api/users/change-password { currentPassword, newPassword } → 200
+  Next login requires new password
+
+Phase 4: Member is suspended (by Admin/Librarian)
+  POST /api/members/{id}/suspend { suspendedUntil, reason } → 200
+  Assert: Member.Status=Suspended
+  POST /api/borrows → by Librarian for this member → DomainException thrown
+  Assert: 400 Domain error "Member is suspended"
+
+Phase 5: Suspension expires or Admin activates
+  POST /api/members/{id}/activate → 200
+  Assert: Member.Status=Active
+  Borrow works again
+</pre>
+
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h2 id="bg">7. Background Job Tests</h2>
+
+<h3>7.1 Outbox Processor</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>B1</td><td>Domain event published via outbox</td><td>Create a borrow → triggers <code>BookBorrowedEvent</code> → saved to <code>OutboxMessages</code> table</td><td><code>OutboxMessages</code> row with <code>ProcessedOn: null</code></td></tr>
+<tr><td>B2</td><td>OutboxProcessor picks up and publishes</td><td>Wait ≤30s for Hangfire job</td><td><code>ProcessedOn</code> set to timestamp; event dispatched to MediatR handlers</td></tr>
+<tr><td>B3</td><td>Retry on failure</td><td>Publisher throws transient exception</td><td><code>RetryCount</code> incremented; re-queued; max 3 retries</td></tr>
+<tr><td>B4</td><td>Dead letter after max retries</td><td>Publisher fails 3 times</td><td><code>RetryCount ≥ MaxRetries</code>; <code>Error</code> field set; stays unprocessed</td></tr>
+</table>
+
+<h3>7.2 Overdue Check</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>B5</td><td>Overdue detection</td><td>Create borrow with 1-day due date; advance clock past due</td><td>OverdueCheckJob updates status to <code>"Overdue"</code></td></tr>
+<tr><td>B6</td><td>No false positives</td><td>Create borrow with 14-day due date</td><td>Job leaves status as <code>"Active"</code></td></tr>
+</table>
+
+<h3>7.3 Reservation Expiry</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>B7</td><td>Expire unfulfilled available reservation</td><td>Set reservation <code>Available</code> + <code>ExpiresAt</code> in the past</td><td>ReservationExpiryJob sets <code>Status=Expired</code></td></tr>
+<tr><td>B8</td><td>Expire does not affect fulfilled</td><td>Fulfilled reservation with past <code>ExpiresAt</code></td><td>Status remains <code>Fulfilled</code></td></tr>
+</table>
+
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h2 id="security">8. Security Boundary Tests</h2>
+
+<h3>8.1 Authentication</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>S1</td><td>Invalid credentials</td><td><code>POST /api/auth/login { wrong username/password }</code></td><td>401; <code>"Invalid username or password."</code></td></tr>
+<tr><td>S2</td><td>Invalid JWT signature</td><td>Modify token payload; send to protected endpoint</td><td>401 Unauthorized</td></tr>
+<tr><td>S3</td><td>Expired token</td><td>Use token past <code>exp</code> claim</td><td>401; frontend auto-refreshes via refresh token</td></tr>
+<tr><td>S4</td><td>Refresh with revoked token</td><td>Logout → <code>POST /api/auth/refresh</code> with old refresh token</td><td>401; tokens cleared; redirect to login</td></tr>
+<tr><td>S5</td><td>Register with weak password</td><td>Password &lt; 8 chars, no uppercase, no digit</td><td>400; validation errors for each rule</td></tr>
+<tr><td>S6</td><td>SQL injection attempt</td><td><code>GET /api/books?searchTerm='; DROP TABLE "Users";--</code></td><td>200 with no results (EF Core parameterized queries)</td></tr>
+</table>
+
+<h3>8.2 Authorization — Role Escalation Prevention</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>S7</td><td>Member accesses admin endpoint</td><td>Login as Member → <code>GET /api/members</code></td><td>403 Forbidden</td></tr>
+<tr><td>S8</td><td>Member accesses reports</td><td>Login as Member → <code>GET /api/reports/dashboard</code></td><td>403 Forbidden</td></tr>
+<tr><td>S9</td><td>Member changes another user's role</td><td>Login as Member → <code>POST /api/users/change-role</code></td><td>403 Forbidden</td></tr>
+<tr><td>S10</td><td>Librarian changes another user's role</td><td>Login as Librarian → <code>POST /api/users/change-role</code></td><td>403 Forbidden</td></tr>
+<tr><td>S11</td><td>Member reserves for another member</td><td><code>POST /api/reservations { memberId: otherMemberId, ... }</code></td><td>403 Forbidden (handler checks claim)</td></tr>
+<tr><td>S12</td><td>Member cancels another's reservation</td><td><code>POST /api/reservations/{otherId}/cancel</code></td><td>403 Forbidden</td></tr>
+<tr><td>S13</td><td>Member views another's borrow</td><td><code>GET /api/borrows/{otherBorrowId}</code></td><td>403 Forbidden</td></tr>
+<tr><td>S14</td><td>Member views another's reservation</td><td><code>GET /api/reservations/{otherReservationId}</code></td><td>403 Forbidden</td></tr>
+</table>
+
+<h3>8.3 Data Integrity</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>S15</td><td>Concurrent borrow of same copy</td><td>Two simultaneous <code>POST /api/borrows</code> with same <code>bookCopyId</code></td><td>First succeeds; second gets <code>IsFinePaid</code> / domain error</td></tr>
+<tr><td>S16</td><td>Borrow suspended member</td><td><code>POST /api/borrows</code> with suspended member</td><td>400; domain error "Member is suspended"</td></tr>
+<tr><td>S17</td><td>Borrow at max limit</td><td>Member has 5 active borrows; try 6th</td><td>400; domain error "Maximum active borrows reached"</td></tr>
+<tr><td>S18</td><td>Return already returned book</td><td><code>POST /api/borrows/return</code> on already-returned borrow</td><td>400; domain error</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h2 id="perf">9. Performance &amp; Error Handling Tests</h2>
+
+<h3>9.1 API Response Envelope</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>P1</td><td>Success response format</td><td><code>GET /api/branches</code></td><td><code>{ "success": true, "data": [...], "message": "Success", "errors": null }</code></td></tr>
+<tr><td>P2</td><td>Validation error format</td><td><code>POST /api/books</code> with empty title</td><td><code>{ "success": false, "errorCode": "VALIDATION_ERROR", "errors": { "Title": [...] } }</code></td></tr>
+<tr><td>P3</td><td>Not found format</td><td><code>GET /api/books/{nonexistentId}</code></td><td><code>{ "success": false, "errorCode": "NOT_FOUND", "data": null }</code></td></tr>
+<tr><td>P4</td><td>Unauthorized format</td><td>Protected endpoint without token</td><td><code>{ "success": false, "errorCode": "UNAUTHORIZED" }</code></td></tr>
+<tr><td>P5</td><td>500 Internal error format</td><td>Unhandled exception</td><td><code>{ "success": false, "errorCode": "INTERNAL_ERROR", "message": "Internal Server Error" }</code> — no stack trace leaked</td></tr>
+</table>
+
+<h3>9.2 Pagination</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>P6</td><td>Default pagination</td><td><code>GET /api/books</code> (no page params)</td><td><code>page: 1, pageSize: 10</code></td></tr>
+<tr><td>P7</td><td>Custom page size</td><td><code>GET /api/books?page=2&pageSize=5</code></td><td>Returns items 6-10; <code>hasPreviousPage: true</code>, <code>hasNextPage: true</code> if more</td></tr>
+<tr><td>P8</td><td>Out of range page</td><td><code>GET /api/books?page=999</code></td><td>200 OK; <code>items: []</code>, <code>hasNextPage: false</code></td></tr>
+<tr><td>P9</td><td>Negative page number</td><td><code>GET /api/books?page=-1</code></td><td>400; validation error</td></tr>
+</table>
+
+<h3>9.3 Health Check &amp; Startup</h3>
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>P10</td><td>Health endpoint</td><td><code>GET /health</code></td><td>200; body: "Healthy"</td></tr>
+<tr><td>P11</td><td>Graceful startup without Redis</td><td>Start API with Redis unavailable</td><td>App starts; logs warning; uses <code>NullCacheService</code> (in-memory fallback)</td></tr>
+<tr><td>P12</td><td>CORS allowed origin</td><td>Request from <code>Origin: http://localhost:3000</code></td><td>Response includes <code>Access-Control-Allow-Origin</code></td></tr>
+<tr><td>P13</td><td>CORS disallowed origin</td><td>Request from <code>Origin: https://evil.com</code></td><td>No CORS headers; browser blocks request</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<div class="page-break"></div>
+<h2 id="env">10. Environment &amp; Deployment Tests</h2>
+
+<table>
+<tr><th>#</th><th>Test</th><th>Steps</th><th>Expected Result</th></tr>
+<tr><td>E1</td><td>Docker Compose build &amp; up</td><td><code>docker compose build --no-cache</code> then <code>docker compose up -d</code></td><td>3 containers: api, frontend, db. All healthy.</td></tr>
+<tr><td>E2</td><td>Database migration on startup</td><td>First docker-compose up with empty database</td><td>DbMigrator runs; tables created; seed data inserted</td></tr>
+<tr><td>E3</td><td>Frontend connects to API</td><td>Open <code>http://localhost:3000</code> in browser</td><td>Login page loads; no CORS errors in console</td></tr>
+<tr><td>E4</td><td>API exposes Swagger</td><td><code>GET /swagger</code> (Development only)</td><td>Swagger UI with all endpoints documented</td></tr>
+<tr><td>E5</td><td>Hangfire Dashboard</td><td><code>GET /hangfire</code></td><td>Hangfire UI showing jobs, queues, servers</td></tr>
+<tr><td>E6</td><td>CI pipeline builds</td><td>GitHub Actions workflow runs</td><td>Solution builds; frontend builds; all tests pass</td></tr>
+<tr><td>E7</td><td>Environment variables correct</td><td>Check <code>VITE_API_URL</code> in frontend container</td><td><code>http://api:8080</code> (Docker network)</td></tr>
+<tr><td>E8</td><td>Persistent data after restart</td><td><code>docker compose down</code> → <code>docker compose up -d</code></td><td>Existing borrows, members, books still present</td></tr>
+</table>
+
+<h3>Environment Configuration</h3>
+<table>
+<tr><th>Setting</th><th>Development</th><th>Docker</th></tr>
+<tr><td>API URL (<code>VITE_API_URL</code>)</td><td><code>http://localhost:5252</code></td><td><code>http://localhost:8080</code></td></tr>
+<tr><td>Frontend Port</td><td><code>3000</code></td><td><code>3000</code> (maps to container port 80)</td></tr>
+<tr><td>PostgreSQL</td><td><code>localhost:5432</code></td><td><code>db:5432</code> (Docker service name)</td></tr>
+<tr><td>Redis</td><td><code>localhost:6379</code> (optional)</td><td>Not in Docker Compose (fallback used)</td></tr>
+<tr><td>JWT Secret</td><td><code>appsettings.json</code></td><td>Should be set via Docker env var (TODO)</td></tr>
+</table>
+
+<hr style="margin-top:30px;">
+<p style="text-align:center;color:#94a3b8;font-size:9pt;">
+  LibraryMS — Test Scenarios Document | Generated: July 30, 2026
+</p>
+
+</body>
+</html>

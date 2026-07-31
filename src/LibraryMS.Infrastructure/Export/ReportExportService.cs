@@ -6,15 +6,11 @@ using System.Reflection;
 
 namespace LibraryMS.Infrastructure.Export;
 
-/// <summary>
-/// Implements both Excel (ClosedXML) and PDF (QuestPDF) report generation.
-/// Strategy Pattern: caller decides which format to invoke.
-/// </summary>
+// Implements both Excel (ClosedXML) and PDF (QuestPDF) report generation.
+// Strategy Pattern: caller decides which format to invoke.
 public sealed class ReportExportService : IReportExportService
 {
-    /// <summary>
-    /// Generates an Excel (.xlsx) file from any list of objects using reflection.
-    /// </summary>
+    // Generates an Excel (.xlsx) file from any list of objects using reflection.
     public Task<byte[]> ExportToExcelAsync<T>(
         IEnumerable<T> data, string sheetName, CancellationToken cancellationToken = default)
     {
@@ -53,9 +49,7 @@ public sealed class ReportExportService : IReportExportService
         return Task.FromResult(stream.ToArray());
     }
 
-    /// <summary>
-    /// Generates a PDF report using QuestPDF (Community License).
-    /// </summary>
+    // Generates a PDF report using QuestPDF (Community License).
     public Task<byte[]> ExportToPdfAsync(
         string title, string htmlContent, CancellationToken cancellationToken = default)
     {

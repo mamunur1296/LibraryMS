@@ -1,6 +1,5 @@
+using LibraryMS.Application.Contracts.Common;
 using LibraryMS.Domain.Shared.Exceptions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace LibraryMS.HttpApi.Host.Middleware;
@@ -35,22 +34,21 @@ public class GlobalExceptionMiddleware
 
         var (statusCode, message, errors, errorCode) = exception switch
         {
+            ValidationException ve => (400, "Validation Error", new Dictionary<string, string[]>(ve.Errors), "VALIDATION_ERROR"),
             FluentValidation.ValidationException ve => (400, "Validation Error", ve.Errors?.ToDictionary(e => e.PropertyName, e => new[] { e.ErrorMessage }) ?? new Dictionary<string, string[]>(), "VALIDATION_ERROR"),
             DomainException de => (400, de.Message, new Dictionary<string, string[]>(), "DOMAIN_ERROR"),
             NotFoundException ne => (404, ne.Message, new Dictionary<string, string[]>(), "NOT_FOUND"),
             UnauthorizedAccessException => (401, "Unauthorized", new Dictionary<string, string[]>(), "UNAUTHORIZED"),
+            UnauthorizedException => (401, exception.Message, new Dictionary<string, string[]>(), "UNAUTHORIZED"),
+            Microsoft.EntityFrameworkCore.DbUpdateException dbEx => (400, "Database Update Error: " + (dbEx.InnerException?.Message ?? dbEx.Message), new Dictionary<string, string[]>(), "DB_UPDATE_ERROR"),
             _ => (500, "Internal Server Error", new Dictionary<string, string[]>(), "INTERNAL_ERROR")
         };
 
         context.Response.StatusCode = statusCode;
 
-        var result = JsonSerializer.Serialize(new
-        {
-            Status = statusCode,
-            Message = message,
-            ErrorCode = errorCode,
-            Errors = errors
-        }, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+        var apiResponse = ApiResponse<object>.FailureResult(message, errorCode, errors);
+
+        var result = JsonSerializer.Serialize(apiResponse, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
 
         await context.Response.WriteAsync(result);
     }

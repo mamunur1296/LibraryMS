@@ -1,11 +1,11 @@
+using LibraryMS.Application.Contracts.Services;
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using LibraryMS.Application.Contracts.Auth;
-using LibraryMS.Domain.IdentityManagement;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 
 namespace LibraryMS.Infrastructure.Auth;
 
@@ -25,13 +25,22 @@ public class JwtTokenService : IJwtTokenService
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        var claimsList = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
-            new Claim("MemberId", user.MemberId?.ToString() ?? string.Empty)
+            new Claim("MemberId", user.MemberId?.ToString() ?? string.Empty),
+            new Claim("memberId", user.MemberId?.ToString() ?? string.Empty)
         };
+
+        if (user.BranchId.HasValue)
+        {
+            claimsList.Add(new Claim("branchId", user.BranchId.Value.ToString()));
+            claimsList.Add(new Claim("BranchId", user.BranchId.Value.ToString()));
+        }
+
+        var claims = claimsList.ToArray();
 
         var expirationMinutes = int.Parse(jwtSettings["AccessTokenExpirationMinutes"] ?? "60");
         var expires = DateTime.UtcNow.AddMinutes(expirationMinutes);
@@ -70,14 +79,23 @@ public class JwtTokenService : IJwtTokenService
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
-        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
-
-        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
-            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+        ClaimsPrincipal principal;
+        try
         {
-            throw new SecurityTokenException("Invalid token");
+            principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+
+            if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
+                throw new SecurityTokenException("Invalid token");
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new SecurityTokenException("Invalid token", ex);
         }
 
         return principal;
     }
 }
+

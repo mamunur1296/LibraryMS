@@ -1,6 +1,6 @@
 namespace LibraryMS.Domain.Shared.Enums;
 
-/// <summary>Member account status</summary>
+// Member account status
 public enum MemberStatus
 {
     Active = 1,

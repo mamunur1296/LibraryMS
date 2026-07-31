@@ -1,31 +1,41 @@
-using LibraryMS.EntityFrameworkCore.Interceptors;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace LibraryMS.EntityFrameworkCore;
 
-/// <summary>
-/// EF Core Design-Time DbContext Factory.
-/// Used by 'dotnet ef migrations' commands to safely instantiate the DbContext 
-/// without needing the full web host DI container at design time.
-/// </summary>
 public sealed class LibraryDbContextFactory : IDesignTimeDbContextFactory<LibraryDbContext>
 {
     public LibraryDbContext CreateDbContext(string[] args)
     {
+        var basePath = Directory.GetCurrentDirectory();
+        if (!File.Exists(Path.Combine(basePath, "appsettings.json")))
+        {
+            var candidate = Path.Combine(basePath, "src", "LibraryMS.HttpApi.Host");
+            if (Directory.Exists(candidate))
+            {
+                basePath = candidate;
+            }
+            else
+            {
+                candidate = Path.Combine(basePath, "..", "LibraryMS.HttpApi.Host");
+                if (Directory.Exists(candidate))
+                {
+                    basePath = Path.GetFullPath(candidate);
+                }
+            }
+        }
+
+        var configuration = new ConfigurationBuilder()
+            .SetBasePath(basePath)
+            .AddJsonFile("appsettings.json")
+            .Build();
+
         var optionsBuilder = new DbContextOptionsBuilder<LibraryDbContext>();
-        
-        // Dummy/development connection string for migrations generation
-        optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=LibraryMS;Username=postgres;Password=2025");
 
-        // Instantiate interceptors required by LibraryDbContext constructor
-        var auditableInterceptor = new AuditableEntityInterceptor();
-        var domainEventInterceptor = new DomainEventToOutboxInterceptor();
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        optionsBuilder.UseNpgsql(connectionString);
 
-        return new LibraryDbContext(
-            optionsBuilder.Options,
-            auditableInterceptor,
-            domainEventInterceptor);
+        return new LibraryDbContext(optionsBuilder.Options);
     }
 }

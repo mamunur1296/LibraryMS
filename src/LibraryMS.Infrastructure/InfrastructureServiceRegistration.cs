@@ -1,6 +1,5 @@
 using Hangfire;
 using Hangfire.PostgreSql;
-using LibraryMS.Application.Contracts.Auth;
 using LibraryMS.Application.Contracts.Services;
 using LibraryMS.Infrastructure.Auth;
 using LibraryMS.Infrastructure.Caching;
@@ -31,27 +30,40 @@ public static class InfrastructureServiceRegistration
         // 3. Redis Cache service (Adapter Pattern - wraps StackExchange.Redis)
         var redisConfig = configuration.GetSection(RedisOptions.SectionName).Get<RedisOptions>()
             ?? new RedisOptions();
-        services.AddSingleton<IConnectionMultiplexer>(
-            ConnectionMultiplexer.Connect(redisConfig.Configuration));
-        services.AddScoped<ICacheService, RedisCacheService>();
+        try
+        {
+            var multiplexer = ConnectionMultiplexer.Connect(redisConfig.Configuration);
+            services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+            services.AddScoped<ICacheService, RedisCacheService>();
+        }
+        catch
+        {
+            services.AddSingleton<IConnectionMultiplexer>(sp => null!);
+            services.AddScoped<ICacheService, NullCacheService>();
+        }
 
         // 4. Report Export service (Strategy Pattern - Excel + PDF)
         QuestPDF.Settings.License = LicenseType.Community; // Community license
         services.AddScoped<IReportExportService, ReportExportService>();
 
         // 5. Hangfire (Background Job Scheduler)
-        services.AddHangfire(config => config
-            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-            .UseSimpleAssemblyNameTypeSerializer()
-            .UseRecommendedSerializerSettings()
-            .UsePostgreSqlStorage(c =>
-                c.UseNpgsqlConnection(configuration.GetConnectionString("DefaultConnection"))));
-
-        services.AddHangfireServer(options =>
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        if (!string.IsNullOrEmpty(connectionString))
         {
-            options.WorkerCount = 5;
-            options.Queues = ["default", "outbox", "reports"];
-        });
+            services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UsePostgreSqlStorage(c =>
+                    c.UseNpgsqlConnection(connectionString),
+                    new PostgreSqlStorageOptions { DistributedLockTimeout = TimeSpan.FromSeconds(30) }));
+
+            services.AddHangfireServer(options =>
+            {
+                options.WorkerCount = 5;
+                options.Queues = ["default", "outbox", "reports"];
+            });
+        }
 
         // 6. Register Infrastructure-level background job classes for DI
         services.AddScoped<OutboxProcessorJob>();

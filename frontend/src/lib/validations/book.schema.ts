@@ -16,9 +16,14 @@ export type CategoryFormData = z.infer<typeof categorySchema>;
 
 export const bookSchema = z.object({
   title: z.string().min(2, "Title is required"),
-  isbn: z.string().min(10, "ISBN is required").max(20, "ISBN is too long"),
+  isbn: z.string()
+    .min(1, "ISBN is required")
+    .refine((val) => {
+      const cleaned = val.replace(/[- ]/g, "");
+      return (cleaned.length === 10 || cleaned.length === 13) && /^\d+$/.test(cleaned);
+    }, "ISBN must be a valid 10 or 13 digit number"),
   description: z.string().optional(),
-  publicationYear: z.number().min(1000, "Invalid year").max(new Date().getFullYear(), "Year cannot be in the future"),
+  publicationYear: z.number().min(1000, "Invalid year").max(new Date().getFullYear() + 1, "Year cannot be too far in the future"),
   categoryId: z.string().min(1, "Category is required"),
   authorId: z.string().min(1, "Author is required"),
   language: z.string().min(2, "Language is required"),

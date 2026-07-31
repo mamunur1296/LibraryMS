@@ -31,20 +31,11 @@ public class AuthController : BaseController
         return NoContent();
     }
 
-    [HttpGet("me")]
-    [Authorize]
-    public async Task<ActionResult<UserDto>> GetCurrentUser(CancellationToken cancellationToken)
+    [HttpPost("register")]
+    [AllowAnonymous]
+    public async Task<ActionResult<Guid>> Register([FromBody] RegisterUserCommand command, CancellationToken cancellationToken)
     {
-        // Get user ID from claims
-        var userIdString = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value 
-                           ?? User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-        if (!Guid.TryParse(userIdString, out var userId))
-            return Unauthorized();
-
-        var user = await Mediator.Send(new GetCurrentUserQuery(userId), cancellationToken);
-        if (user is null) return NotFound();
-
-        return Ok(user);
+        var result = await Mediator.Send(command, cancellationToken);
+        return Ok(result);
     }
 }

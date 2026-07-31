@@ -1,4 +1,3 @@
-using LibraryMS.Application.Contracts.Common;
 using LibraryMS.Application.Contracts.DTOs.Member;
 using MediatR;
 
@@ -26,10 +25,8 @@ public sealed record SuspendMemberCommand(
 public sealed record ActivateMemberCommand(Guid Id)
     : IRequest<MemberDto>;
 
-// ──── Queries ────
-public sealed record GetMemberByIdQuery(Guid Id)
-    : IRequest<MemberDto?>;
+public sealed record ResetMemberPasswordCommand(Guid MemberId, string NewPassword) : IRequest;
 
-public sealed record SearchMembersQuery(
-    string? SearchTerm, string? Status, int Page, int PageSize)
-    : IRequest<PagedResult<MemberDto>>;
+public sealed record CreateMemberUserCommand(Guid MemberId, string Username, string Password) : IRequest;
+
+public sealed record RenewMembershipCommand(Guid Id, int Days) : IRequest<MemberDto>;

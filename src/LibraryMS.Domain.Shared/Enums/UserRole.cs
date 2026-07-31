@@ -1,6 +1,6 @@
 namespace LibraryMS.Domain.Shared.Enums;
 
-/// <summary>System user roles</summary>
+// System user roles
 public enum UserRole
 {
     Admin = 1,

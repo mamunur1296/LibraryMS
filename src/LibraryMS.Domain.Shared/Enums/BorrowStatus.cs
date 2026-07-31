@@ -1,6 +1,6 @@
 namespace LibraryMS.Domain.Shared.Enums;
 
-/// <summary>Borrow record lifecycle status</summary>
+// Borrow record lifecycle status
 public enum BorrowStatus
 {
     Active = 1,

@@ -1,5 +1,6 @@
 using LibraryMS.Application.Contracts.Common;
 using LibraryMS.Application.Contracts.DTOs.Member;
+using LibraryMS.Application.Contracts.DTOs.Borrow;
 using LibraryMS.Application.Contracts.Members;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +25,30 @@ public class MembersController : BaseController
     {
         var result = await Mediator.Send(new GetMemberByIdQuery(id), cancellationToken);
         if (result is null) return NotFound();
+        return Ok(result);
+    }
+
+    [HttpGet("{id}/stats")]
+    [Authorize(Roles = "Admin,Librarian,Member")]
+    public async Task<ActionResult<MemberProfileStatsDto>> GetStats(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(new GetMemberProfileStatsQuery(id), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("{id}/active-borrows")]
+    [Authorize(Roles = "Admin,Librarian,Member")]
+    public async Task<ActionResult<List<BorrowDto>>> GetActiveBorrows(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(new GetMemberActiveBorrowsQuery(id), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("{id}/fines")]
+    [Authorize(Roles = "Admin,Librarian,Member")]
+    public async Task<ActionResult<List<BorrowDto>>> GetFineHistory(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(new GetMemberFineHistoryQuery(id), cancellationToken);
         return Ok(result);
     }
 
@@ -62,6 +87,30 @@ public class MembersController : BaseController
     public async Task<ActionResult<MemberDto>> Activate(Guid id, CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(new ActivateMemberCommand(id), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("{id}/reset-password")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ResetPassword(Guid id, [FromBody] ResetMemberPasswordRequest request, CancellationToken cancellationToken)
+    {
+        await Mediator.Send(new ResetMemberPasswordCommand(id, request.NewPassword), cancellationToken);
+        return Ok(new { Message = "Password reset successfully." });
+    }
+
+    [HttpPost("{id}/create-account")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> CreateAccount(Guid id, [FromBody] CreateMemberUserRequest request, CancellationToken cancellationToken)
+    {
+        await Mediator.Send(new CreateMemberUserCommand(id, request.Username, request.Password), cancellationToken);
+        return Ok(new { Message = "Account created successfully." });
+    }
+
+    [HttpPost("{id}/renew")]
+    [Authorize(Roles = "Admin,Librarian,Member")]
+    public async Task<ActionResult<MemberDto>> Renew(Guid id, [FromBody] RenewMembershipRequest request, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(new RenewMembershipCommand(id, request.Days), cancellationToken);
         return Ok(result);
     }
 }

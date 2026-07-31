@@ -5,7 +5,11 @@ import {
   PopularBookDto, 
   MemberActivityDto, 
   ReportRequest, 
-  PagedResult 
+  PagedResult,
+  BranchComparisonDto,
+  AnnualRevenueDto,
+  MemberGrowthDto,
+  LibrarianActivityDto
 } from "../../types/report.types";
 
 export const reportService = {
@@ -46,6 +50,29 @@ export const reportService = {
     if (params.pageSize) queryParams.append("pageSize", params.pageSize.toString());
 
     const response = await apiClient.get<PagedResult<MemberActivityDto>>(`/api/Reports/member-activity?${queryParams.toString()}`);
+    return response.data;
+  },
+
+  async getBranchComparison(): Promise<BranchComparisonDto[]> {
+    const response = await apiClient.get<BranchComparisonDto[]>("/api/Reports/branch-comparison");
+    return response.data;
+  },
+
+  async getAnnualRevenue(year: number): Promise<AnnualRevenueDto[]> {
+    const response = await apiClient.get<AnnualRevenueDto[]>(`/api/Reports/annual-revenue?year=${year}`);
+    return response.data;
+  },
+
+  async getMemberGrowth(year: number): Promise<MemberGrowthDto[]> {
+    const response = await apiClient.get<MemberGrowthDto[]>(`/api/Reports/member-growth?year=${year}`);
+    return response.data;
+  },
+
+  async getLibrarianActivity(params: ReportRequest): Promise<LibrarianActivityDto[]> {
+    const queryParams = new URLSearchParams();
+    if (params.fromDate) queryParams.append("fromDate", params.fromDate);
+    if (params.toDate) queryParams.append("toDate", params.toDate);
+    const response = await apiClient.get<LibrarianActivityDto[]>(`/api/Reports/librarian-activity?${queryParams.toString()}`);
     return response.data;
   },
 

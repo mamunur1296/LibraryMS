@@ -1,8 +1,10 @@
-import { apiClient } from "../api-client";
-import { 
-  MemberDto, PagedResult, CreateMemberRequest, 
-  UpdateMemberRequest, SuspendMemberRequest 
-} from "../../types/member.types";
+import { apiClient } from "@/lib/api-client";
+import {
+  MemberDto, PagedResult, CreateMemberRequest,
+  UpdateMemberRequest, SuspendMemberRequest,
+  MemberProfileStatsDto, ResetMemberPasswordRequest,
+  CreateMemberUserRequest, RenewMembershipRequest
+} from "@/types/member.types";
 
 export const memberService = {
   async search(
@@ -48,5 +50,23 @@ export const memberService = {
   async activate(id: string): Promise<MemberDto> {
     const response = await apiClient.post<MemberDto>(`/api/Members/${id}/activate`);
     return response.data;
-  }
+  },
+
+  async getStats(id: string): Promise<MemberProfileStatsDto> {
+    const response = await apiClient.get<MemberProfileStatsDto>(`/api/Members/${id}/stats`);
+    return response.data;
+  },
+
+  async resetPassword(id: string, data: ResetMemberPasswordRequest): Promise<void> {
+    await apiClient.post(`/api/Members/${id}/reset-password`, data);
+  },
+
+  async createAccount(id: string, data: CreateMemberUserRequest): Promise<void> {
+    await apiClient.post(`/api/Members/${id}/create-account`, data);
+  },
+
+  async renew(id: string, data: RenewMembershipRequest): Promise<MemberDto> {
+    const response = await apiClient.post<MemberDto>(`/api/Members/${id}/renew`, data);
+    return response.data;
+  },
 };

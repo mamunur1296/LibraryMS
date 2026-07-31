@@ -10,12 +10,25 @@ namespace LibraryMS.HttpApi.Controllers;
 public class BorrowsController : BaseController
 {
     [HttpGet]
-    [Authorize(Roles = "Admin,Librarian")]
+    [Authorize(Roles = "Admin,Librarian,Member")]
     public async Task<ActionResult<PagedResult<BorrowDto>>> GetAll(
         [FromQuery] Guid? memberId, [FromQuery] Guid? bookId, [FromQuery] string? status, 
         [FromQuery] int page = 1, [FromQuery] int pageSize = 10, 
         CancellationToken cancellationToken = default)
     {
+        if (User.IsInRole("Member"))
+        {
+            var currentMemberIdString = User.Claims.FirstOrDefault(c => c.Type.Equals("memberId", StringComparison.OrdinalIgnoreCase))?.Value;
+            if (Guid.TryParse(currentMemberIdString, out var currentMemberId))
+            {
+                memberId = currentMemberId;
+            }
+            else
+            {
+                return Forbid();
+            }
+        }
+
         var result = await Mediator.Send(new GetBorrowsQuery(memberId, bookId, status, page, pageSize), cancellationToken);
         return Ok(result);
     }
@@ -27,7 +40,7 @@ public class BorrowsController : BaseController
         if (result is null) return NotFound();
         
         // Members can only view their own borrows
-        if (User.IsInRole("Member") && result.MemberId.ToString() != User.Claims.FirstOrDefault(c => c.Type == "memberId")?.Value)
+        if (User.IsInRole("Member") && result.MemberId.ToString() != User.Claims.FirstOrDefault(c => c.Type.Equals("memberId", StringComparison.OrdinalIgnoreCase))?.Value)
             return Forbid();
             
         return Ok(result);
@@ -37,7 +50,7 @@ public class BorrowsController : BaseController
     [Authorize(Roles = "Member")]
     public async Task<ActionResult<List<BorrowDto>>> GetMyActiveBorrows(CancellationToken cancellationToken)
     {
-        var memberIdString = User.Claims.FirstOrDefault(c => c.Type == "memberId")?.Value;
+        var memberIdString = User.Claims.FirstOrDefault(c => c.Type.Equals("memberId", StringComparison.OrdinalIgnoreCase))?.Value;
         if (!Guid.TryParse(memberIdString, out var memberId)) return Unauthorized();
 
         var result = await Mediator.Send(new GetActiveBorrowsByMemberQuery(memberId), cancellationToken);

@@ -1,4 +1,5 @@
 using LibraryMS.Domain.BorrowManagement;
+using LibraryMS.Domain.BorrowManagement.AggregateRoots;
 using LibraryMS.Domain.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,8 +25,9 @@ public sealed class BorrowRepository : BaseRepository<BorrowRecord>, IBorrowRepo
     }
 
     public async Task<(List<BorrowRecord> Items, int TotalCount)> GetPagedAsync(
-        Guid? memberId, Guid? bookId, string? status, 
-        int page, int pageSize, CancellationToken cancellationToken = default)
+        Guid? memberId, Guid? bookId, string? status,
+        int page, int pageSize, CancellationToken cancellationToken = default,
+        DateTime? fromDate = null, DateTime? toDate = null, Guid? branchId = null)
     {
         var query = DbSet.AsNoTracking().AsQueryable();
 
@@ -38,6 +40,15 @@ public sealed class BorrowRepository : BaseRepository<BorrowRecord>, IBorrowRepo
         if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<BorrowStatus>(status, true, out var parsedStatus))
             query = query.Where(r => r.Status == parsedStatus);
 
+        if (fromDate.HasValue)
+            query = query.Where(r => r.BorrowDate >= fromDate.Value);
+
+        if (toDate.HasValue)
+            query = query.Where(r => r.BorrowDate <= toDate.Value);
+
+        if (branchId.HasValue)
+            query = query.Where(r => r.BranchId == branchId.Value);
+
         var total = await query.CountAsync(cancellationToken);
 
         var items = await query
@@ -48,11 +59,38 @@ public sealed class BorrowRepository : BaseRepository<BorrowRecord>, IBorrowRepo
 
         return (items, total);
     }
+
+    public async Task<List<BorrowRecord>> GetByMemberIdsAsync(List<Guid> memberIds, DateTime? fromDate, DateTime? toDate, CancellationToken cancellationToken = default)
+    {
+        var query = DbSet.AsNoTracking().Where(r => memberIds.Contains(r.MemberId));
+
+        if (fromDate.HasValue)
+            query = query.Where(r => r.BorrowDate >= fromDate.Value);
+
+        if (toDate.HasValue)
+            query = query.Where(r => r.BorrowDate <= toDate.Value);
+
+        return await query.ToListAsync(cancellationToken);
+    }
     public async Task<List<BorrowRecord>> GetActiveBorrowsByMemberAsync(Guid memberId, CancellationToken cancellationToken = default)
     {
         return await DbSet
             .Where(r => r.MemberId == memberId && (r.Status == BorrowStatus.Active || r.Status == BorrowStatus.Overdue))
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<decimal> GetTotalLateFinesCollectedAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Where(r => r.IsFinePaid)
+            .SumAsync(r => r.LateFine, cancellationToken);
+    }
+
+    public async Task<decimal> GetPendingLateFinesAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Where(r => !r.IsFinePaid && r.LateFine > 0)
+            .SumAsync(r => r.LateFine, cancellationToken);
     }
 
     public async Task<bool> HasActiveBorrowForCopyAsync(Guid bookCopyId, CancellationToken cancellationToken = default)
@@ -61,4 +99,12 @@ public sealed class BorrowRepository : BaseRepository<BorrowRecord>, IBorrowRepo
             r => r.BookCopyId == bookCopyId && (r.Status == BorrowStatus.Active || r.Status == BorrowStatus.Overdue),
             cancellationToken);
     }
+
+    public async Task<bool> HasUnpaidFineAsync(Guid memberId, CancellationToken cancellationToken = default)
+    {
+        return await DbSet.AnyAsync(
+            r => r.MemberId == memberId && r.LateFine > 0 && !r.IsFinePaid,
+            cancellationToken);
+    }
 }
+

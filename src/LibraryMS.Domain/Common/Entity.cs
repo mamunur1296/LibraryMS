@@ -2,10 +2,7 @@ using LibraryMS.Domain.Shared.Interfaces;
 
 namespace LibraryMS.Domain.Common;
 
-/// <summary>
-/// Base class for all domain entities. Holds the typed identity key.
-/// </summary>
-/// <typeparam name="TId">Type of the entity's unique identifier.</typeparam>
+// Base class for all domain entities. Holds the typed identity key.
 public abstract class Entity<TId> : IAuditableEntity, ISoftDelete
 {
     public TId Id { get; protected set; } = default!;

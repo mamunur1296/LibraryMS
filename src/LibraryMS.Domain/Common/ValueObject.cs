@@ -1,8 +1,6 @@
 namespace LibraryMS.Domain.Common;
 
-/// <summary>
-/// Base class for Value Objects — immutable, equality by value, no identity.
-/// </summary>
+// Base class for Value Objects — immutable, equality by value, no identity.
 public abstract class ValueObject
 {
     protected abstract IEnumerable<object> GetEqualityComponents();

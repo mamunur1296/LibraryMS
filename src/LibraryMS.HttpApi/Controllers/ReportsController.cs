@@ -20,11 +20,19 @@ public class ReportsController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet("dashboard")]
-    [ProducesResponseType(typeof(DashboardSummaryDto), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetDashboardSummary(CancellationToken cancellationToken)
+    [HttpGet("dashboard-summary")]
+    [Authorize(Roles = "Admin,Librarian")]
+    public async Task<ActionResult<DashboardSummaryDto>> GetDashboardSummary(CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new GetDashboardSummaryQuery(), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("admin-dashboard-summary")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<AdminDashboardSummaryDto>> GetAdminDashboardSummary(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new GetAdminDashboardSummaryQuery(), cancellationToken);
         return Ok(result);
     }
 
@@ -72,5 +80,80 @@ public class ReportsController : ControllerBase
         var fileName = $"OverdueReport_{DateTime.Now:yyyyMMdd}.{(format.ToLower() == "pdf" ? "pdf" : "xlsx")}";
         
         return File(result, contentType, fileName);
+    }
+
+    [HttpGet("fines/export")]
+    public async Task<IActionResult> ExportFineCollectionReport(
+        [FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate,
+        [FromQuery] Guid? branchId, [FromQuery] string format = "excel",
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new ExportFineCollectionReportQuery(fromDate, toDate, branchId, format), cancellationToken);
+        var contentType = format.ToLower() == "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        var fileName = $"FineCollectionReport_{DateTime.Now:yyyyMMdd}.{(format.ToLower() == "pdf" ? "pdf" : "xlsx")}";
+        
+        return File(result, contentType, fileName);
+    }
+
+    [HttpGet("branch-comparison")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(List<BranchComparisonDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetBranchComparisonReport(CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetBranchComparisonReportQuery(), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("branch-comparison/export")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ExportBranchComparisonReport(
+        [FromQuery] string format = "excel",
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new ExportBranchComparisonReportQuery(format), cancellationToken);
+        var contentType = format.ToLower() == "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        var fileName = $"BranchComparisonReport_{DateTime.Now:yyyyMMdd}.{(format.ToLower() == "pdf" ? "pdf" : "xlsx")}";
+        
+        return File(result, contentType, fileName);
+    }
+
+    [HttpGet("annual-revenue")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(List<AnnualRevenueDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAnnualRevenueReport([FromQuery] int year, CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetAnnualRevenueReportQuery(year), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("fines")]
+    [Authorize(Roles = "Admin,Librarian")]
+    [ProducesResponseType(typeof(List<FineCollectionDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetFineCollectionReport(
+        [FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate,
+        [FromQuery] Guid? branchId, CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetFineCollectionReportQuery(fromDate, toDate, branchId), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("member-growth")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(List<MemberGrowthDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMemberGrowthReport([FromQuery] int year, CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetMemberGrowthReportQuery(year), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("librarian-activity")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(List<LibrarianActivityDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetLibrarianActivityReport(
+        [FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(new GetLibrarianActivityReportQuery(fromDate, toDate), cancellationToken);
+        return Ok(result);
     }
 }

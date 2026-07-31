@@ -1,7 +1,12 @@
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
+using LibraryMS.Domain.BookManagement.Entities;
+using LibraryMS.Domain.BookManagement.Services;
 using LibraryMS.Domain.BookManagement.VOs;
 using LibraryMS.Domain.Shared.Exceptions;
 using FluentAssertions;
+using System;
+using Xunit;
 
 namespace LibraryMS.Domain.Tests.BookManagement;
 
@@ -9,13 +14,17 @@ public class BookTests
 {
     private static Book CreateBook(string title = "Clean Code", string isbn = "9780132350884")
     {
-        var ctor = typeof(Book).GetConstructors(
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-            .First(c => c.GetParameters().Length == 7);
-
-        return (Book)ctor.Invoke([
-            Guid.NewGuid(), title, isbn, "A description", 2008, Guid.NewGuid(), Guid.NewGuid(), "English"
-        ]);
+        var categoryId = Guid.NewGuid();
+        var authorId = Guid.NewGuid();
+        return new Book(
+            Guid.NewGuid(),
+            title,
+            isbn,
+            "Software Legend",
+            2008,
+            categoryId,
+            authorId,
+            "English");
     }
 
     [Fact]
@@ -31,12 +40,11 @@ public class BookTests
         var book = CreateBook();
         var branchId = Guid.NewGuid();
 
-        var addCopyMethod = typeof(Book).GetMethod("AddCopy",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        addCopyMethod!.Invoke(book, [branchId]);
+        var copy = book.AddCopy(branchId);
 
         book.TotalCopies.Should().Be(1);
         book.AvailableCopies.Should().Be(1);
+        copy.Status.Should().Be(LibraryMS.Domain.Shared.Enums.CopyStatus.Available);
     }
 
     [Fact]
@@ -44,16 +52,12 @@ public class BookTests
     {
         var book = CreateBook();
         var branchId = Guid.NewGuid();
+        var copy = book.AddCopy(branchId);
 
-        var addCopyMethod = typeof(Book).GetMethod("AddCopy",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        var copy = (BookCopy)addCopyMethod!.Invoke(book, [branchId])!;
-
-        var borrowMethod = typeof(Book).GetMethod("BorrowCopy",
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        borrowMethod!.Invoke(book, [copy.Id]);
+        book.BorrowCopy(copy.Id);
 
         book.AvailableCopies.Should().Be(0);
+        copy.Status.Should().Be(LibraryMS.Domain.Shared.Enums.CopyStatus.Borrowed);
     }
 }
 
@@ -93,3 +97,4 @@ public class ISBNTests
         a.Should().Be(b);
     }
 }
+

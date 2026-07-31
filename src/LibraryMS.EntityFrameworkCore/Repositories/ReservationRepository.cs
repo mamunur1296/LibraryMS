@@ -1,4 +1,5 @@
 using LibraryMS.Domain.ReservationManagement;
+using LibraryMS.Domain.ReservationManagement.AggregateRoots;
 using LibraryMS.Domain.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,6 +42,13 @@ public sealed class ReservationRepository : BaseRepository<Reservation>, IReserv
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<int> GetPendingCountAsync(CancellationToken cancellationToken = default)
+    {
+        return await DbSet.CountAsync(
+            r => r.Status == ReservationStatus.Pending || r.Status == ReservationStatus.Available,
+            cancellationToken);
+    }
+
     public async Task<(List<Reservation> Items, int TotalCount)> GetPagedAsync(
         Guid? memberId, Guid? bookId, string? status, 
         int page, int pageSize, CancellationToken cancellationToken = default)
@@ -67,3 +75,4 @@ public sealed class ReservationRepository : BaseRepository<Reservation>, IReserv
         return (items, total);
     }
 }
+

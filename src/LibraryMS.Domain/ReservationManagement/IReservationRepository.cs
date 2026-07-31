@@ -1,6 +1,8 @@
+using LibraryMS.Domain.ReservationManagement.AggregateRoots;
+
 namespace LibraryMS.Domain.ReservationManagement;
 
-/// <summary>Repository contract for Reservation aggregate.</summary>
+// Repository contract for Reservation aggregate.
 public interface IReservationRepository
 {
     Task<Reservation?> GetByIdAsync(Guid id, CancellationToken ct = default);
@@ -8,6 +10,7 @@ public interface IReservationRepository
     Task<int> GetNextQueuePositionAsync(Guid bookId, Guid branchId, CancellationToken ct = default);
     Task<bool> HasActiveReservationAsync(Guid memberId, Guid bookId, CancellationToken ct = default);
     Task<List<Reservation>> GetExpiredReservationsAsync(CancellationToken ct = default);
+    Task<int> GetPendingCountAsync(CancellationToken ct = default);
     Task<(List<Reservation> Items, int TotalCount)> GetPagedAsync(
         Guid? memberId, Guid? bookId, string? status, int page, int pageSize, CancellationToken ct = default);
     Task AddAsync(Reservation reservation, CancellationToken ct = default);
