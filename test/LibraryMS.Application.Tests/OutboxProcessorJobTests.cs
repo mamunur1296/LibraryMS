@@ -12,6 +12,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using LibraryMS.Infrastructure.Jobs.Handlers;
 
 namespace LibraryMS.Application.Tests;
 
@@ -48,8 +49,13 @@ public class OutboxProcessorJobTests
         await dbContext.SaveChangesAsync();
 
         var publisherMock = new Mock<IPublisher>();
+        var serviceProviderMock = new Mock<IServiceProvider>();
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(IPublisher))).Returns(publisherMock.Object);
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(ILogger<DomainEventOutboxMessageHandler>))).Returns(new Mock<ILogger<DomainEventOutboxMessageHandler>>().Object);
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(ILogger<EmailOutboxMessageHandler>))).Returns(new Mock<ILogger<EmailOutboxMessageHandler>>().Object);
+
         var loggerMock = new Mock<ILogger<OutboxProcessorJob>>();
-        var job = new OutboxProcessorJob(dbContext, publisherMock.Object, loggerMock.Object);
+        var job = new OutboxProcessorJob(dbContext, serviceProviderMock.Object, loggerMock.Object);
 
         // Act
         await job.ProcessAsync(CancellationToken.None);
@@ -86,7 +92,12 @@ public class OutboxProcessorJobTests
             .ThrowsAsync(new Exception("MediatR handler failed"));
 
         var loggerMock = new Mock<ILogger<OutboxProcessorJob>>();
-        var job = new OutboxProcessorJob(dbContext, publisherMock.Object, loggerMock.Object);
+        var serviceProviderMock = new Mock<IServiceProvider>();
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(IPublisher))).Returns(publisherMock.Object);
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(ILogger<DomainEventOutboxMessageHandler>))).Returns(new Mock<ILogger<DomainEventOutboxMessageHandler>>().Object);
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(ILogger<EmailOutboxMessageHandler>))).Returns(new Mock<ILogger<EmailOutboxMessageHandler>>().Object);
+
+        var job = new OutboxProcessorJob(dbContext, serviceProviderMock.Object, loggerMock.Object);
 
         // Act
         await job.ProcessAsync(CancellationToken.None);
@@ -127,7 +138,12 @@ public class OutboxProcessorJobTests
             .ThrowsAsync(new Exception("MediatR handler failed"));
 
         var loggerMock = new Mock<ILogger<OutboxProcessorJob>>();
-        var job = new OutboxProcessorJob(dbContext, publisherMock.Object, loggerMock.Object);
+        var serviceProviderMock = new Mock<IServiceProvider>();
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(IPublisher))).Returns(publisherMock.Object);
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(ILogger<DomainEventOutboxMessageHandler>))).Returns(new Mock<ILogger<DomainEventOutboxMessageHandler>>().Object);
+        serviceProviderMock.Setup(sp => sp.GetService(typeof(ILogger<EmailOutboxMessageHandler>))).Returns(new Mock<ILogger<EmailOutboxMessageHandler>>().Object);
+
+        var job = new OutboxProcessorJob(dbContext, serviceProviderMock.Object, loggerMock.Object);
 
         // Act
         await job.ProcessAsync(CancellationToken.None);

@@ -24,6 +24,7 @@ public class BorrowRecordTests
             Guid.NewGuid(),
             Guid.NewGuid(),
             Guid.NewGuid(),
+            null, // issuedById
             borrowDays);
     }
 

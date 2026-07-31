@@ -46,6 +46,7 @@ public sealed class GetMemberProfileStatsQueryHandler : IRequestHandler<GetMembe
         // Wait, GetPagedAsync with int.MaxValue is safe for a single member since they won't have millions of borrows.
         var allBorrowsResult = await _borrowRepository.GetPagedAsync(request.MemberId, null, null, 1, 10000, cancellationToken);
         var totalFinesDue = allBorrowsResult.Items.Where(b => !b.IsFinePaid).Sum(b => b.LateFine);
+        var totalFinesPaid = allBorrowsResult.Items.Where(b => b.IsFinePaid).Sum(b => b.LateFine);
 
         // Get active reservations
         // Let's just fetch all and filter, or use paged with max value.
@@ -59,7 +60,9 @@ public sealed class GetMemberProfileStatsQueryHandler : IRequestHandler<GetMembe
             ActiveBorrows = activeCount,
             OverdueBorrows = overdueCount,
             ActiveReservations = activeReservations,
-            TotalFinesDue = totalFinesDue
+            TotalFinesDue = totalFinesDue,
+            TotalFinesPaid = totalFinesPaid,
+            MembershipExpiry = member.MembershipExpiry
         };
     }
 }

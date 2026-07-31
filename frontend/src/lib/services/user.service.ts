@@ -22,6 +22,13 @@ interface ChangeEmailRequest {
   newEmail: string;
 }
 
+export interface CreateLibrarianRequest {
+  username: string;
+  email: string;
+  password?: string;
+  branchId?: string;
+}
+
 export const userService = {
   async getAllUsers(): Promise<User[]> {
     const response = await apiClient.get<User[]>("/api/Users");
@@ -44,4 +51,21 @@ export const userService = {
   async changeEmail(data: ChangeEmailRequest): Promise<void> {
     await apiClient.post("/api/Users/change-email", data);
   },
+
+  async createLibrarian(data: CreateLibrarianRequest): Promise<string> {
+    const response = await apiClient.post<string>("/api/Users/create-librarian", data);
+    return response.data;
+  },
+
+  async assignBranch(userId: string, branchId: string): Promise<void> {
+    await apiClient.post(`/api/Users/${userId}/assign-branch`, { branchId });
+  },
+
+  async suspend(userId: string): Promise<void> {
+    await apiClient.post(`/api/Users/${userId}/suspend`);
+  },
+
+  async activate(userId: string): Promise<void> {
+    await apiClient.post(`/api/Users/${userId}/activate`);
+  }
 };

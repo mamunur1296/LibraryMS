@@ -3,7 +3,7 @@ import {
   MemberDto, PagedResult, CreateMemberRequest,
   UpdateMemberRequest, SuspendMemberRequest,
   MemberProfileStatsDto, ResetMemberPasswordRequest,
-  CreateMemberUserRequest
+  CreateMemberUserRequest, RenewMembershipRequest
 } from "@/types/member.types";
 
 export const memberService = {
@@ -63,5 +63,10 @@ export const memberService = {
 
   async createAccount(id: string, data: CreateMemberUserRequest): Promise<void> {
     await apiClient.post(`/api/Members/${id}/create-account`, data);
-  }
+  },
+
+  async renew(id: string, data: RenewMembershipRequest): Promise<MemberDto> {
+    const response = await apiClient.post<MemberDto>(`/api/Members/${id}/renew`, data);
+    return response.data;
+  },
 };

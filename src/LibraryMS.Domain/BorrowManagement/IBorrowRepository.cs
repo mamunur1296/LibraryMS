@@ -9,6 +9,7 @@ public interface IBorrowRepository
     Task<List<BorrowRecord>> GetActiveBorrowsByMemberAsync(Guid memberId, CancellationToken ct = default);
     Task<List<BorrowRecord>> GetOverdueBorrowsAsync(CancellationToken ct = default);
     Task<bool> HasActiveBorrowForCopyAsync(Guid copyId, CancellationToken ct = default);
+    Task<bool> HasUnpaidFineAsync(Guid memberId, CancellationToken ct = default);
     Task<(List<BorrowRecord> Items, int TotalCount)> GetPagedAsync(
         Guid? memberId, Guid? bookId, string? status,
         int page, int pageSize, CancellationToken ct = default,

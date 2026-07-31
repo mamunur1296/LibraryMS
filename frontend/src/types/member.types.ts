@@ -53,6 +53,10 @@ export interface ResetMemberPasswordRequest {
   newPassword: string;
 }
 
+export interface RenewMembershipRequest {
+  days: number;
+}
+
 export interface CreateMemberUserRequest {
   username: string;
   password?: string;

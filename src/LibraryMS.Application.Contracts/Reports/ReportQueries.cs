@@ -8,6 +8,9 @@ namespace LibraryMS.Application.Contracts.Reports;
 public sealed record GetDashboardSummaryQuery()
     : IRequest<DashboardSummaryDto>;
 
+public sealed record GetAdminDashboardSummaryQuery()
+    : IRequest<AdminDashboardSummaryDto>;
+
 public sealed record GetOverdueReportQuery(
     DateTime? FromDate, DateTime? ToDate,
     Guid? BranchId, int Page, int PageSize)
@@ -24,4 +27,16 @@ public sealed record GetMemberActivityReportQuery(
 
 public sealed record ExportOverdueReportQuery(
     DateTime? FromDate, DateTime? ToDate, Guid? BranchId, string Format = "excel")
+    : IRequest<byte[]>;
+
+public sealed record GetFineCollectionReportQuery(
+    DateTime? FromDate, DateTime? ToDate, Guid? BranchId)
+    : IRequest<List<FineCollectionDto>>;
+
+public sealed record ExportFineCollectionReportQuery(
+    DateTime? FromDate, DateTime? ToDate, Guid? BranchId, string Format = "excel")
+    : IRequest<byte[]>;
+
+
+public sealed record ExportBranchComparisonReportQuery(string Format = "excel")
     : IRequest<byte[]>;

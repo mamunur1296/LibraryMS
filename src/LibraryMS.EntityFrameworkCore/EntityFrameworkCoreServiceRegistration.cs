@@ -4,6 +4,7 @@ using LibraryMS.Domain.BranchManagement;
 using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.MemberManagement;
 using LibraryMS.Domain.ReservationManagement;
+using LibraryMS.Domain.SettingsManagement;
 using LibraryMS.Domain.Shared;
 using LibraryMS.EntityFrameworkCore.Interceptors;
 using LibraryMS.EntityFrameworkCore.Repositories;
@@ -37,10 +38,12 @@ public static class EntityFrameworkCoreServiceRegistration
         // Register Repositories
         services.AddScoped<IBookRepository, BookRepository>();
         services.AddScoped<IBranchRepository, BranchRepository>();
+        services.AddScoped<LibraryMS.Application.Contracts.Reports.IReportRepository, ReportRepository>();
         services.AddScoped<IMemberRepository, MemberRepository>();
         services.AddScoped<IBorrowRepository, BorrowRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ISystemSettingRepository, SystemSettingRepository>();
 
         return services;
     }

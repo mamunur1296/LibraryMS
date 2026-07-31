@@ -50,4 +50,33 @@ export interface ReportRequest {
   pageSize?: number;
 }
 
+export interface BranchComparisonDto {
+  branchId: string;
+  branchName: string;
+  totalBooks: number;
+  activeBorrows: number;
+  overdueBorrows: number;
+  totalRevenue: number;
+}
+
+export interface AnnualRevenueDto {
+  month: number;
+  monthName: string;
+  revenue: number;
+}
+
+export interface MemberGrowthDto {
+  month: number;
+  monthName: string;
+  newMembers: number;
+}
+
+export interface LibrarianActivityDto {
+  userId: string;
+  name: string;
+  branchName: string;
+  booksIssued: number;
+  booksReturned: number;
+}
+
 export type { PagedResult };

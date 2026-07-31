@@ -35,6 +35,8 @@ public sealed class LibraryDbContext : DbContext
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
+    public DbSet<LibraryMS.Domain.SettingsManagement.Entities.SystemSetting> SystemSettings => Set<LibraryMS.Domain.SettingsManagement.Entities.SystemSetting>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

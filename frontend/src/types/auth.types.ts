@@ -1,9 +1,14 @@
+export type Role = "Admin" | "Librarian" | "Member";
+
 export interface User {
   id: string;
   username: string;
   email: string;
   role: string;
   memberId?: string | null;
+  branchId?: string | null;
+  branchName?: string | null;
+  isActive?: boolean;
 }
 
 export interface AuthResponse {

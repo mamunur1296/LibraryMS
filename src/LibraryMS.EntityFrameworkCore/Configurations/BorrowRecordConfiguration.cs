@@ -23,5 +23,15 @@ public class BorrowRecordConfiguration : IEntityTypeConfiguration<BorrowRecord>
         builder.HasOne<Book>().WithMany().HasForeignKey(r => r.BookId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<BookCopy>().WithMany().HasForeignKey(r => r.BookCopyId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Branch>().WithMany().HasForeignKey(r => r.BranchId).OnDelete(DeleteBehavior.Restrict);
+        
+        builder.HasOne<LibraryMS.Domain.IdentityManagement.AggregateRoots.User>()
+               .WithMany()
+               .HasForeignKey(r => r.IssuedById)
+               .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne<LibraryMS.Domain.IdentityManagement.AggregateRoots.User>()
+               .WithMany()
+               .HasForeignKey(r => r.ReturnedById)
+               .OnDelete(DeleteBehavior.SetNull);
     }
 }

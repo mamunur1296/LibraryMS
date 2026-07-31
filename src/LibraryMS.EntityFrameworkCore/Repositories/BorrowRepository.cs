@@ -99,5 +99,12 @@ public sealed class BorrowRepository : BaseRepository<BorrowRecord>, IBorrowRepo
             r => r.BookCopyId == bookCopyId && (r.Status == BorrowStatus.Active || r.Status == BorrowStatus.Overdue),
             cancellationToken);
     }
+
+    public async Task<bool> HasUnpaidFineAsync(Guid memberId, CancellationToken cancellationToken = default)
+    {
+        return await DbSet.AnyAsync(
+            r => r.MemberId == memberId && r.LateFine > 0 && !r.IsFinePaid,
+            cancellationToken);
+    }
 }
 

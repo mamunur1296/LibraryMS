@@ -31,7 +31,7 @@ public sealed class ReturnBookCommandHandler : IRequestHandler<ReturnBookCommand
     {
         _logger.LogInformation("Processing ReturnBookCommand for BorrowId: {BorrowId}", request.BorrowId);
 
-        var record = await _borrowManager.ReturnAsync(request.BorrowId, request.Notes, cancellationToken);
+        var record = await _borrowManager.ReturnAsync(request.BorrowId, request.Notes, null, cancellationToken);
 
         var dbFailed = false;
         try

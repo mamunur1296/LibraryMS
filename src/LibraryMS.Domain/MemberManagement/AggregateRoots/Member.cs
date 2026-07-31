@@ -1,5 +1,6 @@
 using LibraryMS.Domain.Common;
 using LibraryMS.Domain.MemberManagement.Events;
+using LibraryMS.Domain.MemberManagement.Entities;
 using LibraryMS.Domain.Shared.Enums;
 using LibraryMS.Domain.Shared.Guards;
 using LibraryMS.Domain.Shared.Constants;
@@ -18,9 +19,13 @@ public sealed class Member : AggregateRoot<Guid>
     public MemberStatus Status { get; private set; }
     public DateTime JoinDate { get; private set; }
     public DateTime? SuspendedUntil { get; private set; }
+    public DateTime MembershipExpiry { get; private set; }
 
     // Optimistic concurrency token
     public byte[] RowVersion { get; private set; } = default!;
+
+    private readonly List<MemberFavorite> _favorites = new();
+    public IReadOnlyCollection<MemberFavorite> Favorites => _favorites.AsReadOnly();
 
     public string FullName => $"{FirstName} {LastName}";
 
@@ -38,6 +43,7 @@ public sealed class Member : AggregateRoot<Guid>
         Address = address;
         Status = MemberStatus.Active;
         JoinDate = DateTime.UtcNow;
+        MembershipExpiry = DateTime.UtcNow.AddYears(1); // Default 1 year
         CreatedAt = DateTime.UtcNow;
 
         AddDomainEvent(new MemberRegisteredEvent(id, firstName, lastName, email));
@@ -70,6 +76,40 @@ public sealed class Member : AggregateRoot<Guid>
         Status = MemberStatus.Active;
         SuspendedUntil = null;
         LastModifiedAt = DateTime.UtcNow;
+    }
+
+    public void RenewMembership(int days)
+    {
+        Ensure.Against(days <= 0, "Renewal days must be greater than zero.", "MEMBER_RENEWAL_INVALID_DAYS");
+        
+        if (MembershipExpiry < DateTime.UtcNow)
+        {
+            MembershipExpiry = DateTime.UtcNow.AddDays(days);
+        }
+        else
+        {
+            MembershipExpiry = MembershipExpiry.AddDays(days);
+        }
+
+        LastModifiedAt = DateTime.UtcNow;
+        AddDomainEvent(new MembershipRenewedEvent(Id, MembershipExpiry));
+    }
+
+    public void AddFavorite(Guid bookId)
+    {
+        if (_favorites.Any(f => f.BookId == bookId)) return;
+        _favorites.Add(new MemberManagement.Entities.MemberFavorite(Guid.NewGuid(), Id, bookId));
+        LastModifiedAt = DateTime.UtcNow;
+    }
+
+    public void RemoveFavorite(Guid bookId)
+    {
+        var favorite = _favorites.FirstOrDefault(f => f.BookId == bookId);
+        if (favorite != null)
+        {
+            _favorites.Remove(favorite);
+            LastModifiedAt = DateTime.UtcNow;
+        }
     }
 
     // Checks if the member can borrow a book (not suspended, not overdue-blocked).

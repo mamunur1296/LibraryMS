@@ -10,4 +10,6 @@ public class MemberProfileStatsDto
     public int OverdueBorrows { get; set; }
     public int ActiveReservations { get; set; }
     public decimal TotalFinesDue { get; set; }
+    public decimal TotalFinesPaid { get; set; }
+    public DateTime MembershipExpiry { get; set; }
 }

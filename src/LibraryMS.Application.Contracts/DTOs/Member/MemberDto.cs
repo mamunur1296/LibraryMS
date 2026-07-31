@@ -12,6 +12,7 @@ public sealed class MemberDto
     public string? Address { get; init; }
     public string Status { get; init; } = default!;
     public DateTime JoinDate { get; init; }
+    public DateTime MembershipExpiry { get; init; }
     public DateTime? SuspendedUntil { get; init; }
     public int ActiveBorrows { get; init; }
     public bool HasAccount { get; init; }

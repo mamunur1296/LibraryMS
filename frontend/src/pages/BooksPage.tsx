@@ -6,8 +6,16 @@ import { AddCopiesModal } from "@/components/books/AddCopiesModal";
 import { ViewCopiesModal } from "@/components/books/ViewCopiesModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast } from "@/components/ui/Toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { branchService } from "@/lib/services/branch.service";
+import { BranchDto } from "@/types/branch.types";
 
 export default function BooksPage() {
+  const { user } = useAuth();
+  const isLibrarian = user?.role === "Librarian";
+  const [branches, setBranches] = useState<BranchDto[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState("");
+  
   const [data, setData] = useState<PagedResult<BookDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,14 +29,29 @@ export default function BooksPage() {
   const fetchBooks = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await bookService.search(searchTerm, undefined, undefined, undefined, page, 10);
+      const targetBranch = isLibrarian ? (user?.branchId || selectedBranch) : selectedBranch;
+      const result = await bookService.search(searchTerm, undefined, undefined, targetBranch || undefined, page, 10);
       setData(result);
     } catch {
       toast.error("Failed to fetch books.");
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, page]);
+  }, [searchTerm, page, selectedBranch, isLibrarian, user]);
+
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const branchData = await branchService.getAll(false);
+        setBranches(branchData);
+      } catch {
+        // ignore
+      }
+    };
+    if (!isLibrarian) {
+      void fetchBranches();
+    }
+  }, [isLibrarian]);
 
   useEffect(() => {
     const delay = setTimeout(() => { void fetchBooks(); }, 300);
@@ -95,6 +118,27 @@ export default function BooksPage() {
               onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
               className="block w-full pl-10 pr-3 py-2 border border-slate-700 rounded-lg bg-slate-950 text-slate-300 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
+          </div>
+          <div className="flex items-center gap-4">
+            {isLibrarian ? (
+              <div className="text-sm px-3 py-1.5 bg-slate-800 text-slate-400 border border-slate-700 rounded-lg flex items-center gap-2 cursor-not-allowed" title="Librarians can only manage books in their assigned branch">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                Your Branch
+              </div>
+            ) : (
+              <select
+                value={selectedBranch}
+                onChange={(e) => { setSelectedBranch(e.target.value); setPage(1); }}
+                className="block w-48 pl-3 pr-10 py-2 text-sm border border-slate-700 rounded-lg bg-slate-950 text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="">All Branches</option>
+                {branches.map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            )}
           </div>
         </div>
 

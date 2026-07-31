@@ -25,7 +25,7 @@ public class JwtTokenService : IJwtTokenService
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        var claimsList = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
@@ -33,6 +33,14 @@ public class JwtTokenService : IJwtTokenService
             new Claim("MemberId", user.MemberId?.ToString() ?? string.Empty),
             new Claim("memberId", user.MemberId?.ToString() ?? string.Empty)
         };
+
+        if (user.BranchId.HasValue)
+        {
+            claimsList.Add(new Claim("branchId", user.BranchId.Value.ToString()));
+            claimsList.Add(new Claim("BranchId", user.BranchId.Value.ToString()));
+        }
+
+        var claims = claimsList.ToArray();
 
         var expirationMinutes = int.Parse(jwtSettings["AccessTokenExpirationMinutes"] ?? "60");
         var expires = DateTime.UtcNow.AddMinutes(expirationMinutes);

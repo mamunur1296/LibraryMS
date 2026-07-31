@@ -239,7 +239,7 @@ public static class MapperExtensions
         };
     }
 
-    public static UserDto ToDto(this User user)
+    public static UserDto ToDto(this User user, Branch? branch = null)
     {
         return new UserDto
         {
@@ -247,7 +247,10 @@ public static class MapperExtensions
             Username = user.Username,
             Email = user.Email,
             Role = user.Role.ToString(),
-            MemberId = user.MemberId
+            IsActive = user.IsActive,
+            MemberId = user.MemberId,
+            BranchId = user.BranchId,
+            BranchName = branch?.Name
         };
     }
 }

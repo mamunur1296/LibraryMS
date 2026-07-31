@@ -11,6 +11,7 @@ public sealed class RefreshToken : Entity<Guid>
 
     public DateTime? RevokedAt { get; private set; }
     public string? CreatedByIp { get; private set; }
+    public bool IsUsed { get; private set; }
 
     private RefreshToken() { }
 
@@ -26,7 +27,12 @@ public sealed class RefreshToken : Entity<Guid>
 
     public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
     public bool IsRevoked => RevokedAt.HasValue;
-    public bool IsActive => !IsRevoked && !IsExpired;
+    public bool IsActive => !IsRevoked && !IsExpired && !IsUsed;
+
+    public void MarkAsUsed()
+    {
+        IsUsed = true;
+    }
 
     public void Revoke()
     {
