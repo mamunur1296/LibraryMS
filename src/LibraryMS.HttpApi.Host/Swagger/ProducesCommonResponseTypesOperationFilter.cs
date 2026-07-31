@@ -5,10 +5,6 @@ using LibraryMS.Application.Contracts.Common;
 
 namespace LibraryMS.HttpApi.Host.Swagger;
 
-/// <summary>
-/// A global Swagger operation filter that automatically documents common error response types (400, 401, 403, 404, 500)
-/// along with their standardized response schema structure (ApiResponse of object) to keep contracts consistent.
-/// </summary>
 public sealed class ProducesCommonResponseTypesOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
