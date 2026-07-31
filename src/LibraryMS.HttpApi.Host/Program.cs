@@ -148,4 +148,22 @@ RecurringJob.AddOrUpdate<ReservationExpiryJob>(
     Cron.Hourly(), // Every hour
     new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
 
+RecurringJob.AddOrUpdate<DailyFineAccumulationJob>(
+    "daily-fine-accumulation",
+    job => job.ExecuteAsync(CancellationToken.None),
+    Cron.Daily(0), // Every day at 00:00 UTC
+    new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
+
+RecurringJob.AddOrUpdate<DueDateReminderJob>(
+    "due-date-reminder",
+    job => job.ExecuteAsync(CancellationToken.None),
+    Cron.Daily(9), // Every day at 09:00 UTC
+    new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
+
+RecurringJob.AddOrUpdate<MembershipExpiryJob>(
+    "membership-expiry",
+    job => job.ExecuteAsync(CancellationToken.None),
+    Cron.Daily(8), // Every day at 08:00 UTC
+    new RecurringJobOptions { TimeZone = TimeZoneInfo.Utc });
+
 app.Run();

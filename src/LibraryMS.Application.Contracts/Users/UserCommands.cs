@@ -14,3 +14,11 @@ public sealed record ChangeEmailCommand(Guid UserId, string NewEmail)
 
 public sealed record ChangeUserRoleCommand(Guid TargetUserId, string NewRole)
     : IRequest;
+
+public sealed record SuspendUserCommand(Guid UserId) : IRequest;
+
+public sealed record ActivateUserCommand(Guid UserId) : IRequest;
+
+public sealed record CreateLibrarianCommand(string Username, string Email, string Password, Guid? BranchId) : IRequest<Guid>;
+
+public sealed record AssignLibrarianToBranchCommand(Guid LibrarianId, Guid BranchId) : IRequest;

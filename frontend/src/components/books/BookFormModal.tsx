@@ -105,7 +105,10 @@ export function BookFormModal({ isOpen, onClose, onSuccess, bookToEdit }: BookFo
       const apiErrors = err.response?.data?.errors;
       if (apiErrors && typeof apiErrors === "object") {
         Object.keys(apiErrors).forEach((key) => {
-          const fieldName = (key.charAt(0).toLowerCase() + key.slice(1)) as keyof BookFormData;
+          let fieldName = (key.charAt(0).toLowerCase() + key.slice(1)) as keyof BookFormData;
+          if (key.toUpperCase() === "ISBN") {
+            fieldName = "isbn" as keyof BookFormData;
+          }
           setError(fieldName, {
             type: "server",
             message: apiErrors[key][0],
@@ -140,6 +143,18 @@ export function BookFormModal({ isOpen, onClose, onSuccess, bookToEdit }: BookFo
             ) : (
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  
+                  {/* Cover Image Upload (Disabled) */}
+                  <div className="md:col-span-2 border-2 border-dashed border-slate-700 rounded-xl p-6 bg-slate-900/50 flex flex-col items-center justify-center">
+                    <svg className="w-10 h-10 text-slate-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-sm text-slate-400 mb-3">Upload Book Cover (JPG, PNG)</p>
+                    <button type="button" disabled className="px-4 py-2 bg-slate-800 text-slate-500 border border-slate-700 rounded-lg cursor-not-allowed text-xs font-medium">
+                      Select Image (Coming Soon)
+                    </button>
+                  </div>
+
                   {/* Basic Info */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-300 mb-1">Title</label>
@@ -152,12 +167,27 @@ export function BookFormModal({ isOpen, onClose, onSuccess, bookToEdit }: BookFo
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1">ISBN</label>
-                    <input
-                      type="text"
-                      {...register("isbn")}
-                      className="w-full px-4 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
+                    <div className="flex justify-between items-end mb-1">
+                      <label className="block text-sm font-medium text-slate-300">ISBN</label>
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        {...register("isbn")}
+                        className="flex-1 px-4 py-2 bg-slate-950 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                      <button 
+                        type="button" 
+                        title="Scan Barcode (Coming Soon)"
+                        className="px-3 py-2 bg-slate-800 border border-slate-700 text-slate-400 hover:text-indigo-400 hover:bg-slate-700 rounded-lg transition-colors flex items-center justify-center"
+                        onClick={() => alert('Barcode scanning integration coming soon!')}
+                      >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4h4v4H4V4zm12 0h4v4h-4V4zM4 16h4v4H4v-4zm12 0h4v4h-4v-4z" />
+                        </svg>
+                      </button>
+                    </div>
                     {errors.isbn && <p className="text-red-400 text-xs mt-1">{errors.isbn.message}</p>}
                   </div>
 

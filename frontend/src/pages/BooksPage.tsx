@@ -2,10 +2,20 @@ import { useEffect, useState, useCallback } from "react";
 import { bookService } from "@/lib/services/book.service";
 import { BookDto, PagedResult } from "@/types/book.types";
 import { BookFormModal } from "@/components/books/BookFormModal";
+import { AddCopiesModal } from "@/components/books/AddCopiesModal";
+import { ViewCopiesModal } from "@/components/books/ViewCopiesModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast } from "@/components/ui/Toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { branchService } from "@/lib/services/branch.service";
+import { BranchDto } from "@/types/branch.types";
 
 export default function BooksPage() {
+  const { user } = useAuth();
+  const isLibrarian = user?.role === "Librarian";
+  const [branches, setBranches] = useState<BranchDto[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState("");
+  
   const [data, setData] = useState<PagedResult<BookDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,18 +23,35 @@ export default function BooksPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bookToEdit, setBookToEdit] = useState<BookDto | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<BookDto | null>(null);
+  const [addCopiesTarget, setAddCopiesTarget] = useState<BookDto | null>(null);
+  const [viewCopiesTarget, setViewCopiesTarget] = useState<BookDto | null>(null);
 
   const fetchBooks = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await bookService.search(searchTerm, undefined, undefined, undefined, page, 10);
+      const targetBranch = isLibrarian ? (user?.branchId || selectedBranch) : selectedBranch;
+      const result = await bookService.search(searchTerm, undefined, undefined, targetBranch || undefined, page, 10);
       setData(result);
     } catch {
       toast.error("Failed to fetch books.");
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, page]);
+  }, [searchTerm, page, selectedBranch, isLibrarian, user]);
+
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const branchData = await branchService.getAll(false);
+        setBranches(branchData);
+      } catch {
+        // ignore
+      }
+    };
+    if (!isLibrarian) {
+      void fetchBranches();
+    }
+  }, [isLibrarian]);
 
   useEffect(() => {
     const delay = setTimeout(() => { void fetchBooks(); }, 300);
@@ -39,6 +66,10 @@ export default function BooksPage() {
   const handleEdit = (book: BookDto) => {
     setBookToEdit(book);
     setIsModalOpen(true);
+  };
+
+  const handleAddCopies = (book: BookDto) => {
+    setAddCopiesTarget(book);
   };
 
   const handleDeleteConfirm = async () => {
@@ -88,6 +119,27 @@ export default function BooksPage() {
               className="block w-full pl-10 pr-3 py-2 border border-slate-700 rounded-lg bg-slate-950 text-slate-300 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
             />
           </div>
+          <div className="flex items-center gap-4">
+            {isLibrarian ? (
+              <div className="text-sm px-3 py-1.5 bg-slate-800 text-slate-400 border border-slate-700 rounded-lg flex items-center gap-2 cursor-not-allowed" title="Librarians can only manage books in their assigned branch">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                Your Branch
+              </div>
+            ) : (
+              <select
+                value={selectedBranch}
+                onChange={(e) => { setSelectedBranch(e.target.value); setPage(1); }}
+                className="block w-48 pl-3 pr-10 py-2 text-sm border border-slate-700 rounded-lg bg-slate-950 text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="">All Branches</option>
+                {branches.map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -127,6 +179,11 @@ export default function BooksPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-slate-400">{book.publicationYear}</td>
                     <td className="px-6 py-4 text-right space-x-3 whitespace-nowrap">
+                      <button onClick={() => { setViewCopiesTarget(book); }} className="text-cyan-400 hover:text-cyan-300 text-xs font-medium" title="View Copies">
+                        <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                        View
+                      </button>
+                      <button onClick={() => { handleAddCopies(book); }} className="text-emerald-400 hover:text-emerald-300 text-xs font-medium" title="Add Copies">+ Copies</button>
                       <button onClick={() => { handleEdit(book); }} className="text-indigo-400 hover:text-indigo-300 text-xs font-medium">Edit</button>
                       <button onClick={() => { setDeleteTarget(book); }} className="text-red-400 hover:text-red-300 text-xs font-medium">Delete</button>
                     </td>
@@ -137,16 +194,33 @@ export default function BooksPage() {
           </table>
         </div>
 
-        {data && data.totalPages > 1 && (
+        {data && (
           <div className="px-6 py-3 border-t border-slate-800 bg-slate-900/50 flex items-center justify-between">
             <div className="text-sm text-slate-400">
-              Showing <span className="font-medium text-white">{(page - 1) * 10 + 1}</span> to{" "}
+              Showing <span className="font-medium text-white">{data.totalCount === 0 ? 0 : (page - 1) * 10 + 1}</span> to{" "}
               <span className="font-medium text-white">{Math.min(page * 10, data.totalCount)}</span> of{" "}
               <span className="font-medium text-white">{data.totalCount}</span> results
             </div>
-            <div className="flex space-x-2">
-              <button onClick={() => { setPage((p) => Math.max(1, p - 1)); }} disabled={!data.hasPreviousPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm">Previous</button>
-              <button onClick={() => { setPage((p) => Math.min(data.totalPages, p + 1)); }} disabled={!data.hasNextPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm">Next</button>
+            <div className="flex space-x-1 items-center">
+              <button onClick={() => { setPage((p) => Math.max(1, p - 1)); }} disabled={!data.hasPreviousPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm border border-slate-700">Previous</button>
+              
+              <div className="hidden sm:flex space-x-1 mx-1">
+                {Array.from({ length: Math.max(1, data.totalPages) }).map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => setPage(i + 1)}
+                    className={`px-3 py-1 rounded text-sm border ${
+                      page === i + 1 
+                        ? "bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-500/20" 
+                        : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+
+              <button onClick={() => { setPage((p) => Math.min(Math.max(1, data.totalPages), p + 1)); }} disabled={!data.hasNextPage} className="px-3 py-1 bg-slate-800 text-slate-300 rounded hover:bg-slate-700 disabled:opacity-50 text-sm border border-slate-700">Next</button>
             </div>
           </div>
         )}
@@ -157,6 +231,19 @@ export default function BooksPage() {
         onClose={() => { setIsModalOpen(false); }}
         onSuccess={() => { void fetchBooks(); }}
         bookToEdit={bookToEdit}
+      />
+
+      <AddCopiesModal
+        isOpen={addCopiesTarget !== null}
+        onClose={() => { setAddCopiesTarget(null); }}
+        onSuccess={() => { void fetchBooks(); }}
+        book={addCopiesTarget}
+      />
+      
+      <ViewCopiesModal
+        isOpen={viewCopiesTarget !== null}
+        onClose={() => { setViewCopiesTarget(null); }}
+        book={viewCopiesTarget}
       />
 
       <ConfirmDialog

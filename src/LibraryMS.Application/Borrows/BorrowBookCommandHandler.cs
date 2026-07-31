@@ -36,7 +36,7 @@ public sealed class BorrowBookCommandHandler : IRequestHandler<BorrowBookCommand
 
         var record = await _borrowManager.BorrowAsync(
             request.MemberId, request.BookCopyId, request.BookId,
-            request.BranchId, borrowDays, cancellationToken);
+            request.BranchId, null, borrowDays, cancellationToken);
 
         var dbFailed = false;
         try

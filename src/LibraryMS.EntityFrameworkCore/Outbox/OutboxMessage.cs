@@ -27,6 +27,12 @@ public sealed class OutboxMessage
     // Max number of retries before the message is considered dead.
     public int MaxRetries { get; private set; } = 3;
 
+    // Optional category for grouping messages (e.g. for Chain of Responsibility).
+    public string? Category { get; private set; }
+
+    // Optional scheduled time for the message to be processed.
+    public DateTime? ScheduledFor { get; private set; }
+
     private OutboxMessage() { }
 
     public static OutboxMessage Create(string type, string content)
@@ -38,6 +44,19 @@ public sealed class OutboxMessage
             OccurredOn = DateTime.UtcNow,
             RetryCount = 0,
             MaxRetries = 3
+        };
+
+    public static OutboxMessage CreateScheduled(string type, string content, string category, DateTime scheduledFor)
+        => new()
+        {
+            Id = Guid.NewGuid(),
+            Type = type,
+            Content = content,
+            OccurredOn = DateTime.UtcNow,
+            RetryCount = 0,
+            MaxRetries = 3,
+            Category = category,
+            ScheduledFor = scheduledFor
         };
 
     // Marks the message as successfully processed.
@@ -58,5 +77,5 @@ public sealed class OutboxMessage
     public bool IsDeadLetter => RetryCount >= MaxRetries && ProcessedOn is null;
 
     // Returns true when the message is eligible for processing.
-    public bool IsEligibleForProcessing => ProcessedOn is null && RetryCount < MaxRetries;
+    public bool IsEligibleForProcessing => ProcessedOn is null && RetryCount < MaxRetries && (ScheduledFor is null || ScheduledFor <= DateTime.UtcNow);
 }

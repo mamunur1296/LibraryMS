@@ -1,7 +1,8 @@
 import { apiClient } from "@/lib/api-client";
 import {
   BookDto, PagedResult, AuthorDto, CategoryDto,
-  CreateBookRequest, UpdateBookRequest, CreateAuthorRequest, CreateCategoryRequest
+  CreateBookRequest, UpdateBookRequest, CreateAuthorRequest, CreateCategoryRequest,
+  BookCopy
 } from "@/types/book.types";
 
 export const bookService = {
@@ -41,6 +42,11 @@ export const bookService = {
     return response.data;
   },
 
+  async addCopies(id: string, data: { branchId: string; quantity: number }): Promise<any[]> {
+    const response = await apiClient.post<any[]>(`/api/Books/${id}/copies`, { bookId: id, ...data });
+    return response.data;
+  },
+
   async delete(id: string): Promise<void> {
     await apiClient.delete(`/api/Books/${id}`);
   },
@@ -65,5 +71,10 @@ export const bookService = {
   async createCategory(data: CreateCategoryRequest): Promise<CategoryDto> {
     const response = await apiClient.post<CategoryDto>("/api/Books/categories", data);
     return response.data;
+  },
+
+  async getBookCopies(id: string): Promise<BookCopy[]> {
+    const { data } = await apiClient.get<BookCopy[]>(`/api/Books/${id}/copies`);
+    return data;
   }
 };

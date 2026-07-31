@@ -44,7 +44,7 @@ public class ReservationsController : BaseController
     }
 
     [HttpGet("queue")]
-    [AllowAnonymous]
+    [Authorize(Roles = "Admin,Librarian,Member")]
     public async Task<ActionResult<ReservationQueueDto>> GetQueue([FromQuery] Guid bookId, [FromQuery] Guid branchId, CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(new GetBookQueueQuery(bookId, branchId), cancellationToken);

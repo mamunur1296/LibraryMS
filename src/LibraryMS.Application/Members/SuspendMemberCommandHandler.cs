@@ -38,7 +38,11 @@ public sealed class SuspendMemberCommandHandler : IRequestHandler<SuspendMemberC
         var member = await _repository.GetByIdAsync(request.Id, cancellationToken);
         Ensure.Found(member, $"Member with ID '{request.Id}' was not found.");
 
-        _manager.SuspendMember(member!, request.SuspendedUntil, request.Reason);
+        var suspendedUntilUtc = request.SuspendedUntil.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(request.SuspendedUntil, DateTimeKind.Utc)
+            : request.SuspendedUntil.ToUniversalTime();
+
+        _manager.SuspendMember(member!, suspendedUntilUtc, request.Reason);
         await _repository.UpdateAsync(member!, cancellationToken);
 
         var dbFailed = false;

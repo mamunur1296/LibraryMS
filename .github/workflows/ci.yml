@@ -58,8 +58,7 @@ jobs:
       - name: Run Build
         run: npm run build
         env:
-          NEXT_TELEMETRY_DISABLED: 1
-          NEXT_PUBLIC_API_URL: http://localhost:8080
+          VITE_API_URL: http://localhost:8080
 
   docker:
     name: Docker Configuration Checks

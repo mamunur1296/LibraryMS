@@ -44,10 +44,14 @@ public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
                 entry.State = EntityState.Modified;
                 entry.Entity.IsDeleted = true;
                 entry.Entity.DeletedAt = DateTime.UtcNow;
+
+                foreach (var referenceEntry in entry.References.Where(r => r.TargetEntry != null && r.TargetEntry.State == EntityState.Deleted))
+                {
+                    referenceEntry.TargetEntry.State = EntityState.Modified;
+                }
             }
         }
 
-        // Generate client-side concurrency tokens for PostgreSQL RowVersion columns
         foreach (var entry in context.ChangeTracker.Entries())
         {
             if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
@@ -55,7 +59,7 @@ public sealed class AuditableEntityInterceptor : SaveChangesInterceptor
                 var rowVersionProp = entry.Metadata.FindProperty("RowVersion");
                 if (rowVersionProp != null && rowVersionProp.ClrType == typeof(byte[]))
                 {
-                    entry.Property("RowVersion").CurrentValue = Guid.NewGuid().ToByteArray();
+                    entry.Property("RowVersion").CurrentValue = BitConverter.GetBytes(DateTime.UtcNow.Ticks);
                 }
             }
         }

@@ -12,6 +12,7 @@ export type BorrowBookFormData = z.infer<typeof borrowBookSchema>;
 
 export const returnBookSchema = z.object({
   notes: z.string().optional(),
+  fineCollection: z.enum(["none", "cash", "waive", "online"]).optional(),
 });
 
 export type ReturnBookFormData = z.infer<typeof returnBookSchema>;

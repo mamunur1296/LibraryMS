@@ -57,12 +57,13 @@ public static class ApplicationServiceRegistration
         services.AddScoped<RefreshTokenManager>();
         services.AddSingleton<IGuidGenerator, GuidGenerator>();
 
-        // Application-level Background Job classes (registered here to avoid circular dependency)
+        // Background Jobs
         services.AddScoped<BackgroundJobs.OverdueCheckJob>();
         services.AddScoped<BackgroundJobs.ReservationExpiryJob>();
+        services.AddScoped<BackgroundJobs.DailyFineAccumulationJob>();
+        services.AddScoped<BackgroundJobs.MembershipExpiryJob>();
+        services.AddScoped<BackgroundJobs.DueDateReminderJob>();
 
         return services;
     }
 }
-
-

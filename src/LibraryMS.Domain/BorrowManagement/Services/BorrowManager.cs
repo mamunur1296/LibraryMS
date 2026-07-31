@@ -29,6 +29,7 @@ public sealed class BorrowManager
     // Orchestrates the full borrow workflow:
     public async Task<BorrowRecord> BorrowAsync(
         Guid memberId, Guid bookCopyId, Guid bookId, Guid branchId,
+        Guid? issuedById = null,
         int borrowDays = BorrowRecord.MaxBorrowDays,
         CancellationToken ct = default)
     {
@@ -37,6 +38,10 @@ public sealed class BorrowManager
         Ensure.Found(member, nameof(Member), memberId);
 
         Ensure.Against(!member!.CanBorrow(), $"Member '{member.FullName}' is suspended and cannot borrow books.", "BORROW_MEMBER_SUSPENDED");
+
+        // Rule 1.5: Check for unpaid fines
+        var hasUnpaidFine = await _borrowRepository.HasUnpaidFineAsync(memberId, ct);
+        Ensure.Against(hasUnpaidFine, "Member has unpaid fines and cannot borrow books.", "BORROW_MEMBER_HAS_FINE");
 
         // Rule 2: Max 5 active borrows
         var activeBorrows = await _memberRepository.GetActiveBorrowCountAsync(memberId, ct);
@@ -54,32 +59,31 @@ public sealed class BorrowManager
         await _bookRepository.UpdateAsync(book, ct);
 
         // Rule 5: Create borrow record
-        var borrow = new BorrowRecord(Guid.NewGuid(), memberId, bookCopyId, bookId, branchId, borrowDays);
-        await _borrowRepository.AddAsync(borrow, ct);
+        var borrowRecord = new BorrowRecord(
+            Guid.NewGuid(), memberId, bookCopyId, bookId, branchId, issuedById, borrowDays);
+        await _borrowRepository.AddAsync(borrowRecord, ct);
 
-        return borrow;
+        return borrowRecord;
     }
 
     // Orchestrates the return
     public async Task<BorrowRecord> ReturnAsync(
-        Guid borrowId, string? notes = null,
-        CancellationToken ct = default)
+        Guid borrowRecordId, string? notes = null, Guid? returnedById = null, CancellationToken ct = default)
     {
-        var borrow = await _borrowRepository.GetByIdAsync(borrowId, ct);
-        Ensure.Found(borrow, nameof(BorrowRecord), borrowId);
+        var record = await _borrowRepository.GetByIdAsync(borrowRecordId, ct);
+        Ensure.Found(record, nameof(BorrowRecord), borrowRecordId);
 
-        // Process return (calculates late fine internally)
-        borrow!.Return(notes);
-
-        // Mark the copy as available again
-        var book = await _bookRepository.GetByIdWithCopiesAsync(borrow.BookId, ct);
-        Ensure.Found(book, nameof(Book), borrow.BookId);
-
-        book!.ReturnCopy(borrow.BookCopyId);
+        // Update book copy
+        var book = await _bookRepository.GetByIdWithCopiesAsync(record!.BookId, ct);
+        Ensure.Found(book, nameof(Book), record.BookId);
+        
+        book!.ReturnCopy(record.BookCopyId);
         await _bookRepository.UpdateAsync(book, ct);
-        await _borrowRepository.UpdateAsync(borrow, ct);
 
-        return borrow;
+        // Update borrow record
+        record.Return(notes, returnedById);
+        await _borrowRepository.UpdateAsync(record, ct);
+
+        return record;
     }
 }
-

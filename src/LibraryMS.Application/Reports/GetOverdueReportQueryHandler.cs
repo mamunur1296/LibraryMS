@@ -2,16 +2,15 @@ using LibraryMS.Application.Contracts.Common;
 using LibraryMS.Application.Contracts.DTOs.Report;
 using LibraryMS.Application.Contracts.Reports;
 using LibraryMS.Domain.BookManagement;
+using LibraryMS.Domain.BookManagement.AggregateRoots;
 using LibraryMS.Domain.BorrowManagement;
+using LibraryMS.Domain.BorrowManagement.AggregateRoots;
 using LibraryMS.Domain.MemberManagement;
+using LibraryMS.Domain.MemberManagement.AggregateRoots;
 using LibraryMS.Domain.BranchManagement;
+using LibraryMS.Domain.BranchManagement.AggregateRoots;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace LibraryMS.Application.Reports;
 
@@ -41,52 +40,41 @@ public sealed class GetOverdueReportQueryHandler : IRequestHandler<GetOverdueRep
     {
         _logger.LogInformation("Generating Overdue Books Report via Domain Repositories.");
 
-        var (borrows, _) = await _borrowRepo.GetPagedAsync(
-            null, null, "Overdue", 1, int.MaxValue, cancellationToken);
+        var (borrows, totalCount) = await _borrowRepo.GetPagedAsync(
+            null, null, "Overdue", request.Page, request.PageSize, cancellationToken,
+            request.FromDate, request.ToDate, request.BranchId);
 
         var today = DateTime.UtcNow.Date;
-        var query = borrows.AsQueryable();
+        var memberIds = borrows.Where(b => b.MemberId != Guid.Empty).Select(b => b.MemberId).Distinct().ToList();
+        var bookIds = borrows.Where(b => b.BookId != Guid.Empty).Select(b => b.BookId).Distinct().ToList();
 
-        if (request.FromDate.HasValue)
-            query = query.Where(b => b.BorrowDate >= request.FromDate.Value);
+        var membersTask = memberIds.Count > 0
+            ? _memberRepo.GetByIdsAsync(memberIds, cancellationToken)
+            : Task.FromResult(new List<Member>());
+        var booksTask = bookIds.Count > 0
+            ? _bookRepo.GetByIdsAsync(bookIds, cancellationToken)
+            : Task.FromResult(new List<Book>());
+        var branchesTask = _branchRepo.GetAllAsync(cancellationToken);
 
-        if (request.ToDate.HasValue)
-            query = query.Where(b => b.BorrowDate <= request.ToDate.Value);
+        await Task.WhenAll(membersTask, booksTask, branchesTask);
 
-        if (request.BranchId.HasValue)
-            query = query.Where(b => b.BranchId == request.BranchId.Value);
+        var members = membersTask.Result.ToDictionary(m => m.Id);
+        var books = booksTask.Result.ToDictionary(b => b.Id);
+        var branches = branchesTask.Result.ToDictionary(br => br.Id);
 
-        var filteredBorrows = query.ToList();
-        var totalCount = filteredBorrows.Count;
-
-        var pagedBorrows = filteredBorrows
-            .Skip((request.Page - 1) * request.PageSize)
-            .Take(request.PageSize)
-            .ToList();
-
-        var items = new List<OverdueReportDto>();
-        var branches = await _branchRepo.GetAllAsync(cancellationToken);
-
-        foreach (var b in pagedBorrows)
+        var items = borrows.Select(b => new OverdueReportDto
         {
-            var member = await _memberRepo.GetByIdAsync(b.MemberId, cancellationToken);
-            var book = await _bookRepo.GetByIdAsync(b.BookId, cancellationToken);
-            var branch = branches.FirstOrDefault(br => br.Id == b.BranchId);
-
-            items.Add(new OverdueReportDto
-            {
-                BorrowId = b.Id,
-                MemberName = member != null ? $"{member.FirstName} {member.LastName}" : "Unknown Member",
-                MembershipNumber = member?.MembershipNumber ?? "N/A",
-                MemberEmail = member?.Email ?? "N/A",
-                BookTitle = book?.Title ?? "Unknown Book",
-                BranchName = branch?.Name ?? "Unknown Branch",
-                BorrowDate = b.BorrowDate,
-                DueDate = b.DueDate,
-                OverdueDays = b.DueDate.Date < today ? (today - b.DueDate.Date).Days : 0,
-                AccruedFine = b.LateFine
-            });
-        }
+            BorrowId = b.Id,
+            MemberName = members.TryGetValue(b.MemberId, out var m) ? $"{m.FirstName} {m.LastName}" : "Unknown Member",
+            MembershipNumber = m?.MembershipNumber ?? "N/A",
+            MemberEmail = m?.Email ?? "N/A",
+            BookTitle = books.TryGetValue(b.BookId, out var book) ? book.Title : "Unknown Book",
+            BranchName = branches.TryGetValue(b.BranchId, out var br) ? br.Name : "Unknown Branch",
+            BorrowDate = b.BorrowDate,
+            DueDate = b.DueDate,
+            OverdueDays = b.DueDate.Date < today ? (today - b.DueDate.Date).Days : 0,
+            AccruedFine = b.LateFine
+        }).ToList();
 
         return PagedResult<OverdueReportDto>.Create(items, totalCount, request.Page, request.PageSize);
     }

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { reportService } from '@/lib/services/report.service';
 import { ReportFilterBar } from '@/components/reports/ReportFilterBar';
-import { PagedResult, OverdueReportDto, PopularBookDto, MemberActivityDto } from '@/types/report.types';
+import { PagedResult, OverdueReportDto, PopularBookDto, MemberActivityDto, BranchComparisonDto, LibrarianActivityDto, AnnualRevenueDto, MemberGrowthDto } from '@/types/report.types';
 
-type TabType = 'overdue' | 'popular' | 'activity';
+type TabType = 'overdue' | 'popular' | 'activity' | 'branch' | 'librarian' | 'revenue' | 'growth';
 
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('overdue');
@@ -14,6 +14,10 @@ export default function ReportsPage() {
   const [overdueData, setOverdueData] = useState<PagedResult<OverdueReportDto> | null>(null);
   const [popularData, setPopularData] = useState<PagedResult<PopularBookDto> | null>(null);
   const [activityData, setActivityData] = useState<PagedResult<MemberActivityDto> | null>(null);
+  const [branchData, setBranchData] = useState<BranchComparisonDto[] | null>(null);
+  const [librarianData, setLibrarianData] = useState<LibrarianActivityDto[] | null>(null);
+  const [revenueData, setRevenueData] = useState<AnnualRevenueDto[] | null>(null);
+  const [growthData, setGrowthData] = useState<MemberGrowthDto[] | null>(null);
 
   useEffect(() => { fetchData(); }, [activeTab, page, filters]);
 
@@ -23,6 +27,10 @@ export default function ReportsPage() {
       if (activeTab === 'overdue') { const result = await reportService.getOverdueReport({ ...filters, page, pageSize: 20 }); setOverdueData(result); }
       else if (activeTab === 'popular') { const result = await reportService.getPopularBooks({ ...filters, page, pageSize: 20 }); setPopularData(result); }
       else if (activeTab === 'activity') { const result = await reportService.getMemberActivity({ ...filters, page, pageSize: 20 }); setActivityData(result); }
+      else if (activeTab === 'branch') { const result = await reportService.getBranchComparison(); setBranchData(result); }
+      else if (activeTab === 'librarian') { const result = await reportService.getLibrarianActivity(filters); setLibrarianData(result); }
+      else if (activeTab === 'revenue') { const result = await reportService.getAnnualRevenue(new Date().getFullYear()); setRevenueData(result); }
+      else if (activeTab === 'growth') { const result = await reportService.getMemberGrowth(new Date().getFullYear()); setGrowthData(result); }
     } catch (error) { console.error('Failed to fetch report data', error); }
     finally { setLoading(false); }
   };
@@ -58,10 +66,10 @@ export default function ReportsPage() {
       <ReportFilterBar onFilterChange={(f) => { setFilters(f as any); setPage(1); }} showBranchFilter={activeTab !== 'activity'} />
 
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-        <div className="flex border-b border-slate-800">
-          {(['overdue', 'popular', 'activity'] as TabType[]).map((tab) => (
-            <button key={tab} onClick={() => { setActiveTab(tab); setPage(1); }} className={`flex-1 px-4 py-4 text-sm font-medium text-center transition-colors border-b-2 ${activeTab === tab ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5' : 'border-transparent text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'}`}>
-              {tab === 'overdue' ? 'Overdue Books' : tab === 'popular' ? 'Most Popular Books' : 'Member Activity'}
+        <div className="flex border-b border-slate-800 overflow-x-auto whitespace-nowrap">
+          {(['overdue', 'popular', 'activity', 'branch', 'librarian', 'revenue', 'growth'] as TabType[]).map((tab) => (
+            <button key={tab} onClick={() => { setActiveTab(tab); setPage(1); }} className={`flex-1 min-w-[120px] px-4 py-4 text-sm font-medium text-center transition-colors border-b-2 ${activeTab === tab ? 'border-indigo-500 text-indigo-400 bg-indigo-500/5' : 'border-transparent text-slate-400 hover:text-slate-300 hover:bg-slate-800/50'}`}>
+              {tab === 'overdue' ? 'Overdue Books' : tab === 'popular' ? 'Popular Books' : tab === 'activity' ? 'Member Activity' : tab === 'branch' ? 'Branch Stats' : tab === 'librarian' ? 'Librarians' : tab === 'revenue' ? 'Revenue' : 'Growth'}
             </button>
           ))}
         </div>
@@ -114,7 +122,7 @@ export default function ReportsPage() {
                 )}
               </tbody>
             </table>
-          ) : (
+          ) : activeTab === 'activity' ? (
             <table className="w-full text-left text-sm text-slate-300">
               <thead className="text-xs uppercase bg-slate-900 border-b border-slate-800 text-slate-400">
                 <tr><th className="px-6 py-4 font-medium">Member</th><th className="px-6 py-4 font-medium text-center">Total Borrows</th><th className="px-6 py-4 font-medium text-center">Active</th><th className="px-6 py-4 font-medium text-center">Overdue</th><th className="px-6 py-4 font-medium text-right">Fines Paid</th></tr>
@@ -133,12 +141,71 @@ export default function ReportsPage() {
                 )}
               </tbody>
             </table>
-          )}
+          ) : activeTab === 'branch' ? (
+            <table className="w-full text-left text-sm text-slate-300">
+              <thead className="text-xs uppercase bg-slate-900 border-b border-slate-800 text-slate-400">
+                <tr><th className="px-6 py-4 font-medium">Branch</th><th className="px-6 py-4 font-medium text-center">Total Books</th><th className="px-6 py-4 font-medium text-center">Active Borrows</th><th className="px-6 py-4 font-medium text-center">Overdue</th><th className="px-6 py-4 font-medium text-right">Revenue</th></tr>
+              </thead>
+              <tbody>
+                {!branchData || branchData.length === 0 ? (<tr><td colSpan={5} className="px-6 py-10 text-center text-slate-500">No branch data found.</td></tr>) : (
+                  branchData.map((row) => (
+                    <tr key={row.branchId} className="border-b border-slate-800/50 hover:bg-slate-800/20">
+                      <td className="px-6 py-4 font-medium text-white">{row.branchName}</td>
+                      <td className="px-6 py-4 text-center font-medium text-slate-300">{row.totalBooks}</td>
+                      <td className="px-6 py-4 text-center text-indigo-400">{row.activeBorrows}</td>
+                      <td className="px-6 py-4 text-center text-red-400 font-bold">{row.overdueBorrows}</td>
+                      <td className="px-6 py-4 text-right font-medium text-emerald-400">${row.totalRevenue.toFixed(2)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          ) : activeTab === 'librarian' ? (
+            <table className="w-full text-left text-sm text-slate-300">
+              <thead className="text-xs uppercase bg-slate-900 border-b border-slate-800 text-slate-400">
+                <tr><th className="px-6 py-4 font-medium">Librarian</th><th className="px-6 py-4 font-medium">Branch</th><th className="px-6 py-4 font-medium text-center">Books Issued</th><th className="px-6 py-4 font-medium text-center">Books Returned</th></tr>
+              </thead>
+              <tbody>
+                {!librarianData || librarianData.length === 0 ? (<tr><td colSpan={4} className="px-6 py-10 text-center text-slate-500">No librarian activity found.</td></tr>) : (
+                  librarianData.map((row) => (
+                    <tr key={row.userId} className="border-b border-slate-800/50 hover:bg-slate-800/20">
+                      <td className="px-6 py-4 font-medium text-white">{row.name}</td>
+                      <td className="px-6 py-4 text-slate-400">{row.branchName}</td>
+                      <td className="px-6 py-4 text-center text-indigo-400">{row.booksIssued}</td>
+                      <td className="px-6 py-4 text-center text-emerald-400">{row.booksReturned}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          ) : activeTab === 'revenue' ? (
+            <div className="p-6">
+              <h3 className="text-lg font-medium text-white mb-4">Annual Revenue ({new Date().getFullYear()})</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {revenueData?.map(row => (
+                  <div key={row.month} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700 text-center">
+                    <div className="text-sm text-slate-400 mb-1">{row.monthName}</div>
+                    <div className="text-xl font-bold text-emerald-400">${row.revenue.toFixed(2)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : activeTab === 'growth' ? (
+            <div className="p-6">
+              <h3 className="text-lg font-medium text-white mb-4">Member Growth ({new Date().getFullYear()})</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {growthData?.map(row => (
+                  <div key={row.month} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700 text-center">
+                    <div className="text-sm text-slate-400 mb-1">{row.monthName}</div>
+                    <div className="text-xl font-bold text-indigo-400">{row.newMembers}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
 
-        {activeTab === 'overdue' && renderPagination(overdueData)}
-        {activeTab === 'popular' && renderPagination(popularData)}
-        {activeTab === 'activity' && renderPagination(activityData)}
+        {activeTab === 'overdue' ? renderPagination(overdueData) : activeTab === 'popular' ? renderPagination(popularData) : activeTab === 'activity' ? renderPagination(activityData) : null}
       </div>
     </div>
   );

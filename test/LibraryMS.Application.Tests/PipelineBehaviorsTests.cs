@@ -2,6 +2,7 @@ using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using LibraryMS.Application.Behaviours;
+using LibraryMS.Application.Contracts.Common;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Moq;

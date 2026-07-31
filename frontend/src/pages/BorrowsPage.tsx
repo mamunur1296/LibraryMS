@@ -7,7 +7,10 @@ import { ReturnBookModal } from "@/components/borrows/ReturnBookModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast } from "@/components/ui/Toast";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 export default function BorrowsPage() {
+  const { user } = useAuth();
   const [data, setData] = useState<PagedResult<BorrowDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
@@ -23,7 +26,8 @@ export default function BorrowsPage() {
   const fetchBorrows = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await borrowService.search(undefined, undefined, statusFilter || undefined, page, 10);
+      const targetMemberId = !isLibrarianOrAdmin ? (user?.memberId ?? undefined) : undefined;
+      const result = await borrowService.search(targetMemberId, undefined, statusFilter || undefined, page, 10);
       setData(result);
     } catch {
       toast.error("Failed to fetch borrow records.");
@@ -52,8 +56,8 @@ export default function BorrowsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Borrow &amp; Return</h1>
-          <p className="text-sm text-slate-400 mt-1">Issue books, process returns, and manage fines.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-white">{isLibrarianOrAdmin ? 'Borrow & Return' : 'My Borrows'}</h1>
+          <p className="text-sm text-slate-400 mt-1">{isLibrarianOrAdmin ? 'Issue books, process returns, and manage fines.' : 'View your borrowing history and due dates.'}</p>
         </div>
         {isLibrarianOrAdmin && (
           <button onClick={() => { setIsFormModalOpen(true); }} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow-lg shadow-indigo-500/20 text-sm font-medium transition-all flex items-center gap-2">
@@ -78,7 +82,7 @@ export default function BorrowsPage() {
             <thead className="text-xs uppercase bg-slate-900 border-b border-slate-800 text-slate-400">
               <tr>
                 <th className="px-6 py-4 font-medium">Book Details</th>
-                <th className="px-6 py-4 font-medium">Member</th>
+                {isLibrarianOrAdmin && <th className="px-6 py-4 font-medium">Member</th>}
                 <th className="px-6 py-4 font-medium">Timeline</th>
                 <th className="px-6 py-4 font-medium">Status / Fines</th>
                 <th className="px-6 py-4 text-right font-medium">Actions</th>
@@ -96,10 +100,12 @@ export default function BorrowsPage() {
                       <div className="font-medium text-white">{borrow.bookTitle}</div>
                       <div className="text-xs text-slate-500 mt-0.5 font-mono">Copy: #{borrow.copyNumber}</div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-slate-300">{borrow.memberName}</div>
-                      <div className="text-xs text-slate-500 mt-0.5">ID: {borrow.membershipNumber}</div>
-                    </td>
+                    {isLibrarianOrAdmin && (
+                      <td className="px-6 py-4">
+                        <div className="text-slate-300">{borrow.memberName}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">ID: {borrow.membershipNumber}</div>
+                      </td>
+                    )}
                     <td className="px-6 py-4">
                       <div className="text-xs text-slate-400">Borrowed: {new Date(borrow.borrowDate).toLocaleDateString()}</div>
                       <div className={`text-xs mt-1 ${borrow.isOverdue && borrow.status === "Active" ? "text-red-400 font-medium" : "text-slate-400"}`}>Due: {new Date(borrow.dueDate).toLocaleDateString()}</div>

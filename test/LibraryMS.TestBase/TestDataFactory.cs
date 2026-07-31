@@ -78,6 +78,7 @@ public static class TestDataFactory
             copy.Id,
             copy.BookId,
             copy.BranchId,
+            null, // issuedById
             days);
         return borrowRecord;
     }

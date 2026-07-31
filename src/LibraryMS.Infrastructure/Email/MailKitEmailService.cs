@@ -16,6 +16,7 @@ public sealed class SmtpOptions
     public string FromEmail { get; init; } = default!;
     public string FromName { get; init; } = "LibraryMS";
     public bool EnableSsl { get; init; } = true;
+    public bool IsEnabled { get; init; } = true;
 }
 
 // Adapter Pattern: Wraps MailKit into our IEmailService abstraction.
@@ -31,6 +32,11 @@ public sealed class MailKitEmailService : IEmailService
         string toEmail, string toName, string subject, string htmlBody,
         CancellationToken cancellationToken = default)
     {
+        if (!_options.IsEnabled)
+        {
+            return;
+        }
+
         var message = new MimeMessage();
         message.From.Add(new MailboxAddress(_options.FromName, _options.FromEmail));
         message.To.Add(new MailboxAddress(toName, toEmail));

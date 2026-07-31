@@ -9,6 +9,7 @@ using LibraryMS.Domain.MemberManagement.AggregateRoots;
 using LibraryMS.Domain.MemberManagement.Services;
 using LibraryMS.Domain.ReservationManagement;
 using LibraryMS.Domain.ReservationManagement.AggregateRoots;
+using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
@@ -22,17 +23,21 @@ public sealed class CreateReservationCommandHandler : IRequestHandler<CreateRese
     private readonly IBookRepository _bookRepo;
     private readonly IMemberRepository _memberRepo;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IBorrowRepository _borrowRepo;
     private readonly ILogger<CreateReservationCommandHandler> _logger;
 
     public CreateReservationCommandHandler(
         IReservationRepository reservationRepo,
         IBookRepository bookRepo,
         IMemberRepository memberRepo,
+        IBorrowRepository borrowRepo,
         IUnitOfWork unitOfWork,
         ILogger<CreateReservationCommandHandler> logger)
     {
         _reservationRepo = reservationRepo;
-        _bookRepo = bookRepo; _memberRepo = memberRepo;
+        _bookRepo = bookRepo; 
+        _memberRepo = memberRepo;
+        _borrowRepo = borrowRepo;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
@@ -47,6 +52,9 @@ public sealed class CreateReservationCommandHandler : IRequestHandler<CreateRese
         Ensure.Found(member, $"Member with ID '{request.MemberId}' was not found.");
 
         Ensure.Against(!member!.CanBorrow(), "Suspended members cannot create reservations.", "RESERVATION_SUSPENDED_MEMBER");
+
+        var hasUnpaidFine = await _borrowRepo.HasUnpaidFineAsync(request.MemberId, cancellationToken);
+        Ensure.Against(hasUnpaidFine, "Member has unpaid fines and cannot reserve books.", "RESERVATION_MEMBER_HAS_FINE");
 
         // Validate book exists
         var book = await _bookRepo.GetByIdWithCopiesAsync(request.BookId, cancellationToken);

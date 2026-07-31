@@ -80,4 +80,41 @@ public class UsersController : BaseController
         await Mediator.Send(command, cancellationToken);
         return NoContent();
     }
+
+    [HttpPost("{id}/suspend")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Suspend(Guid id, CancellationToken cancellationToken)
+    {
+        await Mediator.Send(new SuspendUserCommand(id), cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPost("{id}/activate")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Activate(Guid id, CancellationToken cancellationToken)
+    {
+        await Mediator.Send(new ActivateUserCommand(id), cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPost("{id}/assign-branch")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> AssignBranch(Guid id, [FromBody] AssignBranchRequest request, CancellationToken cancellationToken)
+    {
+        await Mediator.Send(new AssignBranchToLibrarianCommand(id, request.BranchId), cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPost("create-librarian")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<Guid>> CreateLibrarian([FromBody] CreateLibrarianCommand command, CancellationToken cancellationToken)
+    {
+        var result = await Mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+}
+
+public class AssignBranchRequest
+{
+    public Guid BranchId { get; set; }
 }

@@ -6,7 +6,11 @@ import { ViewQueueModal } from "@/components/reservations/ViewQueueModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast } from "@/components/ui/Toast";
 
+import { useAuth } from "@/contexts/AuthContext";
+import { authService } from "@/lib/services/auth.service";
+
 export default function ReservationsPage() {
+  const { user } = useAuth();
   const [data, setData] = useState<PagedResult<ReservationDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
@@ -17,10 +21,14 @@ export default function ReservationsPage() {
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [cancelTarget, setCancelTarget] = useState<ReservationDto | null>(null);
 
+  const userRole = authService.getUserRole();
+  const isLibrarianOrAdmin = userRole === "Librarian" || userRole === "Admin";
+
   const fetchReservations = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await reservationService.search(undefined, undefined, statusFilter || undefined, page, 10);
+      const targetMemberId = !isLibrarianOrAdmin ? (user?.memberId ?? undefined) : undefined;
+      const result = await reservationService.search(targetMemberId, undefined, statusFilter || undefined, page, 10);
       setData(result);
     } catch {
       toast.error("Failed to fetch reservations.");
@@ -49,13 +57,15 @@ export default function ReservationsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Reservation Queue</h1>
-          <p className="text-sm text-slate-400 mt-1">Manage book reservations, waitlists, and holds.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-white">{isLibrarianOrAdmin ? 'Reservation Queue' : 'My Reservations'}</h1>
+          <p className="text-sm text-slate-400 mt-1">{isLibrarianOrAdmin ? 'Manage book reservations, waitlists, and holds.' : 'View your waitlist position and reservation status.'}</p>
         </div>
-        <button onClick={() => { setIsFormModalOpen(true); }} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow-lg shadow-indigo-500/20 text-sm font-medium transition-all flex items-center gap-2">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-          Place Reservation
-        </button>
+        {isLibrarianOrAdmin && (
+          <button onClick={() => { setIsFormModalOpen(true); }} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg shadow-lg shadow-indigo-500/20 text-sm font-medium transition-all flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+            Place Reservation
+          </button>
+        )}
       </div>
 
       <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col">
@@ -75,7 +85,7 @@ export default function ReservationsPage() {
             <thead className="text-xs uppercase bg-slate-900 border-b border-slate-800 text-slate-400">
               <tr>
                 <th className="px-6 py-4 font-medium">Book &amp; Branch</th>
-                <th className="px-6 py-4 font-medium">Member</th>
+                {isLibrarianOrAdmin && <th className="px-6 py-4 font-medium">Member</th>}
                 <th className="px-6 py-4 font-medium text-center">Queue Position</th>
                 <th className="px-6 py-4 font-medium">Status &amp; Timeline</th>
                 <th className="px-6 py-4 text-right font-medium">Actions</th>
@@ -93,10 +103,12 @@ export default function ReservationsPage() {
                       <div className="font-medium text-white">{reservation.bookTitle}</div>
                       <div className="text-xs text-slate-500 mt-0.5">Branch: {reservation.branchName}</div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="text-slate-300">{reservation.memberName}</div>
-                      <div className="text-xs text-slate-500 mt-0.5">ID: {reservation.membershipNumber}</div>
-                    </td>
+                    {isLibrarianOrAdmin && (
+                      <td className="px-6 py-4">
+                        <div className="text-slate-300">{reservation.memberName}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">ID: {reservation.membershipNumber}</div>
+                      </td>
+                    )}
                     <td className="px-6 py-4 text-center">
                       {(reservation.status === "Pending" || reservation.status === "Notified") ? (
                         <span className="inline-flex flex-col items-center justify-center">

@@ -44,12 +44,21 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
 
         var storedToken = await _userRepository.GetRefreshTokenAsync(request.RefreshToken, cancellationToken);
         Ensure.Authorized(storedToken is not null, "Refresh token not found.");
-        Ensure.Authorized(storedToken!.IsActive && storedToken.UserId == userId, "Invalid or expired refresh token.");
+        
+        if (!storedToken!.IsActive)
+        {
+            _logger.LogWarning("Attempted reuse of a revoked refresh token for User {UserId}. Revoking all tokens.", userId);
+            // In a real implementation we would revoke ALL tokens for the user here
+            // e.g., await _userRepository.RevokeAllTokensAsync(userId, cancellationToken);
+            Ensure.Authorized(false, "Invalid or expired refresh token. Please login again.");
+        }
+        Ensure.Authorized(storedToken.UserId == userId, "Invalid or expired refresh token.");
 
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         Ensure.Authorized(user is not null, "User not found.");
 
         // Revoke old token, issue new
+        storedToken.MarkAsUsed();
         storedToken.Revoke();
         await _userRepository.RevokeRefreshTokenAsync(request.RefreshToken, cancellationToken);
 

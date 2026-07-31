@@ -1,8 +1,10 @@
 using LibraryMS.Domain.Common;
 using LibraryMS.EntityFrameworkCore;
 using LibraryMS.EntityFrameworkCore.Outbox;
+using LibraryMS.Infrastructure.Jobs.Handlers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
@@ -12,17 +14,30 @@ namespace LibraryMS.Infrastructure.Jobs;
 public sealed class OutboxProcessorJob
 {
     private readonly LibraryDbContext _dbContext;
-    private readonly IPublisher _publisher;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<OutboxProcessorJob> _logger;
+    private readonly IOutboxMessageHandler _messageHandlerChain;
 
     public OutboxProcessorJob(
         LibraryDbContext dbContext,
-        IPublisher publisher,
+        IServiceProvider serviceProvider,
         ILogger<OutboxProcessorJob> logger)
     {
         _dbContext = dbContext;
-        _publisher = publisher;
+        _serviceProvider = serviceProvider;
         _logger = logger;
+
+        // Build the chain
+        var domainHandler = new DomainEventOutboxMessageHandler(
+            serviceProvider.GetRequiredService<IPublisher>(), 
+            serviceProvider.GetRequiredService<ILogger<DomainEventOutboxMessageHandler>>());
+            
+        var emailHandler = new EmailOutboxMessageHandler(
+            serviceProvider.GetRequiredService<ILogger<EmailOutboxMessageHandler>>());
+
+        domainHandler.SetNext(emailHandler);
+        
+        _messageHandlerChain = domainHandler;
     }
 
     // Entry point called by Hangfire every 30 seconds.
@@ -70,10 +85,19 @@ public sealed class OutboxProcessorJob
                 return;
             }
 
-            await _publisher.Publish(domainEvent, cancellationToken);
-            message.MarkAsProcessed();
+            var handled = await _messageHandlerChain.HandleAsync(message, domainEvent, cancellationToken);
+            
+            if (handled)
+            {
+                message.MarkAsProcessed();
+                _logger.LogInformation("OutboxProcessor: Processed message {Id} ({Type}) with Category: {Category}.", message.Id, message.Type, message.Category ?? "None");
+            }
+            else
+            {
+                _logger.LogWarning("OutboxProcessor: Message {Id} was not handled by any handler in the chain.", message.Id);
+                message.RecordFailure("No handler found for message.");
+            }
 
-            _logger.LogInformation("OutboxProcessor: Processed message {Id} ({Type}).", message.Id, message.Type);
         }
         catch (Exception ex)
         {

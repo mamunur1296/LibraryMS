@@ -267,6 +267,9 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
                     b.Property<bool>("IsFinePaid")
                         .HasColumnType("boolean");
 
+                    b.Property<Guid?>("IssuedById")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime?>("LastModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -285,6 +288,9 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
                     b.Property<DateTime?>("ReturnDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("ReturnedById")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -298,7 +304,11 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
 
                     b.HasIndex("BranchId");
 
+                    b.HasIndex("IssuedById");
+
                     b.HasIndex("MemberId");
+
+                    b.HasIndex("ReturnedById");
 
                     b.ToTable("BorrowRecords", (string)null);
                 });
@@ -370,6 +380,9 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("BranchId")
+                        .HasColumnType("uuid");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -427,6 +440,8 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BranchId");
+
                     b.HasIndex("Email")
                         .IsUnique();
 
@@ -463,6 +478,9 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsUsed")
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastModifiedAt")
@@ -539,6 +557,9 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("MembershipExpiry")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("MembershipNumber")
                         .IsRequired()
@@ -641,11 +662,54 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
                     b.ToTable("Reservations", (string)null);
                 });
 
+            modelBuilder.Entity("LibraryMS.Domain.SettingsManagement.Entities.SystemSetting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SystemSettings");
+                });
+
             modelBuilder.Entity("LibraryMS.EntityFrameworkCore.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("text");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -666,6 +730,9 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
 
                     b.Property<int>("RetryCount")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ScheduledFor")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -756,15 +823,30 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("LibraryMS.Domain.IdentityManagement.AggregateRoots.User", null)
+                        .WithMany()
+                        .HasForeignKey("IssuedById")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("LibraryMS.Domain.MemberManagement.AggregateRoots.Member", null)
                         .WithMany()
                         .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("LibraryMS.Domain.IdentityManagement.AggregateRoots.User", null)
+                        .WithMany()
+                        .HasForeignKey("ReturnedById")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("LibraryMS.Domain.IdentityManagement.AggregateRoots.User", b =>
                 {
+                    b.HasOne("LibraryMS.Domain.BranchManagement.AggregateRoots.Branch", null)
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("LibraryMS.Domain.MemberManagement.AggregateRoots.Member", null)
                         .WithMany()
                         .HasForeignKey("MemberId")
@@ -778,6 +860,43 @@ namespace LibraryMS.EntityFrameworkCore.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("LibraryMS.Domain.MemberManagement.AggregateRoots.Member", b =>
+                {
+                    b.OwnsMany("LibraryMS.Domain.MemberManagement.Entities.MemberFavorite", "Favorites", b1 =>
+                        {
+                            b1.Property<Guid>("Id")
+                                .HasColumnType("uuid");
+
+                            b1.Property<DateTime>("AddedAt")
+                                .HasColumnType("timestamp with time zone");
+
+                            b1.Property<Guid>("BookId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<Guid>("MemberId")
+                                .HasColumnType("uuid");
+
+                            b1.HasKey("Id");
+
+                            b1.HasIndex("BookId");
+
+                            b1.HasIndex("MemberId");
+
+                            b1.ToTable("MemberFavorites", (string)null);
+
+                            b1.HasOne("LibraryMS.Domain.BookManagement.AggregateRoots.Book", null)
+                                .WithMany()
+                                .HasForeignKey("BookId")
+                                .OnDelete(DeleteBehavior.Cascade)
+                                .IsRequired();
+
+                            b1.WithOwner()
+                                .HasForeignKey("MemberId");
+                        });
+
+                    b.Navigation("Favorites");
                 });
 
             modelBuilder.Entity("LibraryMS.Domain.ReservationManagement.AggregateRoots.Reservation", b =>

@@ -6,6 +6,7 @@ namespace LibraryMS.Domain.MemberManagement;
 public interface IMemberRepository
 {
     Task<Member?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<List<Member>> GetByIdsAsync(IEnumerable<Guid> ids, CancellationToken ct = default);
     Task<Member?> GetByEmailAsync(string email, CancellationToken ct = default);
     Task<bool> EmailExistsAsync(string email, Guid? excludeId, CancellationToken ct = default);
     Task<bool> MembershipNumberExistsAsync(string number, CancellationToken ct = default);

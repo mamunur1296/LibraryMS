@@ -16,6 +16,7 @@ public sealed class User : AggregateRoot<Guid>
     public UserRole Role { get; private set; }
     public bool IsActive { get; private set; } = true;
     public Guid? MemberId { get; private set; }  // linked to Member if role=Member
+    public Guid? BranchId { get; private set; }  // linked to Branch if role=Librarian
 
     public DateTime? LastLoginAt { get; private set; }
 
@@ -31,6 +32,7 @@ public sealed class User : AggregateRoot<Guid>
         PasswordSalt = salt;
         Role = role;
         MemberId = memberId;
+        BranchId = null;
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
 
@@ -63,6 +65,12 @@ public sealed class User : AggregateRoot<Guid>
     internal void ChangeRole(UserRole newRole)
     {
         Role = newRole;
+    }
+
+    internal void AssignBranch(Guid branchId)
+    {
+        Ensure.Against(Role != UserRole.Librarian, "Only Librarians can be assigned to a specific branch.", "USER_NOT_LIBRARIAN");
+        BranchId = branchId;
     }
 
     internal void ChangeUsername(string newUsername)

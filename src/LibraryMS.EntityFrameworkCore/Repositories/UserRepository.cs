@@ -70,5 +70,10 @@ public sealed class UserRepository : BaseRepository<User>, IUserRepository
     {
         return await DbSet.ToListAsync(cancellationToken);
     }
+
+    public async Task<User?> GetByMemberIdAsync(Guid memberId, CancellationToken cancellationToken = default)
+    {
+        return await DbSet.FirstOrDefaultAsync(u => u.MemberId == memberId, cancellationToken);
+    }
 }
 

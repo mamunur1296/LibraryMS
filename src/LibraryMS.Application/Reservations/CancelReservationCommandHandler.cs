@@ -1,6 +1,5 @@
 using LibraryMS.Application.Contracts.Reservations;
 using LibraryMS.Domain.ReservationManagement;
-using LibraryMS.Domain.ReservationManagement.AggregateRoots;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Exceptions;
 using LibraryMS.Domain.Shared.Guards;

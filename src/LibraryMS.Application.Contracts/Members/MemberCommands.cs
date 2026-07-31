@@ -24,3 +24,9 @@ public sealed record SuspendMemberCommand(
 
 public sealed record ActivateMemberCommand(Guid Id)
     : IRequest<MemberDto>;
+
+public sealed record ResetMemberPasswordCommand(Guid MemberId, string NewPassword) : IRequest;
+
+public sealed record CreateMemberUserCommand(Guid MemberId, string Username, string Password) : IRequest;
+
+public sealed record RenewMembershipCommand(Guid Id, int Days) : IRequest<MemberDto>;

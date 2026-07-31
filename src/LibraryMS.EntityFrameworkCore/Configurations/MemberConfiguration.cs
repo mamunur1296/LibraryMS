@@ -23,5 +23,13 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
         builder.HasIndex(m => m.MembershipNumber).IsUnique();
 
         builder.Property(m => m.RowVersion).IsConcurrencyToken();
+
+        builder.OwnsMany(m => m.Favorites, fb =>
+        {
+            fb.ToTable("MemberFavorites");
+            fb.HasKey(f => f.Id);
+            fb.Property(f => f.Id).ValueGeneratedNever();
+            fb.HasOne<LibraryMS.Domain.BookManagement.AggregateRoots.Book>().WithMany().HasForeignKey(f => f.BookId);
+        });
     }
 }

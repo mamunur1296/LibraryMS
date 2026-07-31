@@ -23,5 +23,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.Email).IsUnique();
         
         builder.HasOne<Member>().WithMany().HasForeignKey(u => u.MemberId).IsRequired(false).OnDelete(DeleteBehavior.SetNull);
+        builder.HasOne<LibraryMS.Domain.BranchManagement.AggregateRoots.Branch>().WithMany().HasForeignKey(u => u.BranchId).IsRequired(false).OnDelete(DeleteBehavior.SetNull);
     }
 }

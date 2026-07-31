@@ -103,18 +103,7 @@ export default function RegisterPage() {
             {errors.password && <p className="text-red-400 text-xs ml-1 mt-1">{errors.password.message}</p>}
           </div>
 
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-200 ml-1">Role</label>
-            <select
-              {...register("role")}
-              className="w-full px-4 py-3 bg-slate-900/50 border border-slate-700/50 rounded-xl text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-            >
-              <option value="Member" className="bg-slate-900 text-white">Member</option>
-              <option value="Librarian" className="bg-slate-900 text-white">Librarian</option>
-              <option value="Admin" className="bg-slate-900 text-white">Admin</option>
-            </select>
-            {errors.role && <p className="text-red-400 text-xs ml-1 mt-1">{errors.role.message}</p>}
-          </div>
+          <input type="hidden" value="Member" {...register("role")} />
 
           <div className="pt-4">
             <button

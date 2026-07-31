@@ -14,6 +14,7 @@ public interface IUserRepository
     Task AddAsync(User user, CancellationToken ct = default);
     Task UpdateAsync(User user, CancellationToken ct = default);
     Task<List<User>> GetAllUsersAsync(CancellationToken ct = default);
+    Task<User?> GetByMemberIdAsync(Guid memberId, CancellationToken ct = default);
 
     // Refresh token management
     Task<RefreshToken?> GetRefreshTokenAsync(string token, CancellationToken ct = default);
