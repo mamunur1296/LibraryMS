@@ -1,6 +1,7 @@
 using System.Text;
 using Asp.Versioning;
 using Hangfire;
+using LibraryMS.HttpApi.Host.Swagger;
 using LibraryMS.Application;
 using LibraryMS.Application.BackgroundJobs;
 using LibraryMS.EntityFrameworkCore;
@@ -94,6 +95,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Library Management System API v1", Version = "v1" });
     c.SwaggerDoc("v2", new OpenApiInfo { Title = "Library Management System API v2", Version = "v2" });
+    
+    // Register global error response filter
+    c.OperationFilter<ProducesCommonResponseTypesOperationFilter>();
     
     // Add JWT support in Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
