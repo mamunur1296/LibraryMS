@@ -33,9 +33,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const response = await apiClient.get<User>("/api/Users/me");
       setUser(response.data);
     } catch {
-      // Token may be valid but /me call failed — don't force logout,
-      // just clear user so protected routes still work via token check
-      setUser(null);
+      // /me call failed but token is valid — decode JWT as fallback
+      // so user.role remains the single source of truth everywhere
+      const fallback = authService.getUserFromToken();
+      setUser(fallback);
     } finally {
       setIsLoading(false);
     }

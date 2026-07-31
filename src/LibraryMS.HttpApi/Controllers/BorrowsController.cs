@@ -58,9 +58,18 @@ public class BorrowsController : BaseController
     }
 
     [HttpPost]
-    [Authorize(Roles = "Librarian")]
+    [Authorize(Roles = "Admin,Librarian,Member")]
     public async Task<ActionResult<BorrowDto>> Borrow([FromBody] BorrowBookCommand command, CancellationToken cancellationToken)
     {
+        if (User.IsInRole("Member"))
+        {
+            var currentMemberIdString = User.Claims.FirstOrDefault(c => c.Type.Equals("memberId", StringComparison.OrdinalIgnoreCase))?.Value;
+            if (!Guid.TryParse(currentMemberIdString, out var currentMemberId) || command.MemberId != currentMemberId)
+            {
+                return Forbid();
+            }
+        }
+
         var result = await Mediator.Send(command, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }

@@ -51,6 +51,7 @@ function AppInner() {
             <Route path="/books" element={<BooksPage />} />
             <Route path="/members" element={<MembersPage />} />
             <Route path="/borrows" element={<BorrowsPage />} />
+            <Route path="/my-borrows" element={<BorrowsPage />} />
             <Route path="/branches" element={<BranchesPage />} />
             <Route path="/reservations" element={<ReservationsPage />} />
             <Route path="/favourites" element={<FavouritesPage />} />

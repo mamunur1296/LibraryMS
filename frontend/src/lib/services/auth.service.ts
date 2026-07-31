@@ -50,11 +50,29 @@ export const authService = {
   },
 
   getUserRole(): string | null {
+    return this.getUserFromToken()?.role ?? null;
+  },
+
+  getUserFromToken(): import("../../types/auth.types").User | null {
     const token = localStorage.getItem("token");
     if (!token) return null;
     try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      return payload.role || payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || null;
+      const p = JSON.parse(atob(token.split(".")[1]));
+      const role =
+        p.role ??
+        p["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ??
+        null;
+      if (!role) return null;
+      return {
+        id: p.sub ?? p.nameid ?? p["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] ?? "",
+        username: p.unique_name ?? p["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"] ?? "",
+        email: p.email ?? "",
+        role,
+        memberId: p.memberId ?? null,
+        branchId: p.branchId ?? null,
+        branchName: p.branchName ?? null,
+        isActive: true,
+      };
     } catch {
       return null;
     }

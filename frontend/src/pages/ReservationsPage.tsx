@@ -5,9 +5,7 @@ import { ReservationFormModal } from "@/components/reservations/ReservationFormM
 import { ViewQueueModal } from "@/components/reservations/ViewQueueModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast } from "@/components/ui/Toast";
-
 import { useAuth } from "@/contexts/AuthContext";
-import { authService } from "@/lib/services/auth.service";
 
 export default function ReservationsPage() {
   const { user } = useAuth();
@@ -21,7 +19,7 @@ export default function ReservationsPage() {
   const [selectedBranchId, setSelectedBranchId] = useState<string | null>(null);
   const [cancelTarget, setCancelTarget] = useState<ReservationDto | null>(null);
 
-  const userRole = authService.getUserRole();
+  const userRole = user?.role;
   const isLibrarianOrAdmin = userRole === "Librarian" || userRole === "Admin";
 
   const fetchReservations = useCallback(async () => {

@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { borrowService } from "@/lib/services/borrow.service";
-import { authService } from "@/lib/services/auth.service";
 import { BorrowDto, PagedResult } from "@/types/borrow.types";
 import { BorrowFormModal } from "@/components/borrows/BorrowFormModal";
 import { ReturnBookModal } from "@/components/borrows/ReturnBookModal";
@@ -22,7 +21,7 @@ export default function BorrowsPage() {
   const [borrowToManage, setBorrowToManage] = useState<BorrowDto | null>(null);
   const [finePayTarget, setFinePayTarget] = useState<BorrowDto | null>(null);
 
-  const userRole = authService.getUserRole();
+  const userRole = user?.role;
   const isLibrarianOrAdmin = userRole === "Librarian" || userRole === "Admin";
 
   const fetchBorrows = useCallback(async () => {

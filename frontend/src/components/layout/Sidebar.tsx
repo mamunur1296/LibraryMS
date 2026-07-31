@@ -22,7 +22,13 @@ const navigation: NavItem[] = [
     name: "Books",
     href: "/books",
     icon: <BookOpen className="w-5 h-5" />,
-    roles: ["Admin", "Librarian", "Member"],
+    roles: ["Admin", "Librarian"],
+  },
+  {
+    name: "Book Catalog",
+    href: "/books",
+    icon: <BookOpen className="w-5 h-5" />,
+    roles: ["Member"],
   },
   {
     name: "Members",
@@ -34,12 +40,6 @@ const navigation: NavItem[] = [
     name: "Branches",
     href: "/branches",
     icon: <Building className="w-5 h-5" />,
-    roles: ["Admin"],
-  },
-  {
-    name: "Librarians",
-    href: "/users",
-    icon: <UserCircle className="w-5 h-5" />,
     roles: ["Admin"],
   },
   {
