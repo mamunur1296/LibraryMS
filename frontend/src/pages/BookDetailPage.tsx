@@ -80,9 +80,15 @@ export default function BookDetailPage() {
     }
 
     if (action === "borrow") {
+<<<<<<< Updated upstream
       navigate(`/dashboard/borrows/new?bookId=${book.id}`);
     } else {
       navigate(`/dashboard/reservations/new?bookId=${book.id}`);
+=======
+      navigate(`/borrows?action=new&bookId=${book.id}`);
+    } else {
+      navigate(`/reservations?action=new&bookId=${book.id}`);
+>>>>>>> Stashed changes
     }
   };
 

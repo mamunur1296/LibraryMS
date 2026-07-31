@@ -1,7 +1,15 @@
 import { Outlet, Link } from "react-router-dom";
 import { ThemeToggle } from "../ui/ThemeToggle";
+<<<<<<< Updated upstream
 
 export function PublicLayout() {
+=======
+import { useAuth } from "@/contexts/AuthContext";
+
+export function PublicLayout() {
+  const { isAuthenticated, user } = useAuth();
+  
+>>>>>>> Stashed changes
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -29,12 +37,30 @@ export function PublicLayout() {
           </div>
           <div className="flex items-center gap-4">
             <ThemeToggle />
+<<<<<<< Updated upstream
             <Link
               to="/login"
               className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               Sign In
             </Link>
+=======
+            {isAuthenticated ? (
+              <Link
+                to="/dashboard"
+                className="inline-flex h-9 items-center justify-center rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 shadow transition-colors hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              >
+                Sign In
+              </Link>
+            )}
+>>>>>>> Stashed changes
           </div>
         </div>
       </header>

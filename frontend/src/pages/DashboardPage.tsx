@@ -2,8 +2,15 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { dashboardService } from '@/lib/services/dashboard.service';
 import { memberService } from '@/lib/services/member.service';
+<<<<<<< Updated upstream
 import { DashboardSummaryDto, AdminDashboardSummaryDto, BranchDashboardSummaryDto } from '@/types/dashboard.types';
 import { MemberProfileStatsDto } from '@/types/member.types';
+=======
+import { favouriteService } from '@/lib/services/favourite.service';
+import { DashboardSummaryDto, AdminDashboardSummaryDto, BranchDashboardSummaryDto } from '@/types/dashboard.types';
+import { MemberProfileStatsDto } from '@/types/member.types';
+import { BookDto } from '@/types/book.types';
+>>>>>>> Stashed changes
 import { useAuth } from '@/contexts/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -15,6 +22,14 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
+<<<<<<< Updated upstream
+=======
+  // Favourites state
+  const [showFavourites, setShowFavourites] = useState(false);
+  const [favourites, setFavourites] = useState<BookDto[]>([]);
+  const [loadingFavourites, setLoadingFavourites] = useState(false);
+  
+>>>>>>> Stashed changes
   // Admin Branch Filter
   const [selectedBranchId, setSelectedBranchId] = useState<string>('all');
 
@@ -64,6 +79,24 @@ export default function DashboardPage() {
     );
   }
 
+<<<<<<< Updated upstream
+=======
+  const toggleFavourites = async () => {
+    if (!showFavourites) {
+      setLoadingFavourites(true);
+      try {
+        const data = await favouriteService.getFavourites();
+        setFavourites(data.map((item: any) => item.book));
+      } catch (err) {
+        console.error('Failed to load favourites', err);
+      } finally {
+        setLoadingFavourites(false);
+      }
+    }
+    setShowFavourites(!showFavourites);
+  };
+
+>>>>>>> Stashed changes
   const adminCards = [
     { name: 'Total Books', value: summary?.totalBooks || 0, icon: '📚', color: 'from-blue-500 to-indigo-500' },
     { name: 'Total Members', value: summary?.totalMembers || 0, icon: '👥', color: 'from-emerald-500 to-teal-500' },
@@ -74,10 +107,67 @@ export default function DashboardPage() {
   ];
 
   const memberCards = [
+<<<<<<< Updated upstream
     { name: 'Active Borrows', value: memberStats?.activeBorrows || 0, icon: '🔄', color: 'from-blue-500 to-indigo-500' },
     { name: 'Total Borrows', value: memberStats?.totalBorrows || 0, icon: '📚', color: 'from-emerald-500 to-teal-500' },
     { name: 'Overdue Borrows', value: memberStats?.overdueBorrows || 0, icon: '⚠️', color: 'from-red-500 to-rose-500' },
     { name: 'Pending Reservations', value: memberStats?.activeReservations || 0, icon: '⏳', color: 'from-purple-500 to-fuchsia-500' },
+=======
+    { 
+      name: 'Active Borrows', 
+      value: memberStats?.activeBorrows || 0, 
+      icon: '📚', 
+      color: 'from-blue-500 to-indigo-500',
+      extra: memberStats?.nearestDueDate ? <span className="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded-full mt-2 inline-block">Due: {new Date(memberStats.nearestDueDate).toLocaleDateString()}</span> : null
+    },
+    { 
+      name: 'Total Borrowed', 
+      value: memberStats?.totalBorrows || 0, 
+      icon: '📖', 
+      color: 'from-emerald-500 to-teal-500' 
+    },
+    { 
+      name: 'Overdue', 
+      value: memberStats?.overdueBorrows || 0, 
+      icon: '⚠️', 
+      color: 'from-red-500 to-rose-500',
+      extra: (memberStats?.overdueBorrows ?? 0) > 0 ? <span className="text-xs text-red-400 bg-red-900/30 px-2 py-1 rounded-full mt-2 inline-block">Fine accumulating daily</span> : null
+    },
+    { 
+      name: 'Pending Reservations', 
+      value: memberStats?.activeReservations || 0, 
+      icon: '⏳', 
+      color: 'from-purple-500 to-fuchsia-500',
+      extra: (memberStats?.activeReservations ?? 0) > 0 ? <span className="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded-full mt-2 inline-block">Queue-এ আছে</span> : null
+    },
+    {
+      name: 'Outstanding Fine',
+      value: `$${(memberStats?.totalFinesDue || 0).toFixed(2)}`,
+      icon: '💰',
+      color: 'from-amber-500 to-orange-500',
+      extra: (memberStats?.totalFinesDue ?? 0) > 0 ? <span className="text-xs text-red-400 bg-red-900/30 px-2 py-1 rounded-full mt-2 inline-block">Red alert</span> : null
+    },
+    {
+      name: 'Total Fine Paid',
+      value: `$${(memberStats?.totalFinesPaid || 0).toFixed(2)}`,
+      icon: '✅',
+      color: 'from-emerald-500 to-green-500'
+    },
+    {
+      name: 'Membership Expires',
+      value: memberStats?.membershipExpiry ? new Date(memberStats.membershipExpiry).toLocaleDateString() : 'N/A',
+      icon: '📅',
+      color: 'from-cyan-500 to-blue-500',
+      extra: memberStats?.membershipExpiry && new Date(memberStats.membershipExpiry).getTime() - new Date().getTime() < 30 * 24 * 60 * 60 * 1000 ? <button className="text-xs text-white bg-indigo-600 hover:bg-indigo-500 px-2 py-1 rounded mt-2 inline-block transition-colors">Renew</button> : null
+    },
+    {
+      name: 'Favourites Count',
+      value: memberStats?.favouriteCount || 0,
+      icon: '❤️',
+      color: 'from-pink-500 to-rose-500',
+      extra: <button onClick={toggleFavourites} className="text-xs text-pink-400 hover:text-pink-300 mt-2 inline-block underline cursor-pointer">{showFavourites ? 'Hide list' : 'Show list'}</button>
+    }
+>>>>>>> Stashed changes
   ];
 
   const statCards = user?.role === 'Member' ? memberCards : adminCards;
@@ -111,6 +201,14 @@ export default function DashboardPage() {
             <div className="relative">
               <dt className="truncate text-sm font-medium text-slate-400">{stat.name}</dt>
               <dd className="mt-2 text-3xl font-semibold tracking-tight text-white">{stat.value}</dd>
+<<<<<<< Updated upstream
+=======
+              {'extra' in stat && stat.extra && (
+                <div className="mt-1">
+                  {stat.extra}
+                </div>
+              )}
+>>>>>>> Stashed changes
             </div>
             <div className={`absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r ${stat.color}`}></div>
           </div>
@@ -119,8 +217,57 @@ export default function DashboardPage() {
 
       {/* Additional sections depending on role */}
       {user?.role === 'Member' && (
+<<<<<<< Updated upstream
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-8">
           <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+=======
+        <>
+          {showFavourites && (
+            <div className="mt-8 rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
+              <div className="p-6 border-b border-slate-800 flex justify-between items-center">
+                <h3 className="text-lg font-medium text-white flex items-center gap-2">
+                  <span className="text-rose-500">❤️</span> My Favourites
+                </h3>
+              </div>
+              <div className="overflow-x-auto">
+                {loadingFavourites ? (
+                  <div className="p-8 text-center text-slate-400">Loading favourites...</div>
+                ) : favourites.length > 0 ? (
+                  <table className="w-full text-left text-sm text-slate-300">
+                    <thead className="text-xs uppercase bg-slate-900/50 border-b border-slate-800 text-slate-400">
+                      <tr>
+                        <th className="px-6 py-4 font-medium">Book Title</th>
+                        <th className="px-6 py-4 font-medium">Author</th>
+                        <th className="px-6 py-4 font-medium text-center">ISBN</th>
+                        <th className="px-6 py-4 font-medium text-right">Available Copies</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800/50">
+                      {favourites.map((book) => (
+                        <tr key={book.id} className="hover:bg-slate-800/20 transition-colors">
+                          <td className="px-6 py-4 font-medium text-white">{book.title}</td>
+                          <td className="px-6 py-4">{book.authorName}</td>
+                          <td className="px-6 py-4 text-center">{book.isbn}</td>
+                          <td className="px-6 py-4 text-right">
+                            {book.availableCopies > 0 ? (
+                              <span className="text-emerald-400">{book.availableCopies} available</span>
+                            ) : (
+                              <span className="text-rose-400">Out of stock</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <div className="p-8 text-center text-slate-400">No favourites added yet.</div>
+                )}
+              </div>
+            </div>
+          )}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-8">
+            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+>>>>>>> Stashed changes
             <h3 className="text-lg font-medium text-white mb-4">Financial Overview</h3>
             <div className="flex justify-between items-center p-4 bg-slate-950 rounded-xl">
               <span className="text-slate-400">Total Fines Due</span>
@@ -139,6 +286,10 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+<<<<<<< Updated upstream
+=======
+      </>
+>>>>>>> Stashed changes
       )}
 
       {user?.role === 'Librarian' && (

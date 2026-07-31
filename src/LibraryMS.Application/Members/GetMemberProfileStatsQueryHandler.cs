@@ -53,6 +53,11 @@ public sealed class GetMemberProfileStatsQueryHandler : IRequestHandler<GetMembe
         var allReservationsResult = await _reservationRepository.GetPagedAsync(request.MemberId, null, null, 1, 10000, cancellationToken);
         var activeReservations = allReservationsResult.Items.Count(r => r.Status == ReservationStatus.Pending || r.Status == ReservationStatus.Fulfilled);
 
+<<<<<<< Updated upstream
+=======
+        var nearestDueDate = activeBorrows.Any() ? activeBorrows.Min(b => b.DueDate) : (DateTime?)null;
+
+>>>>>>> Stashed changes
         return new MemberProfileStatsDto
         {
             MemberId = request.MemberId,
@@ -62,7 +67,13 @@ public sealed class GetMemberProfileStatsQueryHandler : IRequestHandler<GetMembe
             ActiveReservations = activeReservations,
             TotalFinesDue = totalFinesDue,
             TotalFinesPaid = totalFinesPaid,
+<<<<<<< Updated upstream
             MembershipExpiry = member.MembershipExpiry
+=======
+            MembershipExpiry = member.MembershipExpiry,
+            NearestDueDate = nearestDueDate,
+            FavouriteCount = member.Favorites.Count
+>>>>>>> Stashed changes
         };
     }
 }

@@ -75,6 +75,7 @@ export default function FavouritesPage() {
       </div>
 
       {books.length > 0 ? (
+<<<<<<< Updated upstream
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {books.map((book) => (
             <BookCard 
@@ -83,6 +84,67 @@ export default function FavouritesPage() {
               onLoginPrompt={() => navigate("/login")}
             />
           ))}
+=======
+        <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/50">
+          <table className="w-full text-left text-sm text-slate-300">
+            <thead className="bg-slate-900 text-xs uppercase text-slate-400 border-b border-slate-800">
+              <tr>
+                <th className="px-6 py-4 font-medium">Book Title</th>
+                <th className="px-6 py-4 font-medium">Author</th>
+                <th className="px-6 py-4 font-medium text-center">ISBN</th>
+                <th className="px-6 py-4 font-medium text-center">Available Copies</th>
+                <th className="px-6 py-4 font-medium text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/50">
+              {books.map((book) => (
+                <tr key={book.id} className="hover:bg-slate-800/30 transition-colors">
+                  <td className="px-6 py-4 font-medium text-white">{book.title}</td>
+                  <td className="px-6 py-4">{book.authorName}</td>
+                  <td className="px-6 py-4 text-center">{book.isbn}</td>
+                  <td className="px-6 py-4 text-center">
+                    {book.availableCopies > 0 ? (
+                      <span className="text-emerald-400 font-medium">{book.availableCopies} available</span>
+                    ) : (
+                      <span className="text-rose-400">Out of stock</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="default"
+                        className="bg-indigo-600 hover:bg-indigo-500"
+                        disabled={book.availableCopies === 0}
+                        onClick={() => navigate(`/borrows?action=new&bookId=${book.id}`)}
+                      >
+                        Borrow
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="destructive"
+                        className="bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white border border-rose-500/20"
+                        onClick={async () => {
+                          try {
+                            if (user) {
+                              await favouriteService.removeFavourite(book.id);
+                            }
+                            favouriteService.toggleLocalFavourite(book.id);
+                            setBooks(books.filter(b => b.id !== book.id));
+                          } catch (err) {
+                            console.error("Failed to remove favourite", err);
+                          }
+                        }}
+                      >
+                        Unfavourite
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+>>>>>>> Stashed changes
         </div>
       ) : (
         <EmptyState

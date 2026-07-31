@@ -1,4 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
+<<<<<<< Updated upstream
+=======
+import { useSearchParams } from "react-router-dom";
+>>>>>>> Stashed changes
 import { borrowService } from "@/lib/services/borrow.service";
 import { authService } from "@/lib/services/auth.service";
 import { BorrowDto, PagedResult } from "@/types/borrow.types";
@@ -11,6 +15,10 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function BorrowsPage() {
   const { user } = useAuth();
+<<<<<<< Updated upstream
+=======
+  const [searchParams, setSearchParams] = useSearchParams();
+>>>>>>> Stashed changes
   const [data, setData] = useState<PagedResult<BorrowDto> | null>(null);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
@@ -38,6 +46,17 @@ export default function BorrowsPage() {
 
   useEffect(() => { void fetchBorrows(); }, [fetchBorrows]);
 
+<<<<<<< Updated upstream
+=======
+  useEffect(() => {
+    if (searchParams.get("action") === "new") {
+      setIsFormModalOpen(true);
+      // Remove the action from URL so it doesn't reopen on refresh if not desired, 
+      // but keeping it is fine as the modal close will just close it.
+    }
+  }, [searchParams]);
+
+>>>>>>> Stashed changes
   const handlePayFineConfirm = async () => {
     if (!finePayTarget) return;
     try {
@@ -154,7 +173,22 @@ export default function BorrowsPage() {
         )}
       </div>
 
+<<<<<<< Updated upstream
       <BorrowFormModal isOpen={isFormModalOpen} onClose={() => { setIsFormModalOpen(false); }} onSuccess={() => { void fetchBorrows(); }} />
+=======
+      <BorrowFormModal 
+        isOpen={isFormModalOpen} 
+        onClose={() => { 
+          setIsFormModalOpen(false);
+          if (searchParams.get("action") === "new") {
+            searchParams.delete("action");
+            searchParams.delete("bookId");
+            setSearchParams(searchParams);
+          }
+        }} 
+        onSuccess={() => { void fetchBorrows(); }} 
+      />
+>>>>>>> Stashed changes
       <ReturnBookModal isOpen={isReturnModalOpen} onClose={() => { setIsReturnModalOpen(false); }} onSuccess={() => { void fetchBorrows(); }} borrow={borrowToManage} />
 
       <ConfirmDialog

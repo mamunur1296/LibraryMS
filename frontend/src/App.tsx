@@ -35,7 +35,10 @@ function AppInner() {
             <Route path="/" element={<Navigate to="/catalog" replace />} />
             <Route path="/catalog" element={<CatalogPage />} />
             <Route path="/catalog/:id" element={<BookDetailPage />} />
+<<<<<<< Updated upstream
             <Route path="/favourites" element={<FavouritesPage />} />
+=======
+>>>>>>> Stashed changes
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
           </Route>
@@ -54,6 +57,10 @@ function AppInner() {
             <Route path="/borrows" element={<BorrowsPage />} />
             <Route path="/branches" element={<BranchesPage />} />
             <Route path="/reservations" element={<ReservationsPage />} />
+<<<<<<< Updated upstream
+=======
+            <Route path="/favourites" element={<FavouritesPage />} />
+>>>>>>> Stashed changes
             <Route path="/my-fines" element={<MyFinesPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/settings" element={<SettingsPage />} />

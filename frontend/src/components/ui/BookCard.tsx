@@ -70,9 +70,15 @@ export function BookCard({ book, viewMode = "grid", onLoginPrompt }: BookCardPro
     }
 
     if (action === "borrow") {
+<<<<<<< Updated upstream
       navigate(`/dashboard/borrows/new?bookId=${book.id}`);
     } else {
       navigate(`/dashboard/reservations/new?bookId=${book.id}`);
+=======
+      navigate(`/borrows?action=new&bookId=${book.id}`);
+    } else {
+      navigate(`/reservations?action=new&bookId=${book.id}`);
+>>>>>>> Stashed changes
     }
   };
 
@@ -172,11 +178,27 @@ export function BookCard({ book, viewMode = "grid", onLoginPrompt }: BookCardPro
 
           <div className={cn("flex gap-2 transition-opacity", !isGrid && "opacity-100", isHovered ? "opacity-100" : "opacity-100 md:opacity-0")}>
             {book.availableCopies > 0 ? (
+<<<<<<< Updated upstream
               <Button size="sm" onClick={(e) => handleAction(e, "borrow")}>
                 Borrow
               </Button>
             ) : (
               <Button size="sm" variant="outline" onClick={(e) => handleAction(e, "reserve")}>
+=======
+              <Button size="sm" onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleAction(e, "borrow");
+              }}>
+                Borrow
+              </Button>
+            ) : (
+              <Button size="sm" variant="outline" onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleAction(e, "reserve");
+              }}>
+>>>>>>> Stashed changes
                 Reserve
               </Button>
             )}

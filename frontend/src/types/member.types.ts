@@ -40,6 +40,11 @@ export interface SuspendMemberRequest {
   reason: string;
 }
 
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
 export interface MemberProfileStatsDto {
   memberId: string;
   totalBorrows: number;
@@ -47,6 +52,13 @@ export interface MemberProfileStatsDto {
   overdueBorrows: number;
   activeReservations: number;
   totalFinesDue: number;
+<<<<<<< Updated upstream
+=======
+  totalFinesPaid: number;
+  membershipExpiry: string;
+  nearestDueDate: string | null;
+  favouriteCount: number;
+>>>>>>> Stashed changes
 }
 
 export interface ResetMemberPasswordRequest {
@@ -62,4 +74,8 @@ export interface CreateMemberUserRequest {
   password?: string;
 }
 
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
 export type { PagedResult };

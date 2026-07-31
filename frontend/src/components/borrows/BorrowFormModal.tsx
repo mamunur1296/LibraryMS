@@ -6,6 +6,7 @@ import { memberService } from "@/lib/services/member.service";
 import { bookService } from "@/lib/services/book.service";
 import { branchService } from "@/lib/services/branch.service";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 interface BorrowFormModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export function BorrowFormModal({ isOpen, onClose, onSuccess }: BorrowFormModalP
   const [branches, setBranches] = useState<any[]>([]);
   const [availableCopies, setAvailableCopies] = useState<any[]>([]);
   const [loadingData, setLoadingData] = useState(false);
+  const [searchParams] = useSearchParams();
 
   const {
     register,
@@ -39,10 +41,11 @@ export function BorrowFormModal({ isOpen, onClose, onSuccess }: BorrowFormModalP
   useEffect(() => {
     if (isOpen) {
       fetchInitialData();
-      reset({ borrowDays: 14 });
+      const initialBookId = searchParams.get("bookId") || "";
+      reset({ borrowDays: 14, bookId: initialBookId });
       setAvailableCopies([]);
     }
-  }, [isOpen, reset]);
+  }, [isOpen, reset, searchParams]);
 
   // Fetch available copies when a book is selected
   useEffect(() => {
