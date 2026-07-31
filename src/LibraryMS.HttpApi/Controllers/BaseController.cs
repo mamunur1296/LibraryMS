@@ -1,3 +1,4 @@
+using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -5,7 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 namespace LibraryMS.HttpApi.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
 public abstract class BaseController : ControllerBase
 {
     private ISender? _mediator;

@@ -1,4 +1,5 @@
 using System.Text;
+using Asp.Versioning;
 using Hangfire;
 using LibraryMS.Application;
 using LibraryMS.Application.BackgroundJobs;
@@ -73,6 +74,19 @@ builder.Services.AddCors(options =>
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty, name: "PostgreSQL")
     .AddRedis(builder.Configuration["Redis:Configuration"] ?? string.Empty, name: "Redis");
+
+// Add API Versioning
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+})
+.AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
 
 // 5. Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
