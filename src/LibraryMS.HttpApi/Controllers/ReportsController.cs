@@ -8,10 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryMS.HttpApi.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
 [Authorize(Roles = "Admin,Librarian")]
-public class ReportsController : ControllerBase
+public class ReportsController : BaseController
 {
     private readonly IMediator _mediator;
 

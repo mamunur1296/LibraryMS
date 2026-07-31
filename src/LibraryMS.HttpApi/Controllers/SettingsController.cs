@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryMS.HttpApi.Controllers;
 
-[Route("api/[controller]")]
 [Authorize(Roles = "Admin")]
 public class SettingsController : BaseController
 {

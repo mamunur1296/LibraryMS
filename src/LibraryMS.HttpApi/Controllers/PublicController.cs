@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LibraryMS.HttpApi.Controllers;
 
 [AllowAnonymous]
-[Route("api/public")]
+[Route("api/v{version:apiVersion}/public")]
 public class PublicController : BaseController
 {
     [HttpGet("books")]

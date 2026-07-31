@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LibraryMS.HttpApi.Controllers;
 
 [Authorize(Roles = "Member")]
-[Route("api/favourites")]
+[Route("api/v{version:apiVersion}/favourites")]
 public class FavouritesController : BaseController
 {
     [HttpGet]

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LibraryMS.HttpApi.Controllers;
 
 [Authorize]
-[Route("api/profile")]
+[Route("api/v{version:apiVersion}/profile")]
 public class ProfileController : BaseController
 {
     [HttpGet]
