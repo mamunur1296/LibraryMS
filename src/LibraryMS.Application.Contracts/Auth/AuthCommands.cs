@@ -10,4 +10,11 @@ public sealed record RefreshTokenCommand(string AccessToken, string RefreshToken
 
 public sealed record RevokeTokenCommand(string RefreshToken) : IRequest;
 
-public sealed record RegisterUserCommand(string Username, string Email, string Password, string Role) : IRequest<Guid>;
+public sealed record RegisterUserCommand(
+    string Username,
+    string Email,
+    string Password,
+    string Role,
+    string? FirstName = null,
+    string? LastName = null,
+    string? Phone = null) : IRequest<Guid>;

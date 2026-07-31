@@ -42,6 +42,18 @@ public sealed class RegisterUserCommandValidator : AbstractValidator<RegisterUse
             .NotEmpty().WithMessage("Role is required.")
             .Must(r => r is "Admin" or "Librarian" or "Member")
             .WithMessage("Role must be Admin, Librarian, or Member.");
+
+        RuleFor(x => x.FirstName)
+            .NotEmpty().When(x => x.Role == "Member").WithMessage("First name is required when registering as a Member.")
+            .MaximumLength(50).WithMessage("First name cannot exceed 50 characters.");
+
+        RuleFor(x => x.LastName)
+            .NotEmpty().When(x => x.Role == "Member").WithMessage("Last name is required when registering as a Member.")
+            .MaximumLength(50).WithMessage("Last name cannot exceed 50 characters.");
+
+        RuleFor(x => x.Phone)
+            .NotEmpty().When(x => x.Role == "Member").WithMessage("Phone number is required when registering as a Member.")
+            .MaximumLength(20).WithMessage("Phone number cannot exceed 20 characters.");
     }
 }
 

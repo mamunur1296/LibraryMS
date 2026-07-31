@@ -2,6 +2,8 @@ using LibraryMS.Application.Contracts.Auth;
 using LibraryMS.Application.Contracts.Services;
 using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.IdentityManagement.Services;
+using LibraryMS.Domain.MemberManagement;
+using LibraryMS.Domain.MemberManagement.Services;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Enums;
 using LibraryMS.Domain.Shared.Guards;
@@ -15,6 +17,8 @@ public sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserCom
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly UserManager _userManager;
+    private readonly IMemberRepository _memberRepository;
+    private readonly MemberManager _memberManager;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RegisterUserCommandHandler> _logger;
 
@@ -22,12 +26,16 @@ public sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserCom
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         UserManager userManager,
+        IMemberRepository memberRepository,
+        MemberManager memberManager,
         IUnitOfWork unitOfWork,
         ILogger<RegisterUserCommandHandler> logger)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _userManager = userManager;
+        _memberRepository = memberRepository;
+        _memberManager = memberManager;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
@@ -45,9 +53,25 @@ public sealed class RegisterUserCommandHandler : IRequestHandler<RegisterUserCom
         if (!Enum.TryParse<UserRole>(request.Role, true, out var role))
             role = UserRole.Member; // Default role
 
+        Guid? memberId = null;
+
+        if (role == UserRole.Member)
+        {
+            var member = await _memberManager.CreateAsync(
+                request.FirstName ?? "",
+                request.LastName ?? "",
+                request.Email,
+                request.Phone ?? "",
+                address: null,
+                cancellationToken);
+
+            await _memberRepository.AddAsync(member, cancellationToken);
+            memberId = member.Id;
+        }
+
         var (hash, salt) = _passwordHasher.Hash(request.Password);
 
-        var user = _userManager.Create(request.Username, request.Email, hash, salt, role);
+        var user = _userManager.Create(request.Username, request.Email, hash, salt, role, memberId);
 
         await _userRepository.AddAsync(user, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
