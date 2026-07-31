@@ -2,11 +2,9 @@ using LibraryMS.Application.Contracts.Borrows;
 using LibraryMS.Application.Contracts.DTOs.Borrow;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.BookManagement;
-using LibraryMS.Domain.BookManagement.AggregateRoots;
 using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.BranchManagement;
 using LibraryMS.Domain.MemberManagement;
-using LibraryMS.Domain.Shared.Guards;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

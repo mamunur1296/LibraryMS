@@ -21,6 +21,7 @@ public sealed class GetAvailableCopiesQueryHandler : IRequestHandler<GetAvailabl
         if (book == null) return new List<BookCopyDto>();
         return book.Copies
             .Where(c => c.Status == LibraryMS.Domain.Shared.Enums.CopyStatus.Available)
+            .Where(c => request.BranchId == null || c.BranchId == request.BranchId.Value)
             .Select(c => c.ToDto())
             .ToList();
     }

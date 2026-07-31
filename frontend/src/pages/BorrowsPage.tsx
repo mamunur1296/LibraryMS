@@ -3,9 +3,12 @@ import { useSearchParams } from "react-router-dom";
 import { borrowService } from "@/lib/services/borrow.service";
 import { BorrowDto, PagedResult } from "@/types/borrow.types";
 import { BorrowFormModal } from "@/components/borrows/BorrowFormModal";
+import { MemberBorrowModal } from "@/components/borrows/MemberBorrowModal";
 import { ReturnBookModal } from "@/components/borrows/ReturnBookModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast } from "@/components/ui/Toast";
+import { bookService } from "@/lib/services/book.service";
+import { BookDto } from "@/types/book.types";
 
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -20,6 +23,7 @@ export default function BorrowsPage() {
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
   const [borrowToManage, setBorrowToManage] = useState<BorrowDto | null>(null);
   const [finePayTarget, setFinePayTarget] = useState<BorrowDto | null>(null);
+  const [memberBorrowBook, setMemberBorrowBook] = useState<BookDto | null>(null);
 
   const userRole = user?.role;
   const isLibrarianOrAdmin = userRole === "Librarian" || userRole === "Admin";
@@ -40,12 +44,24 @@ export default function BorrowsPage() {
   useEffect(() => { void fetchBorrows(); }, [fetchBorrows]);
 
   useEffect(() => {
-    if (searchParams.get("action") === "new") {
+    if (searchParams.get("action") !== "new") return;
+
+    const bookId = searchParams.get("bookId");
+    if (isLibrarianOrAdmin) {
       setIsFormModalOpen(true);
-      // Remove the action from URL so it doesn't reopen on refresh if not desired, 
-      // but keeping it is fine as the modal close will just close it.
+      return;
     }
-  }, [searchParams]);
+
+    // Member self-service borrow — reuse the member borrow modal instead of
+    // the librarian "Issue Book" form so the copy number is shown clearly.
+    if (bookId && user?.memberId) {
+      setMemberBorrowBook(null);
+      bookService
+        .getById(bookId)
+        .then((book) => setMemberBorrowBook(book))
+        .catch(() => toast.error("Failed to load book details."));
+    }
+  }, [searchParams, isLibrarianOrAdmin, user?.memberId]);
   const handlePayFineConfirm = async () => {
     if (!finePayTarget) return;
     try {
@@ -174,6 +190,26 @@ export default function BorrowsPage() {
         }} 
         onSuccess={() => { void fetchBorrows(); }} 
       />
+
+      {!isLibrarianOrAdmin && (
+        <MemberBorrowModal
+          isOpen={memberBorrowBook !== null}
+          onClose={() => {
+            setMemberBorrowBook(null);
+            if (searchParams.get("action") === "new") {
+              searchParams.delete("action");
+              searchParams.delete("bookId");
+              setSearchParams(searchParams);
+            }
+          }}
+          onSuccess={() => { setMemberBorrowBook(null); void fetchBorrows(); }}
+          book={memberBorrowBook}
+          branchId=""
+          branchName=""
+          memberId={user?.memberId ?? ""}
+        />
+      )}
+
       <ReturnBookModal isOpen={isReturnModalOpen} onClose={() => { setIsReturnModalOpen(false); }} onSuccess={() => { void fetchBorrows(); }} borrow={borrowToManage} />
 
       <ConfirmDialog

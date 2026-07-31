@@ -44,9 +44,10 @@ export function MemberBorrowModal({
           : `/api/Books/${book.id}/available-copies`;
         const res = await apiClient.get<BookCopy[]>(url);
         const copies: BookCopy[] = res.data;
-        // Pick the first available copy in the chosen branch, or just the first one
-        const copy = copies.find((c) => !branchId || c.branchId === branchId) ?? copies[0] ?? null;
-        setSelectedCopy(copy);
+        // Only pick a copy from the chosen branch (the endpoint filters
+        // server-side too). Never silently fall back to a different branch.
+        const matching = branchId ? copies.filter((c) => c.branchId === branchId) : copies;
+        setSelectedCopy(matching[0] ?? null);
       } catch {
         toast.error("Could not load available copies.");
       } finally {

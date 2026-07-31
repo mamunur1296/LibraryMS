@@ -69,9 +69,9 @@ public class BooksController : BaseController
 
     [HttpGet("{id}/available-copies")]
     [Authorize(Roles = "Admin,Librarian,Member")]
-    public async Task<ActionResult<List<BookCopyDto>>> GetAvailableCopies(Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult<List<BookCopyDto>>> GetAvailableCopies(Guid id, [FromQuery] Guid? branchId, CancellationToken cancellationToken)
     {
-        var result = await Mediator.Send(new GetAvailableCopiesQuery(id), cancellationToken);
+        var result = await Mediator.Send(new GetAvailableCopiesQuery(id, branchId), cancellationToken);
         return Ok(result);
     }
 
