@@ -3,8 +3,6 @@ using LibraryMS.Application.Contracts.DTOs.Auth;
 using LibraryMS.Application.Contracts.Services;
 using LibraryMS.Application.Mapping;
 using LibraryMS.Domain.IdentityManagement;
-using LibraryMS.Domain.IdentityManagement.AggregateRoots;
-using LibraryMS.Domain.IdentityManagement.Entities;
 using LibraryMS.Domain.IdentityManagement.Services;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
@@ -44,7 +42,7 @@ public sealed class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCom
 
         var storedToken = await _userRepository.GetRefreshTokenAsync(request.RefreshToken, cancellationToken);
         Ensure.Authorized(storedToken is not null, "Refresh token not found.");
-        
+
         if (!storedToken!.IsActive)
         {
             _logger.LogWarning("Attempted reuse of a revoked refresh token for User {UserId}. Revoking all tokens.", userId);
