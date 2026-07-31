@@ -50,14 +50,15 @@ function AppInner() {
           >
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/books" element={<BooksPage />} />
-            <Route path="/members" element={<MembersPage />} />
-            <Route path="/borrows" element={<BorrowsPage />} />
-            <Route path="/branches" element={<BranchesPage />} />
+            <Route path="/members" element={<ProtectedRoute allowedRoles={["Admin", "Librarian"]}><MembersPage /></ProtectedRoute>} />
+            <Route path="/borrows" element={<ProtectedRoute allowedRoles={["Admin", "Librarian"]}><BorrowsPage /></ProtectedRoute>} />
+            <Route path="/my-borrows" element={<ProtectedRoute allowedRoles={["Member"]}><BorrowsPage /></ProtectedRoute>} />
+            <Route path="/branches" element={<ProtectedRoute allowedRoles={["Admin"]}><BranchesPage /></ProtectedRoute>} />
             <Route path="/reservations" element={<ReservationsPage />} />
-            <Route path="/my-fines" element={<MyFinesPage />} />
-            <Route path="/reports" element={<ReportsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/users" element={<UsersPage />} />
+            <Route path="/my-fines" element={<ProtectedRoute allowedRoles={["Member"]}><MyFinesPage /></ProtectedRoute>} />
+            <Route path="/reports" element={<ProtectedRoute allowedRoles={["Admin", "Librarian"]}><ReportsPage /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute allowedRoles={["Admin"]}><SettingsPage /></ProtectedRoute>} />
+            <Route path="/users" element={<ProtectedRoute allowedRoles={["Admin"]}><UsersPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
 

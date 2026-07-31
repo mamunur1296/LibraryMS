@@ -61,6 +61,7 @@ public class BooksController : BaseController
     }
 
     [HttpGet("{id}/copies")]
+    [AllowAnonymous]
     public async Task<ActionResult<List<BookCopyDto>>> GetCopies(Guid id, CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(new GetBookCopiesQuery(id), cancellationToken);
@@ -68,6 +69,7 @@ public class BooksController : BaseController
     }
 
     [HttpGet("{id}/available-copies")]
+    [AllowAnonymous]
     public async Task<ActionResult<List<BookCopyDto>>> GetAvailableCopies(Guid id, CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(new GetAvailableCopiesQuery(id), cancellationToken);

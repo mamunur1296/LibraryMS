@@ -1,3 +1,4 @@
+import { useLocation } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
 import { borrowService } from "@/lib/services/borrow.service";
 import { authService } from "@/lib/services/auth.service";
@@ -10,6 +11,7 @@ import { toast } from "@/components/ui/Toast";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function BorrowsPage() {
+  const location = useLocation();
   const { user } = useAuth();
   const [data, setData] = useState<PagedResult<BorrowDto> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -21,12 +23,13 @@ export default function BorrowsPage() {
   const [finePayTarget, setFinePayTarget] = useState<BorrowDto | null>(null);
 
   const userRole = authService.getUserRole();
-  const isLibrarianOrAdmin = userRole === "Librarian" || userRole === "Admin";
+  const isMemberRoute = location.pathname.includes('my-borrows');
+  const isLibrarianOrAdmin = (userRole === "Librarian" || userRole === "Admin") && !isMemberRoute;
 
   const fetchBorrows = useCallback(async () => {
     setLoading(true);
     try {
-      const targetMemberId = !isLibrarianOrAdmin ? (user?.memberId ?? undefined) : undefined;
+      const targetMemberId = isMemberRoute ? (user?.memberId ?? undefined) : (!isLibrarianOrAdmin ? (user?.memberId ?? undefined) : undefined);
       const result = await borrowService.search(targetMemberId, undefined, statusFilter || undefined, page, 10);
       setData(result);
     } catch {
@@ -34,7 +37,7 @@ export default function BorrowsPage() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, page]);
+  }, [statusFilter, page, isMemberRoute, isLibrarianOrAdmin, user]);
 
   useEffect(() => { void fetchBorrows(); }, [fetchBorrows]);
 

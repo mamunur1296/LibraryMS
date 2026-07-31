@@ -7,10 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryMS.HttpApi.Controllers;
 
-[Authorize(Roles = "Admin,Librarian")]
+[Authorize]
 public class MembersController : BaseController
 {
     [HttpGet]
+    [Authorize(Roles = "Admin,Librarian")]
     public async Task<ActionResult<PagedResult<MemberDto>>> Search(
         [FromQuery] string? searchTerm, [FromQuery] string? status, 
         [FromQuery] int page = 1, [FromQuery] int pageSize = 10, 
@@ -21,6 +22,7 @@ public class MembersController : BaseController
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin,Librarian")]
     public async Task<ActionResult<MemberDto>> GetById(Guid id, CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(new GetMemberByIdQuery(id), cancellationToken);
@@ -32,6 +34,8 @@ public class MembersController : BaseController
     [Authorize(Roles = "Admin,Librarian,Member")]
     public async Task<ActionResult<MemberProfileStatsDto>> GetStats(Guid id, CancellationToken cancellationToken)
     {
+        if (!IsAuthorizedForMember(id)) return Forbid();
+        
         var result = await Mediator.Send(new GetMemberProfileStatsQuery(id), cancellationToken);
         return Ok(result);
     }
@@ -40,6 +44,8 @@ public class MembersController : BaseController
     [Authorize(Roles = "Admin,Librarian,Member")]
     public async Task<ActionResult<List<BorrowDto>>> GetActiveBorrows(Guid id, CancellationToken cancellationToken)
     {
+        if (!IsAuthorizedForMember(id)) return Forbid();
+
         var result = await Mediator.Send(new GetMemberActiveBorrowsQuery(id), cancellationToken);
         return Ok(result);
     }
@@ -48,11 +54,14 @@ public class MembersController : BaseController
     [Authorize(Roles = "Admin,Librarian,Member")]
     public async Task<ActionResult<List<BorrowDto>>> GetFineHistory(Guid id, CancellationToken cancellationToken)
     {
+        if (!IsAuthorizedForMember(id)) return Forbid();
+
         var result = await Mediator.Send(new GetMemberFineHistoryQuery(id), cancellationToken);
         return Ok(result);
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin,Librarian")]
     public async Task<ActionResult<MemberDto>> Create([FromBody] CreateMemberCommand command, CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(command, cancellationToken);
@@ -60,6 +69,7 @@ public class MembersController : BaseController
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin,Librarian")]
     public async Task<ActionResult<MemberDto>> Update(Guid id, [FromBody] UpdateMemberCommand command, CancellationToken cancellationToken)
     {
         if (id != command.Id) return BadRequest();
@@ -76,6 +86,7 @@ public class MembersController : BaseController
     }
 
     [HttpPost("{id}/suspend")]
+    [Authorize(Roles = "Admin,Librarian")]
     public async Task<ActionResult<MemberDto>> Suspend(Guid id, [FromBody] SuspendMemberCommand command, CancellationToken cancellationToken)
     {
         if (id != command.Id) return BadRequest();
@@ -84,6 +95,7 @@ public class MembersController : BaseController
     }
 
     [HttpPost("{id}/activate")]
+    [Authorize(Roles = "Admin,Librarian")]
     public async Task<ActionResult<MemberDto>> Activate(Guid id, CancellationToken cancellationToken)
     {
         var result = await Mediator.Send(new ActivateMemberCommand(id), cancellationToken);
@@ -110,7 +122,25 @@ public class MembersController : BaseController
     [Authorize(Roles = "Admin,Librarian,Member")]
     public async Task<ActionResult<MemberDto>> Renew(Guid id, [FromBody] RenewMembershipRequest request, CancellationToken cancellationToken)
     {
+        if (!IsAuthorizedForMember(id)) return Forbid();
+
         var result = await Mediator.Send(new RenewMembershipCommand(id, request.Days), cancellationToken);
         return Ok(result);
+    }
+
+    private bool IsAuthorizedForMember(Guid requestedMemberId)
+    {
+        if (User.IsInRole("Admin") || User.IsInRole("Librarian"))
+            return true;
+
+        if (User.IsInRole("Member"))
+        {
+            var memberIdString = User.Claims.FirstOrDefault(c => c.Type.Equals("memberId", StringComparison.OrdinalIgnoreCase))?.Value;
+            if (memberIdString != null && Guid.TryParse(memberIdString, out var currentMemberId))
+            {
+                return currentMemberId == requestedMemberId;
+            }
+        }
+        return false;
     }
 }

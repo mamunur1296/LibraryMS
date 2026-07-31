@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Heart, Check, X, ShieldAlert } from "lucide-react";
+import { Heart, Check, X, ShieldAlert, Lock } from "lucide-react";
 import { BookDto } from "../../types/book.types";
 import { Button } from "./Button";
 import { Badge } from "./Badge";
@@ -172,12 +172,14 @@ export function BookCard({ book, viewMode = "grid", onLoginPrompt }: BookCardPro
 
           <div className={cn("flex gap-2 transition-opacity", !isGrid && "opacity-100", isHovered ? "opacity-100" : "opacity-100 md:opacity-0")}>
             {book.availableCopies > 0 ? (
-              <Button size="sm" onClick={(e) => handleAction(e, "borrow")}>
-                Borrow
+              <Button size="sm" onClick={(e) => handleAction(e, "borrow")} variant={(user as any)?.hasUnpaidFine ? "destructive" : "default"}>
+                {!user && <Lock className="mr-1 h-3 w-3" />}
+                {!user ? "Borrow" : (user as any).hasUnpaidFine ? "Pay Fine" : "Borrow"}
               </Button>
             ) : (
-              <Button size="sm" variant="outline" onClick={(e) => handleAction(e, "reserve")}>
-                Reserve
+              <Button size="sm" variant={!user ? "outline" : (user as any)?.hasUnpaidFine ? "destructive" : "outline"} onClick={(e) => handleAction(e, "reserve")}>
+                {!user && <Lock className="mr-1 h-3 w-3" />}
+                {!user ? "Reserve" : (user as any).hasUnpaidFine ? "Pay Fine" : "Reserve"}
               </Button>
             )}
           </div>

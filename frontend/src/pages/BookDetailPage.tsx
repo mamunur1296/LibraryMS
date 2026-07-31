@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, BookOpen, Check, Heart, User, Building } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, Heart, User, Building, Lock, AlertTriangle } from "lucide-react";
 import { BookDto } from "../types/book.types";
 import { publicService } from "../lib/services/public.service";
 import { favouriteService } from "../lib/services/favourite.service";
@@ -195,14 +195,14 @@ export default function BookDetailPage() {
                 </Button>
                 
                 {book.availableCopies > 0 ? (
-                  <Button size="lg" className="w-full sm:w-auto" onClick={() => handleAction("borrow")}>
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    Borrow Now
+                  <Button size="lg" className="w-full sm:w-auto" onClick={() => handleAction("borrow")} variant={(user as any)?.hasUnpaidFine ? "destructive" : "default"}>
+                    {!user ? <Lock className="mr-2 h-4 w-4" /> : (user as any).hasUnpaidFine ? <AlertTriangle className="mr-2 h-4 w-4" /> : <BookOpen className="mr-2 h-4 w-4" />}
+                    {!user ? "Borrow" : (user as any).hasUnpaidFine ? "Pay Fine First" : "Borrow Now"}
                   </Button>
                 ) : (
-                  <Button size="lg" className="w-full sm:w-auto" onClick={() => handleAction("reserve")}>
-                    <Check className="mr-2 h-4 w-4" />
-                    Reserve
+                  <Button size="lg" className="w-full sm:w-auto" onClick={() => handleAction("reserve")} variant={(user as any)?.hasUnpaidFine ? "destructive" : "default"}>
+                    {!user ? <Lock className="mr-2 h-4 w-4" /> : (user as any).hasUnpaidFine ? <AlertTriangle className="mr-2 h-4 w-4" /> : <Check className="mr-2 h-4 w-4" />}
+                    {!user ? "Reserve" : (user as any).hasUnpaidFine ? "Pay Fine First" : "Reserve"}
                   </Button>
                 )}
               </div>
