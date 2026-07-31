@@ -12,9 +12,6 @@ public class MemberProfileStatsDto
     public decimal TotalFinesDue { get; set; }
     public decimal TotalFinesPaid { get; set; }
     public DateTime MembershipExpiry { get; set; }
-<<<<<<< Updated upstream
-=======
     public DateTime? NearestDueDate { get; set; }
     public int FavouriteCount { get; set; }
->>>>>>> Stashed changes
 }

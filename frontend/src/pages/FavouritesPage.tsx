@@ -75,16 +75,6 @@ export default function FavouritesPage() {
       </div>
 
       {books.length > 0 ? (
-<<<<<<< Updated upstream
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {books.map((book) => (
-            <BookCard 
-              key={book.id} 
-              book={book} 
-              onLoginPrompt={() => navigate("/login")}
-            />
-          ))}
-=======
         <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/50">
           <table className="w-full text-left text-sm text-slate-300">
             <thead className="bg-slate-900 text-xs uppercase text-slate-400 border-b border-slate-800">
@@ -144,7 +134,6 @@ export default function FavouritesPage() {
               ))}
             </tbody>
           </table>
->>>>>>> Stashed changes
         </div>
       ) : (
         <EmptyState

@@ -2,15 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { dashboardService } from '@/lib/services/dashboard.service';
 import { memberService } from '@/lib/services/member.service';
-<<<<<<< Updated upstream
-import { DashboardSummaryDto, AdminDashboardSummaryDto, BranchDashboardSummaryDto } from '@/types/dashboard.types';
-import { MemberProfileStatsDto } from '@/types/member.types';
-=======
 import { favouriteService } from '@/lib/services/favourite.service';
 import { DashboardSummaryDto, AdminDashboardSummaryDto, BranchDashboardSummaryDto } from '@/types/dashboard.types';
 import { MemberProfileStatsDto } from '@/types/member.types';
 import { BookDto } from '@/types/book.types';
->>>>>>> Stashed changes
 import { useAuth } from '@/contexts/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 
@@ -22,14 +17,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-<<<<<<< Updated upstream
-=======
   // Favourites state
   const [showFavourites, setShowFavourites] = useState(false);
   const [favourites, setFavourites] = useState<BookDto[]>([]);
   const [loadingFavourites, setLoadingFavourites] = useState(false);
-  
->>>>>>> Stashed changes
   // Admin Branch Filter
   const [selectedBranchId, setSelectedBranchId] = useState<string>('all');
 
@@ -79,8 +70,6 @@ export default function DashboardPage() {
     );
   }
 
-<<<<<<< Updated upstream
-=======
   const toggleFavourites = async () => {
     if (!showFavourites) {
       setLoadingFavourites(true);
@@ -95,8 +84,6 @@ export default function DashboardPage() {
     }
     setShowFavourites(!showFavourites);
   };
-
->>>>>>> Stashed changes
   const adminCards = [
     { name: 'Total Books', value: summary?.totalBooks || 0, icon: '📚', color: 'from-blue-500 to-indigo-500' },
     { name: 'Total Members', value: summary?.totalMembers || 0, icon: '👥', color: 'from-emerald-500 to-teal-500' },
@@ -107,12 +94,6 @@ export default function DashboardPage() {
   ];
 
   const memberCards = [
-<<<<<<< Updated upstream
-    { name: 'Active Borrows', value: memberStats?.activeBorrows || 0, icon: '🔄', color: 'from-blue-500 to-indigo-500' },
-    { name: 'Total Borrows', value: memberStats?.totalBorrows || 0, icon: '📚', color: 'from-emerald-500 to-teal-500' },
-    { name: 'Overdue Borrows', value: memberStats?.overdueBorrows || 0, icon: '⚠️', color: 'from-red-500 to-rose-500' },
-    { name: 'Pending Reservations', value: memberStats?.activeReservations || 0, icon: '⏳', color: 'from-purple-500 to-fuchsia-500' },
-=======
     { 
       name: 'Active Borrows', 
       value: memberStats?.activeBorrows || 0, 
@@ -167,7 +148,6 @@ export default function DashboardPage() {
       color: 'from-pink-500 to-rose-500',
       extra: <button onClick={toggleFavourites} className="text-xs text-pink-400 hover:text-pink-300 mt-2 inline-block underline cursor-pointer">{showFavourites ? 'Hide list' : 'Show list'}</button>
     }
->>>>>>> Stashed changes
   ];
 
   const statCards = user?.role === 'Member' ? memberCards : adminCards;
@@ -201,14 +181,11 @@ export default function DashboardPage() {
             <div className="relative">
               <dt className="truncate text-sm font-medium text-slate-400">{stat.name}</dt>
               <dd className="mt-2 text-3xl font-semibold tracking-tight text-white">{stat.value}</dd>
-<<<<<<< Updated upstream
-=======
               {'extra' in stat && stat.extra && (
                 <div className="mt-1">
                   {stat.extra}
                 </div>
               )}
->>>>>>> Stashed changes
             </div>
             <div className={`absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r ${stat.color}`}></div>
           </div>
@@ -217,10 +194,6 @@ export default function DashboardPage() {
 
       {/* Additional sections depending on role */}
       {user?.role === 'Member' && (
-<<<<<<< Updated upstream
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-8">
-          <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-=======
         <>
           {showFavourites && (
             <div className="mt-8 rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden">
@@ -267,7 +240,6 @@ export default function DashboardPage() {
           )}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 mt-8">
             <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
->>>>>>> Stashed changes
             <h3 className="text-lg font-medium text-white mb-4">Financial Overview</h3>
             <div className="flex justify-between items-center p-4 bg-slate-950 rounded-xl">
               <span className="text-slate-400">Total Fines Due</span>
@@ -286,10 +258,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-<<<<<<< Updated upstream
-=======
       </>
->>>>>>> Stashed changes
       )}
 
       {user?.role === 'Librarian' && (
