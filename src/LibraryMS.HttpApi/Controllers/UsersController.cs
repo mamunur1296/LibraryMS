@@ -1,5 +1,6 @@
 using LibraryMS.Application.Contracts.DTOs.Auth;
 using LibraryMS.Application.Contracts.Users;
+using LibraryMS.HttpApi.Models.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -114,7 +115,3 @@ public class UsersController : BaseController
     }
 }
 
-public class AssignBranchRequest
-{
-    public Guid BranchId { get; set; }
-}
