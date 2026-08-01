@@ -1,6 +1,7 @@
 using LibraryMS.Application;
 using LibraryMS.Application.Contracts.Services;
 using LibraryMS.DbMigrator;
+using LibraryMS.DbMigrator.Seeders;
 using LibraryMS.EntityFrameworkCore;
 using LibraryMS.Infrastructure.Auth;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,13 @@ var host = Host.CreateDefaultBuilder(args)
 
         // Only register what the migrator needs — skip Redis, Hangfire, Email, Export
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
+
+        // Register Seeders
+        services.AddTransient<IDataSeeder, BranchSeeder>();
+        services.AddTransient<IDataSeeder, AuthorSeeder>();
+        services.AddTransient<IDataSeeder, CategorySeeder>();
+        services.AddTransient<IDataSeeder, BookSeeder>();
+        services.AddTransient<IDataSeeder, UserAndMemberSeeder>();
 
         services.AddHostedService<DbMigratorHostedService>();
     })
