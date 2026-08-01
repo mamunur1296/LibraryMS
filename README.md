@@ -172,9 +172,14 @@ git clone https://github.com/mamunur1296/LibraryMS.git
 cd LibraryMS
 ```
 
-#### Step 2: Database Setup
-1. Create a database named `LibraryMS` in your local PostgreSQL.
-2. Connection string configured in [appsettings.json](file:///d:/Job/A_Main/LibraryMS/src/LibraryMS.HttpApi.Host/appsettings.json):
+#### Step 2: Prerequisites Setup (PostgreSQL & Redis)
+1. **PostgreSQL**: Create a database named `LibraryMS` in your local PostgreSQL server.
+2. **Redis**: Ensure a local Redis server is running (e.g., via Docker: `docker run -d -p 6379:6379 redis`).
+3. **Configuration**: Configure your database connection string and Redis host in **both** of the following `appsettings.json` files:
+   - `src/LibraryMS.HttpApi.Host/appsettings.json`
+   - `src/LibraryMS.DbMigrator/appsettings.json`
+
+   *Example Connection String:*
    `Host=localhost;Port=5432;Database=LibraryMS;Username=postgres;Password=2025`
 
 #### Step 3: Run Database Migrations & Seeds

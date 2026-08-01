@@ -30,7 +30,7 @@ public sealed class RedisCacheService : ICacheService
             var json = value.ToString();
             return JsonSerializer.Deserialize<T>(json, JsonOptions);
         }
-        catch (RedisConnectionException ex)
+        catch (Exception ex) when (ex is RedisException || ex is TimeoutException)
         {
             _logger.LogWarning(ex, "Redis connection failed while trying to get cache key {Key}. Falling back to database.", key);
             return default;
@@ -44,7 +44,7 @@ public sealed class RedisCacheService : ICacheService
             var serialized = JsonSerializer.Serialize(value, JsonOptions);
             await _db.StringSetAsync(key, serialized, expiry ?? TimeSpan.FromMinutes(30));
         }
-        catch (RedisConnectionException ex)
+        catch (Exception ex) when (ex is RedisException || ex is TimeoutException)
         {
             _logger.LogWarning(ex, "Redis connection failed while trying to set cache key {Key}. Operation skipped.", key);
         }
@@ -56,7 +56,7 @@ public sealed class RedisCacheService : ICacheService
         {
             await _db.KeyDeleteAsync(key);
         }
-        catch (RedisConnectionException ex)
+        catch (Exception ex) when (ex is RedisException || ex is TimeoutException)
         {
             _logger.LogWarning(ex, "Redis connection failed while trying to remove cache key {Key}. Operation skipped.", key);
         }
