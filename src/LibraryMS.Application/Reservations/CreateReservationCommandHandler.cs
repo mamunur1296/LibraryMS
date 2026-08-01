@@ -9,6 +9,7 @@ using LibraryMS.Domain.MemberManagement.AggregateRoots;
 using LibraryMS.Domain.MemberManagement.Services;
 using LibraryMS.Domain.ReservationManagement;
 using LibraryMS.Domain.ReservationManagement.AggregateRoots;
+using LibraryMS.Domain.ReservationManagement.Services;
 using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Guards;
@@ -25,6 +26,7 @@ public sealed class CreateReservationCommandHandler : IRequestHandler<CreateRese
     private readonly IUnitOfWork _unitOfWork;
     private readonly IBorrowRepository _borrowRepo;
     private readonly ILogger<CreateReservationCommandHandler> _logger;
+    private readonly ReservationManager _reservationManager;
 
     public CreateReservationCommandHandler(
         IReservationRepository reservationRepo,
@@ -32,7 +34,8 @@ public sealed class CreateReservationCommandHandler : IRequestHandler<CreateRese
         IMemberRepository memberRepo,
         IBorrowRepository borrowRepo,
         IUnitOfWork unitOfWork,
-        ILogger<CreateReservationCommandHandler> logger)
+        ILogger<CreateReservationCommandHandler> logger,
+        ReservationManager reservationManager)
     {
         _reservationRepo = reservationRepo;
         _bookRepo = bookRepo; 
@@ -40,6 +43,7 @@ public sealed class CreateReservationCommandHandler : IRequestHandler<CreateRese
         _borrowRepo = borrowRepo;
         _unitOfWork = unitOfWork;
         _logger = logger;
+        _reservationManager = reservationManager;
     }
 
     public async Task<ReservationDto> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
@@ -72,8 +76,8 @@ public sealed class CreateReservationCommandHandler : IRequestHandler<CreateRese
         var queuePosition = await _reservationRepo.GetNextQueuePositionAsync(
             request.BookId, request.BranchId, cancellationToken);
 
-        var reservation = new Reservation(
-            Guid.NewGuid(), request.MemberId, request.BookId,
+        var reservation = _reservationManager.Create(
+            request.MemberId, request.BookId,
             request.BranchId, queuePosition);
 
         var dbFailed = false;

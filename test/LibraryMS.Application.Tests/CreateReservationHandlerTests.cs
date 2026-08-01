@@ -7,6 +7,8 @@ using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.MemberManagement;
 using LibraryMS.Domain.MemberManagement.AggregateRoots;
 using LibraryMS.Domain.ReservationManagement;
+using LibraryMS.Domain.ReservationManagement.Services;
+using LibraryMS.Domain.Common;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Exceptions;
 using Microsoft.Extensions.Logging;
@@ -42,13 +44,18 @@ public class CreateReservationHandlerTests
         mockMemberRepo.Setup(r => r.GetByIdAsync(memberId, It.IsAny<CancellationToken>())).ReturnsAsync(member);
         mockBookRepo.Setup(r => r.GetByIdWithCopiesAsync(bookId, It.IsAny<CancellationToken>())).ReturnsAsync(book);
 
+        var mockGuidGen = new Mock<IGuidGenerator>();
+        mockGuidGen.Setup(g => g.Create()).Returns(Guid.NewGuid());
+        var reservationManager = new ReservationManager(mockGuidGen.Object);
+
         var handler = new CreateReservationCommandHandler(
             mockReservationRepo.Object,
             mockBookRepo.Object,
             mockMemberRepo.Object,
             mockBorrowRepo.Object,
             mockUnitOfWork.Object,
-            mockLogger.Object);
+            mockLogger.Object,
+            reservationManager);
 
         var command = new CreateReservationCommand(memberId, bookId, branchId);
 

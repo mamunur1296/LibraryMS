@@ -1,10 +1,11 @@
 using LibraryMS.Application.Contracts.DTOs.Borrow;
 using LibraryMS.Application.Contracts.Members;
+using LibraryMS.Application.Mapping;
+using LibraryMS.Domain.BookManagement;
 using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.BorrowManagement.AggregateRoots;
-using LibraryMS.Domain.MemberManagement;
-using LibraryMS.Domain.BookManagement;
 using LibraryMS.Domain.BranchManagement;
+using LibraryMS.Domain.MemberManagement;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -60,7 +61,7 @@ public sealed class GetMemberActiveBorrowsQueryHandler : IRequestHandler<GetMemb
             .ToDictionary(c => c.Id);
 
         return items.Select(record =>
-            LibraryMS.Application.Mapping.MapperExtensions.ToDto(record,
+            MapperExtensions.ToDto(record,
                 members.GetValueOrDefault(record.MemberId),
                 books.GetValueOrDefault(record.BookId),
                 branches.GetValueOrDefault(record.BranchId),

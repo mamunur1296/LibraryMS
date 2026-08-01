@@ -1,7 +1,7 @@
-using LibraryMS.Application.Contracts.Users;
 using LibraryMS.Application.Contracts.Services;
+using LibraryMS.Application.Contracts.Users;
 using LibraryMS.Domain.IdentityManagement;
-using LibraryMS.Domain.IdentityManagement.AggregateRoots;
+using LibraryMS.Domain.IdentityManagement.Services;
 using LibraryMS.Domain.Shared;
 using LibraryMS.Domain.Shared.Enums;
 using LibraryMS.Domain.Shared.Guards;
@@ -16,17 +16,20 @@ internal sealed class CreateLibrarianCommandHandler : IRequestHandler<CreateLibr
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ILogger<CreateLibrarianCommandHandler> _logger;
+    private readonly UserManager _userManager;
 
     public CreateLibrarianCommandHandler(
         IUserRepository userRepository,
         IUnitOfWork unitOfWork,
         IPasswordHasher passwordHasher,
-        ILogger<CreateLibrarianCommandHandler> logger)
+        ILogger<CreateLibrarianCommandHandler> logger,
+        UserManager userManager)
     {
         _userRepository = userRepository;
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
         _logger = logger;
+        _userManager = userManager;
     }
 
     public async Task<Guid> Handle(CreateLibrarianCommand request, CancellationToken cancellationToken)
@@ -41,8 +44,7 @@ internal sealed class CreateLibrarianCommandHandler : IRequestHandler<CreateLibr
 
         var (hash, salt) = _passwordHasher.Hash(request.Password);
 
-        var user = new User(
-            Guid.NewGuid(),
+        var user = _userManager.Create(
             request.Username,
             request.Email,
             hash,

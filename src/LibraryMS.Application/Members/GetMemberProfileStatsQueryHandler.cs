@@ -6,9 +6,6 @@ using LibraryMS.Domain.ReservationManagement;
 using LibraryMS.Domain.Shared.Enums;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace LibraryMS.Application.Members;
 
@@ -35,7 +32,7 @@ public sealed class GetMemberProfileStatsQueryHandler : IRequestHandler<GetMembe
 
         // Get total borrows (using paged query with pageSize = 1 just to get the TotalCount)
         var pagedBorrows = await _borrowRepository.GetPagedAsync(request.MemberId, null, null, 1, 1, cancellationToken);
-        
+
         // Get active borrows (which includes overdue)
         var activeBorrows = await _borrowRepository.GetActiveBorrowsByMemberAsync(request.MemberId, cancellationToken);
         var activeCount = activeBorrows.Count;

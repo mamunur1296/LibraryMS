@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using LibraryMS.Application.Contracts.DTOs.Member;
 using LibraryMS.Application.Contracts.Members;
 using LibraryMS.Application.Mapping;
@@ -35,7 +31,7 @@ internal sealed class GetMemberFavoritesQueryHandler : IRequestHandler<GetMember
         }
 
         var books = await _bookRepository.GetByIdsAsync(bookIds, cancellationToken);
-        
+
         return books.Select(b => new MemberFavoriteDto
         {
             BookId = b.Id,

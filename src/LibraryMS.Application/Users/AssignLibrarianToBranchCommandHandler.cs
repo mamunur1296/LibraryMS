@@ -1,7 +1,6 @@
 using LibraryMS.Application.Contracts.Users;
 using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.Shared;
-using LibraryMS.Domain.Shared.Enums;
 using LibraryMS.Domain.Shared.Guards;
 using MediatR;
 using Microsoft.Extensions.Logging;
