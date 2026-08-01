@@ -11,6 +11,7 @@ public class BookSeeder : IDataSeeder
 
     public static readonly Guid B2Id = Guid.Parse("b2000000-0000-0000-0000-000000000002");
     public static readonly Guid B2Copy1Id = Guid.Parse("c2000000-0000-0000-0000-000000000001");
+    public static readonly Guid B2Copy2Id = Guid.Parse("c2000000-0000-0000-0000-000000000002");
 
     public static readonly Guid B3Id = Guid.Parse("b3000000-0000-0000-0000-000000000003");
     public static readonly Guid B3Copy1Id = Guid.Parse("c3000000-0000-0000-0000-000000000001");
@@ -26,7 +27,7 @@ public class BookSeeder : IDataSeeder
         b1.AddCopy(B1Copy1Id, mainBranchId); b1.AddCopy(B1Copy2Id, downtownBranchId); books.Add(b1);
 
         var b2 = new Book(B2Id, "Clean Architecture", "9780134494166", "A craftsman's guide to software structure and design", 2017, CategorySeeder.SeId, AuthorSeeder.UncleBobId, "English");
-        b2.AddCopy(B2Copy1Id, mainBranchId); b2.AddCopy(downtownBranchId); books.Add(b2);
+        b2.AddCopy(B2Copy1Id, mainBranchId); b2.AddCopy(B2Copy2Id, downtownBranchId); books.Add(b2);
 
         var b3 = new Book(B3Id, "Refactoring", "9780134757599", "Improving the design of existing code, 2nd Edition", 2018, CategorySeeder.SeId, AuthorSeeder.FowlerId, "English");
         b3.AddCopy(B3Copy1Id, mainBranchId); b3.AddCopy(downtownBranchId); books.Add(b3);

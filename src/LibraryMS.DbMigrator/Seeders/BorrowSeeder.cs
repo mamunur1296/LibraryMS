@@ -45,7 +45,28 @@ public class BorrowSeeder : IDataSeeder
         returnedBorrow.AccumulateFine(); // Calculate fine
         returnedBorrow.PayFine();
 
-        dbContext.BorrowRecords.AddRange(activeBorrow, overdueBorrow, returnedBorrow);
+        // 4. Active Borrow for Downtown Branch
+        var downtownActiveBorrow = new BorrowRecord(
+            Guid.NewGuid(), 
+            UserAndMemberSeeder.MemberJaneId, 
+            BookSeeder.B1Copy2Id, 
+            BookSeeder.B1Id, 
+            BranchSeeder.DowntownBranchId
+        );
+        SetPastDates(downtownActiveBorrow, 5, -9);
+
+        // 5. Overdue Borrow for Downtown Branch
+        var downtownOverdueBorrow = new BorrowRecord(
+            Guid.NewGuid(), 
+            UserAndMemberSeeder.MemberBobId, 
+            Guid.Parse("c2000000-0000-0000-0000-000000000002"), // Mock copy ID added in BookSeeder
+            BookSeeder.B2Id, 
+            BranchSeeder.DowntownBranchId
+        );
+        SetPastDates(downtownOverdueBorrow, 25, 11);
+        downtownOverdueBorrow.MarkAsOverdue();
+
+        dbContext.BorrowRecords.AddRange(activeBorrow, overdueBorrow, returnedBorrow, downtownActiveBorrow, downtownOverdueBorrow);
     }
 
     private void SetPastDates(BorrowRecord record, int borrowDaysAgo, int dueDaysAgo)
