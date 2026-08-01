@@ -11,10 +11,10 @@ public sealed class RedisCacheService : ICacheService
 {
     private readonly IDatabase _db;
     private readonly IConnectionMultiplexer _connection;
-    private readonly Microsoft.Extensions.Logging.ILogger<RedisCacheService> _logger;
+    private readonly ILogger<RedisCacheService> _logger;
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = false };
 
-    public RedisCacheService(IConnectionMultiplexer connection, Microsoft.Extensions.Logging.ILogger<RedisCacheService> logger)
+    public RedisCacheService(IConnectionMultiplexer connection, ILogger<RedisCacheService> logger)
     {
         _connection = connection;
         _logger = logger;

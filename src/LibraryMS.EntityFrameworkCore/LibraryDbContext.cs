@@ -6,9 +6,11 @@ using LibraryMS.Domain.IdentityManagement.AggregateRoots;
 using LibraryMS.Domain.IdentityManagement.Entities;
 using LibraryMS.Domain.MemberManagement.AggregateRoots;
 using LibraryMS.Domain.ReservationManagement.AggregateRoots;
+using LibraryMS.Domain.SettingsManagement.Entities;
 using LibraryMS.Domain.Shared.Interfaces;
 using LibraryMS.EntityFrameworkCore.Outbox;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace LibraryMS.EntityFrameworkCore;
 
@@ -35,7 +37,7 @@ public sealed class LibraryDbContext : DbContext
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
-    public DbSet<LibraryMS.Domain.SettingsManagement.Entities.SystemSetting> SystemSettings => Set<LibraryMS.Domain.SettingsManagement.Entities.SystemSetting>();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -46,10 +48,10 @@ public sealed class LibraryDbContext : DbContext
         {
             if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
             {
-                var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
-                var property = System.Linq.Expressions.Expression.Property(parameter, "IsDeleted");
-                var condition = System.Linq.Expressions.Expression.Equal(property, System.Linq.Expressions.Expression.Constant(false));
-                var lambda = System.Linq.Expressions.Expression.Lambda(condition, parameter);
+                var parameter = Expression.Parameter(entityType.ClrType, "e");
+                var property = Expression.Property(parameter, "IsDeleted");
+                var condition = Expression.Equal(property, Expression.Constant(false));
+                var lambda = Expression.Lambda(condition, parameter);
                 modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
             }
         }

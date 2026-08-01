@@ -2,6 +2,7 @@ using LibraryMS.Domain.BookManagement.AggregateRoots;
 using LibraryMS.Domain.BookManagement.Entities;
 using LibraryMS.Domain.BorrowManagement.AggregateRoots;
 using LibraryMS.Domain.BranchManagement.AggregateRoots;
+using LibraryMS.Domain.IdentityManagement.AggregateRoots;
 using LibraryMS.Domain.MemberManagement.AggregateRoots;
 using LibraryMS.Domain.Shared.Constants;
 using Microsoft.EntityFrameworkCore;
@@ -24,12 +25,12 @@ public class BorrowRecordConfiguration : IEntityTypeConfiguration<BorrowRecord>
         builder.HasOne<BookCopy>().WithMany().HasForeignKey(r => r.BookCopyId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne<Branch>().WithMany().HasForeignKey(r => r.BranchId).OnDelete(DeleteBehavior.Restrict);
         
-        builder.HasOne<LibraryMS.Domain.IdentityManagement.AggregateRoots.User>()
+        builder.HasOne<User>()
                .WithMany()
                .HasForeignKey(r => r.IssuedById)
                .OnDelete(DeleteBehavior.SetNull);
 
-        builder.HasOne<LibraryMS.Domain.IdentityManagement.AggregateRoots.User>()
+        builder.HasOne<User>()
                .WithMany()
                .HasForeignKey(r => r.ReturnedById)
                .OnDelete(DeleteBehavior.SetNull);

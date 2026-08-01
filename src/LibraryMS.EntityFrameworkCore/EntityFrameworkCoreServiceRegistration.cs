@@ -1,3 +1,4 @@
+using LibraryMS.Application.Contracts.Reports;
 using LibraryMS.Domain.BookManagement;
 using LibraryMS.Domain.BorrowManagement;
 using LibraryMS.Domain.BranchManagement;
@@ -38,7 +39,7 @@ public static class EntityFrameworkCoreServiceRegistration
         // Register Repositories
         services.AddScoped<IBookRepository, BookRepository>();
         services.AddScoped<IBranchRepository, BranchRepository>();
-        services.AddScoped<LibraryMS.Application.Contracts.Reports.IReportRepository, ReportRepository>();
+        services.AddScoped<IReportRepository, ReportRepository>();
         services.AddScoped<IMemberRepository, MemberRepository>();
         services.AddScoped<IBorrowRepository, BorrowRepository>();
         services.AddScoped<IReservationRepository, ReservationRepository>();

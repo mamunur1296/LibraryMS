@@ -1,3 +1,4 @@
+using LibraryMS.Domain.BookManagement.AggregateRoots;
 using LibraryMS.Domain.MemberManagement.AggregateRoots;
 using LibraryMS.Domain.Shared.Constants;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +30,7 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
             fb.ToTable("MemberFavorites");
             fb.HasKey(f => f.Id);
             fb.Property(f => f.Id).ValueGeneratedNever();
-            fb.HasOne<LibraryMS.Domain.BookManagement.AggregateRoots.Book>().WithMany().HasForeignKey(f => f.BookId);
+            fb.HasOne<Book>().WithMany().HasForeignKey(f => f.BookId);
         });
     }
 }

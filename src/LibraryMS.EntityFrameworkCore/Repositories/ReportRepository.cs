@@ -3,11 +3,6 @@ using LibraryMS.Application.Contracts.Reports;
 using LibraryMS.Domain.BorrowManagement.AggregateRoots;
 using LibraryMS.Domain.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace LibraryMS.EntityFrameworkCore.Repositories;
 
@@ -31,7 +26,7 @@ public class ReportRepository : IReportRepository
 
             // Approximating Total Books by active BookCopies in branch
             var totalBooks = await _dbContext.BookCopies.CountAsync(c => c.BranchId == branchId, ct);
-            
+
             var activeBorrows = await _dbContext.Set<BorrowRecord>()
                 .CountAsync(r => r.BranchId == branchId && r.Status == BorrowStatus.Active, ct);
 
@@ -112,7 +107,7 @@ public class ReportRepository : IReportRepository
     {
         var librarians = await _dbContext.Users.Where(u => u.Role == LibraryMS.Domain.Shared.Enums.UserRole.Librarian).ToListAsync(ct);
         var branches = await _dbContext.Branches.ToListAsync(ct);
-        
+
         var query = _dbContext.Set<BorrowRecord>().AsQueryable();
 
         if (fromDate.HasValue) query = query.Where(r => r.CreatedAt >= fromDate.Value.ToUniversalTime());
@@ -121,8 +116,8 @@ public class ReportRepository : IReportRepository
         var borrows = await query.ToListAsync(ct);
 
         var result = new List<LibrarianActivityDto>();
-        
-        foreach(var lib in librarians)
+
+        foreach (var lib in librarians)
         {
             var issued = borrows.Count(b => b.IssuedById == lib.Id);
             var returned = borrows.Count(b => b.ReturnedById == lib.Id);
