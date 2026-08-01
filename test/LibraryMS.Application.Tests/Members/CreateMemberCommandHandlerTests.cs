@@ -10,13 +10,8 @@ using LibraryMS.Domain.MemberManagement;
 using LibraryMS.Domain.MemberManagement.AggregateRoots;
 using LibraryMS.Domain.MemberManagement.Services;
 using LibraryMS.Domain.Shared;
-using LibraryMS.Domain.Shared.Exceptions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace LibraryMS.Application.Tests.Members;
 
@@ -28,7 +23,7 @@ public class CreateMemberCommandHandlerTests
     private readonly Mock<IGuidGenerator> _guidGeneratorMock;
     private readonly Mock<IUserRepository> _userRepoMock;
     private readonly Mock<IPasswordHasher> _hasherMock;
-    
+
     private readonly MemberManager _memberManager;
     private readonly UserManager _userManager;
     private readonly CreateMemberCommandHandler _handler;
@@ -72,7 +67,7 @@ public class CreateMemberCommandHandlerTests
         result.Should().NotBeNull();
         result.FirstName.Should().Be("John");
         result.Email.Should().Be("john@test.com");
-        
+
         _memberRepoMock.Verify(x => x.AddAsync(It.Is<Member>(m => m.Email == "john@test.com"), It.IsAny<CancellationToken>()), Times.Once);
         _userRepoMock.Verify(x => x.AddAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()), Times.Never);
         _uowMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
@@ -87,10 +82,10 @@ public class CreateMemberCommandHandlerTests
 
         _memberRepoMock.Setup(x => x.EmailExistsAsync("jane@test.com", It.IsAny<Guid?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-            
+
         _userRepoMock.Setup(x => x.UsernameExistsAsync("janedoe", It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
-            
+
         _userRepoMock.Setup(x => x.EmailExistsAsync("jane@test.com", It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
@@ -102,7 +97,7 @@ public class CreateMemberCommandHandlerTests
 
         // Assert
         result.Should().NotBeNull();
-        
+
         _memberRepoMock.Verify(x => x.AddAsync(It.Is<Member>(m => m.Email == "jane@test.com"), It.IsAny<CancellationToken>()), Times.Once);
         _userRepoMock.Verify(x => x.AddAsync(It.Is<User>(u => u.Username == "janedoe"), It.IsAny<CancellationToken>()), Times.Once);
         _uowMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);

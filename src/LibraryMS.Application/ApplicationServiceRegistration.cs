@@ -17,6 +17,7 @@ using LibraryMS.Domain.IdentityManagement.Services;
 using LibraryMS.Domain.MemberManagement;
 using LibraryMS.Domain.MemberManagement.AggregateRoots;
 using LibraryMS.Domain.MemberManagement.Services;
+using LibraryMS.Domain.ReservationManagement.Services;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -55,6 +56,7 @@ public static class ApplicationServiceRegistration
         services.AddScoped<BorrowManager>();
         services.AddScoped<UserManager>();
         services.AddScoped<RefreshTokenManager>();
+        services.AddScoped<ReservationManager>();
         services.AddSingleton<IGuidGenerator, GuidGenerator>();
 
         // Background Jobs
