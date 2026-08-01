@@ -15,12 +15,16 @@ public class UserAndMemberSeeder : IDataSeeder
         _passwordHasher = passwordHasher;
     }
 
+    public static readonly Guid MemberJohnId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+    public static readonly Guid MemberJaneId = Guid.Parse("00000000-0000-0000-0000-000000000002");
+    public static readonly Guid MemberBobId = Guid.Parse("00000000-0000-0000-0000-000000000003");
+
     public async Task SeedAsync(LibraryDbContext dbContext, CancellationToken cancellationToken)
     {
         // 1. Members
-        var memberJohn = new Member(Guid.NewGuid(), "John", "Doe", "john.doe@email.com", "555-1001", "LIB-2026-00001", "123 Main St, New York, NY");
-        var memberJane = new Member(Guid.NewGuid(), "Jane", "Smith", "jane.smith@email.com", "555-1002", "LIB-2026-00002", "456 Oak Ave, San Francisco, CA");
-        var memberBob = new Member(Guid.NewGuid(), "Bob", "Johnson", "bob.johnson@email.com", "555-1003", "LIB-2026-00003", "789 Pine Rd, Chicago, IL");
+        var memberJohn = new Member(MemberJohnId, "John", "Doe", "john.doe@email.com", "555-1001", "LIB-2026-00001", "123 Main St, New York, NY");
+        var memberJane = new Member(MemberJaneId, "Jane", "Smith", "jane.smith@email.com", "555-1002", "LIB-2026-00002", "456 Oak Ave, San Francisco, CA");
+        var memberBob = new Member(MemberBobId, "Bob", "Johnson", "bob.johnson@email.com", "555-1003", "LIB-2026-00003", "789 Pine Rd, Chicago, IL");
         var members = new[] { memberJohn, memberJane, memberBob };
         dbContext.Members.AddRange(members);
 

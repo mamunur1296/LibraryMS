@@ -22,6 +22,8 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddTransient<IDataSeeder, CategorySeeder>();
         services.AddTransient<IDataSeeder, BookSeeder>();
         services.AddTransient<IDataSeeder, UserAndMemberSeeder>();
+        services.AddTransient<IDataSeeder, BorrowSeeder>();
+        services.AddTransient<IDataSeeder, ReservationSeeder>();
 
         services.AddHostedService<DbMigratorHostedService>();
     })

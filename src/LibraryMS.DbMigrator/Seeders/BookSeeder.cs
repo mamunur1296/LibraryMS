@@ -5,6 +5,16 @@ namespace LibraryMS.DbMigrator.Seeders;
 
 public class BookSeeder : IDataSeeder
 {
+    public static readonly Guid B1Id = Guid.Parse("b1000000-0000-0000-0000-000000000001");
+    public static readonly Guid B1Copy1Id = Guid.Parse("c1000000-0000-0000-0000-000000000001");
+    public static readonly Guid B1Copy2Id = Guid.Parse("c1000000-0000-0000-0000-000000000002");
+
+    public static readonly Guid B2Id = Guid.Parse("b2000000-0000-0000-0000-000000000002");
+    public static readonly Guid B2Copy1Id = Guid.Parse("c2000000-0000-0000-0000-000000000001");
+
+    public static readonly Guid B3Id = Guid.Parse("b3000000-0000-0000-0000-000000000003");
+    public static readonly Guid B3Copy1Id = Guid.Parse("c3000000-0000-0000-0000-000000000001");
+
     public async Task SeedAsync(LibraryDbContext dbContext, CancellationToken cancellationToken)
     {
         var mainBranchId = Guid.Parse("11110000-0000-0000-0000-000000000001");
@@ -12,14 +22,14 @@ public class BookSeeder : IDataSeeder
 
         var books = new List<Book>();
 
-        var b1 = new Book(Guid.NewGuid(), "Clean Code", "9780132350884", "A handbook of agile software craftsmanship", 2008, CategorySeeder.ProgId, AuthorSeeder.UncleBobId, "English");
-        b1.AddCopy(mainBranchId); b1.AddCopy(downtownBranchId); books.Add(b1);
+        var b1 = new Book(B1Id, "Clean Code", "9780132350884", "A handbook of agile software craftsmanship", 2008, CategorySeeder.ProgId, AuthorSeeder.UncleBobId, "English");
+        b1.AddCopy(B1Copy1Id, mainBranchId); b1.AddCopy(B1Copy2Id, downtownBranchId); books.Add(b1);
 
-        var b2 = new Book(Guid.NewGuid(), "Clean Architecture", "9780134494166", "A craftsman's guide to software structure and design", 2017, CategorySeeder.SeId, AuthorSeeder.UncleBobId, "English");
-        b2.AddCopy(mainBranchId); b2.AddCopy(downtownBranchId); books.Add(b2);
+        var b2 = new Book(B2Id, "Clean Architecture", "9780134494166", "A craftsman's guide to software structure and design", 2017, CategorySeeder.SeId, AuthorSeeder.UncleBobId, "English");
+        b2.AddCopy(B2Copy1Id, mainBranchId); b2.AddCopy(downtownBranchId); books.Add(b2);
 
-        var b3 = new Book(Guid.NewGuid(), "Refactoring", "9780134757599", "Improving the design of existing code, 2nd Edition", 2018, CategorySeeder.SeId, AuthorSeeder.FowlerId, "English");
-        b3.AddCopy(mainBranchId); b3.AddCopy(downtownBranchId); books.Add(b3);
+        var b3 = new Book(B3Id, "Refactoring", "9780134757599", "Improving the design of existing code, 2nd Edition", 2018, CategorySeeder.SeId, AuthorSeeder.FowlerId, "English");
+        b3.AddCopy(B3Copy1Id, mainBranchId); b3.AddCopy(downtownBranchId); books.Add(b3);
 
         var b4 = new Book(Guid.NewGuid(), "Patterns of Enterprise Application Architecture", "9780321127426", "Catalog of patterns for enterprise application development", 2002, CategorySeeder.DbId, AuthorSeeder.FowlerId, "English");
         b4.AddCopy(mainBranchId); b4.AddCopy(downtownBranchId); books.Add(b4);
