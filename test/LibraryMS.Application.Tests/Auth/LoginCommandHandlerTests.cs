@@ -31,6 +31,7 @@ public class LoginCommandHandlerTests
     public LoginCommandHandlerTests()
     {
         _userRepoMock = new Mock<IUserRepository>();
+        var _branchRepoMock = new Mock<LibraryMS.Domain.BranchManagement.IBranchRepository>();
         _hasherMock = new Mock<IPasswordHasher>();
         _jwtServiceMock = new Mock<IJwtTokenService>();
         _loggerMock = new Mock<ILogger<LoginCommandHandler>>();
@@ -41,6 +42,7 @@ public class LoginCommandHandlerTests
 
         _handler = new LoginCommandHandler(
             _userRepoMock.Object,
+            _branchRepoMock.Object,
             _hasherMock.Object,
             _jwtServiceMock.Object,
             _loggerMock.Object,

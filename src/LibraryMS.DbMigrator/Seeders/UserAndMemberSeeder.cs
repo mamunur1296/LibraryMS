@@ -34,9 +34,15 @@ public class UserAndMemberSeeder : IDataSeeder
         var (memberHash, memberSalt) = _passwordHasher.Hash("Member123!");
 
         var adminUser = new User(Guid.NewGuid(), "admin", "admin@library.com", adminHash, adminSalt, UserRole.Admin);
+        
         var libUser = new User(Guid.NewGuid(), "librarian", "librarian@library.com", libHash, libSalt, UserRole.Librarian);
+        libUser.AssignBranch(BranchSeeder.MainBranchId);
+
+        var libUser2 = new User(Guid.NewGuid(), "librarian2", "librarian2@library.com", libHash, libSalt, UserRole.Librarian);
+        libUser2.AssignBranch(BranchSeeder.DowntownBranchId);
+        
         var memberUser = new User(Guid.NewGuid(), "member", "member@library.com", memberHash, memberSalt, UserRole.Member, memberJohn.Id);
 
-        dbContext.Users.AddRange(adminUser, libUser, memberUser);
+        dbContext.Users.AddRange(adminUser, libUser, libUser2, memberUser);
     }
 }

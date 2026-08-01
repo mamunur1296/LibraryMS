@@ -42,11 +42,14 @@ public sealed class ReservationRepository : BaseRepository<Reservation>, IReserv
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<int> GetPendingCountAsync(CancellationToken cancellationToken = default)
+    public async Task<int> GetPendingCountAsync(Guid? branchId = null, CancellationToken cancellationToken = default)
     {
-        return await DbSet.CountAsync(
-            r => r.Status == ReservationStatus.Pending || r.Status == ReservationStatus.Available,
-            cancellationToken);
+        var query = DbSet.Where(r => r.Status == ReservationStatus.Pending || r.Status == ReservationStatus.Available);
+        if (branchId.HasValue)
+        {
+            query = query.Where(r => r.BranchId == branchId.Value);
+        }
+        return await query.CountAsync(cancellationToken);
     }
 
     public async Task<(List<Reservation> Items, int TotalCount)> GetPagedAsync(

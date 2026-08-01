@@ -5,7 +5,7 @@ using MediatR;
 namespace LibraryMS.Application.Contracts.Reports;
 
 // ──── Queries ────
-public sealed record GetDashboardSummaryQuery()
+public sealed record GetDashboardSummaryQuery(Guid? BranchId = null)
     : IRequest<DashboardSummaryDto>;
 
 public sealed record GetAdminDashboardSummaryQuery()

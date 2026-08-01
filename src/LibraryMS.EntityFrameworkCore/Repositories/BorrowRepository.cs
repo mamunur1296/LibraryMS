@@ -79,18 +79,24 @@ public sealed class BorrowRepository : BaseRepository<BorrowRecord>, IBorrowRepo
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<decimal> GetTotalLateFinesCollectedAsync(CancellationToken cancellationToken = default)
+    public async Task<decimal> GetTotalLateFinesCollectedAsync(Guid? branchId = null, CancellationToken cancellationToken = default)
     {
-        return await DbSet
-            .Where(r => r.IsFinePaid)
-            .SumAsync(r => r.LateFine, cancellationToken);
+        var query = DbSet.Where(r => r.IsFinePaid);
+        if (branchId.HasValue)
+        {
+            query = query.Where(r => r.BranchId == branchId.Value);
+        }
+        return await query.SumAsync(r => r.LateFine, cancellationToken);
     }
 
-    public async Task<decimal> GetPendingLateFinesAsync(CancellationToken cancellationToken = default)
+    public async Task<decimal> GetPendingLateFinesAsync(Guid? branchId = null, CancellationToken cancellationToken = default)
     {
-        return await DbSet
-            .Where(r => !r.IsFinePaid && r.LateFine > 0)
-            .SumAsync(r => r.LateFine, cancellationToken);
+        var query = DbSet.Where(r => !r.IsFinePaid && r.LateFine > 0);
+        if (branchId.HasValue)
+        {
+            query = query.Where(r => r.BranchId == branchId.Value);
+        }
+        return await query.SumAsync(r => r.LateFine, cancellationToken);
     }
 
     public async Task<bool> HasActiveBorrowForCopyAsync(Guid bookCopyId, CancellationToken cancellationToken = default)

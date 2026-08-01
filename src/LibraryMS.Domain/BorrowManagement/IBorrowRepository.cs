@@ -15,8 +15,8 @@ public interface IBorrowRepository
         int page, int pageSize, CancellationToken ct = default,
         DateTime? fromDate = null, DateTime? toDate = null, Guid? branchId = null);
     Task<List<BorrowRecord>> GetByMemberIdsAsync(List<Guid> memberIds, DateTime? fromDate, DateTime? toDate, CancellationToken ct = default);
-    Task<decimal> GetTotalLateFinesCollectedAsync(CancellationToken ct = default);
-    Task<decimal> GetPendingLateFinesAsync(CancellationToken ct = default);
+    Task<decimal> GetTotalLateFinesCollectedAsync(Guid? branchId = null, CancellationToken ct = default);
+    Task<decimal> GetPendingLateFinesAsync(Guid? branchId = null, CancellationToken ct = default);
     Task AddAsync(BorrowRecord record, CancellationToken ct = default);
     Task UpdateAsync(BorrowRecord record, CancellationToken ct = default);
 }
