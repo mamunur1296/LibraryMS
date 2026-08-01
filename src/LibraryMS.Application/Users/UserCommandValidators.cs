@@ -30,14 +30,6 @@ public class AssignLibrarianToBranchCommandValidator : AbstractValidator<AssignL
     }
 }
 
-public class AssignBranchToLibrarianCommandValidator : AbstractValidator<AssignBranchToLibrarianCommand>
-{
-    public AssignBranchToLibrarianCommandValidator()
-    {
-        RuleFor(x => x.UserId).NotEmpty().WithMessage("UserId is required.");
-        RuleFor(x => x.BranchId).NotEmpty().WithMessage("BranchId is required.");
-    }
-}
 
 public class ChangePasswordCommandValidator : AbstractValidator<ChangePasswordCommand>
 {

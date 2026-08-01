@@ -22,3 +22,5 @@ public sealed record ActivateUserCommand(Guid UserId) : IRequest;
 public sealed record CreateLibrarianCommand(string Username, string Email, string Password, Guid? BranchId) : IRequest<Guid>;
 
 public sealed record AssignLibrarianToBranchCommand(Guid LibrarianId, Guid BranchId) : IRequest;
+
+public sealed record AssignBranchToLibrarianCommand(Guid UserId, Guid BranchId) : IRequest;

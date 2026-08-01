@@ -102,7 +102,7 @@ public class UsersController : BaseController
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AssignBranch(Guid id, [FromBody] AssignBranchRequest request, CancellationToken cancellationToken)
     {
-        await Mediator.Send(new AssignBranchToLibrarianCommand(id, request.BranchId), cancellationToken);
+        await Mediator.Send(new AssignLibrarianToBranchCommand(id, request.BranchId), cancellationToken);
         return NoContent();
     }
 
