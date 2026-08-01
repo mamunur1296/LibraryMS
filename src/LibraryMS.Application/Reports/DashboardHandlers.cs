@@ -40,14 +40,14 @@ public sealed class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboa
     {
         _logger.LogInformation("Retrieving dashboard summary counts.");
 
-        var activeBorrows = await _borrowRepo.GetPagedAsync(null, null, "Active", 1, 1, cancellationToken);
-        var overdueBorrows = await _borrowRepo.GetPagedAsync(null, null, "Overdue", 1, 1, cancellationToken);
+        var activeBorrows = await _borrowRepo.GetPagedAsync(null, null, "Active", 1, 1, cancellationToken, null, null, request.BranchId);
+        var overdueBorrows = await _borrowRepo.GetPagedAsync(null, null, "Overdue", 1, 1, cancellationToken, null, null, request.BranchId);
         var books = await _bookRepo.SearchAsync(null, null, null, null, 1, 1, cancellationToken);
         var members = await _memberRepo.SearchAsync(null, null, 1, 1, cancellationToken);
         var branches = await _branchRepo.GetAllAsync(cancellationToken);
-        var pendingReservations = await _reservationRepo.GetPendingCountAsync(cancellationToken);
-        var totalLateFinesCollected = await _borrowRepo.GetTotalLateFinesCollectedAsync(cancellationToken);
-        var pendingLateFines = await _borrowRepo.GetPendingLateFinesAsync(cancellationToken);
+        var pendingReservations = await _reservationRepo.GetPendingCountAsync(request.BranchId, cancellationToken);
+        var totalLateFinesCollected = await _borrowRepo.GetTotalLateFinesCollectedAsync(request.BranchId, cancellationToken);
+        var pendingLateFines = await _borrowRepo.GetPendingLateFinesAsync(request.BranchId, cancellationToken);
 
         _logger.LogInformation("Successfully retrieved dashboard summary.");
 

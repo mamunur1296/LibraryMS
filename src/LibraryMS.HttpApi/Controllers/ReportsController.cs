@@ -22,7 +22,10 @@ public class ReportsController : BaseController
     [Authorize(Roles = "Admin,Librarian")]
     public async Task<ActionResult<DashboardSummaryDto>> GetDashboardSummary(CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new GetDashboardSummaryQuery(), cancellationToken);
+        var branchIdString = User.Claims.FirstOrDefault(c => c.Type == "branchId")?.Value;
+        Guid? branchId = Guid.TryParse(branchIdString, out var parsedId) ? parsedId : null;
+
+        var result = await _mediator.Send(new GetDashboardSummaryQuery(branchId), cancellationToken);
         return Ok(result);
     }
 
@@ -41,7 +44,8 @@ public class ReportsController : BaseController
         [FromQuery] Guid? branchId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetOverdueReportQuery(fromDate, toDate, branchId, page, pageSize), cancellationToken);
+        var secureBranchId = GetSecureBranchId(branchId);
+        var result = await _mediator.Send(new GetOverdueReportQuery(fromDate, toDate, secureBranchId, page, pageSize), cancellationToken);
         return Ok(result);
     }
 
@@ -52,7 +56,8 @@ public class ReportsController : BaseController
         [FromQuery] Guid? branchId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10,
         CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetPopularBooksQuery(fromDate, toDate, branchId, page, pageSize), cancellationToken);
+        var secureBranchId = GetSecureBranchId(branchId);
+        var result = await _mediator.Send(new GetPopularBooksQuery(fromDate, toDate, secureBranchId, page, pageSize), cancellationToken);
         return Ok(result);
     }
 
@@ -73,7 +78,8 @@ public class ReportsController : BaseController
         [FromQuery] Guid? branchId, [FromQuery] string format = "excel",
         CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new ExportOverdueReportQuery(fromDate, toDate, branchId, format), cancellationToken);
+        var secureBranchId = GetSecureBranchId(branchId);
+        var result = await _mediator.Send(new ExportOverdueReportQuery(fromDate, toDate, secureBranchId, format), cancellationToken);
         var contentType = format.ToLower() == "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         var fileName = $"OverdueReport_{DateTime.Now:yyyyMMdd}.{(format.ToLower() == "pdf" ? "pdf" : "xlsx")}";
         
@@ -86,7 +92,8 @@ public class ReportsController : BaseController
         [FromQuery] Guid? branchId, [FromQuery] string format = "excel",
         CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new ExportFineCollectionReportQuery(fromDate, toDate, branchId, format), cancellationToken);
+        var secureBranchId = GetSecureBranchId(branchId);
+        var result = await _mediator.Send(new ExportFineCollectionReportQuery(fromDate, toDate, secureBranchId, format), cancellationToken);
         var contentType = format.ToLower() == "pdf" ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         var fileName = $"FineCollectionReport_{DateTime.Now:yyyyMMdd}.{(format.ToLower() == "pdf" ? "pdf" : "xlsx")}";
         
@@ -131,7 +138,8 @@ public class ReportsController : BaseController
         [FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate,
         [FromQuery] Guid? branchId, CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GetFineCollectionReportQuery(fromDate, toDate, branchId), cancellationToken);
+        var secureBranchId = GetSecureBranchId(branchId);
+        var result = await _mediator.Send(new GetFineCollectionReportQuery(fromDate, toDate, secureBranchId), cancellationToken);
         return Ok(result);
     }
 
@@ -153,5 +161,18 @@ public class ReportsController : BaseController
     {
         var result = await _mediator.Send(new GetLibrarianActivityReportQuery(fromDate, toDate), cancellationToken);
         return Ok(result);
+    }
+
+    private Guid? GetSecureBranchId(Guid? requestedBranchId)
+    {
+        var branchIdString = User.Claims.FirstOrDefault(c => c.Type == "branchId")?.Value;
+        if (Guid.TryParse(branchIdString, out var librarianBranchId))
+        {
+            // If the user is a Librarian (has a branch ID in claims), force it.
+            return librarianBranchId;
+        }
+        
+        // If the user is an Admin, they can pass whatever branchId they want to filter.
+        return requestedBranchId;
     }
 }

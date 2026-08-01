@@ -17,6 +17,6 @@ public static class Helpers
         if (constructor == null)
             throw new Exception("Could not find internal constructor for User.");
 
-        return (User)constructor.Invoke(new object[] { id, username, email, passwordHash, salt, role, null });
+        return (User)constructor.Invoke(new object[] { id, username, email, passwordHash, salt, role, (Guid?)null });
     }
 }

@@ -2,6 +2,7 @@ using LibraryMS.Application.Contracts.Auth;
 using LibraryMS.Application.Contracts.DTOs.Auth;
 using LibraryMS.Application.Contracts.Services;
 using LibraryMS.Application.Mapping;
+using LibraryMS.Domain.BranchManagement;
 using LibraryMS.Domain.IdentityManagement;
 using LibraryMS.Domain.IdentityManagement.Services;
 using LibraryMS.Domain.Shared.Guards;
@@ -14,6 +15,7 @@ namespace LibraryMS.Application.Auth;
 public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
 {
     private readonly IUserRepository _userRepository;
+    private readonly IBranchRepository _branchRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenService _jwtService;
     private readonly ILogger<LoginCommandHandler> _logger;
@@ -22,6 +24,7 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResp
 
     public LoginCommandHandler(
         IUserRepository userRepository,
+        IBranchRepository branchRepository,
         IPasswordHasher passwordHasher,
         IJwtTokenService jwtService,
         ILogger<LoginCommandHandler> logger,
@@ -29,6 +32,7 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResp
         RefreshTokenManager refreshTokenManager)
     {
         _userRepository = userRepository;
+        _branchRepository = branchRepository;
         _passwordHasher = passwordHasher;
         _jwtService = jwtService;
         _logger = logger;
@@ -63,12 +67,18 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResp
 
         _logger.LogInformation("User {Username} logged in successfully.", user.Username);
 
+        LibraryMS.Domain.BranchManagement.AggregateRoots.Branch? branch = null;
+        if (user.BranchId.HasValue)
+        {
+            branch = await _branchRepository.GetByIdAsync(user.BranchId.Value, cancellationToken);
+        }
+
         return new AuthResponse
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken,
             ExpiresAt = expiresAt,
-            User = user.ToDto()
+            User = user.ToDto(branch)
         };
     }
 }

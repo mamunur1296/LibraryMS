@@ -35,6 +35,8 @@ public class UserAndMemberSeeder : IDataSeeder
 
         var adminUser = new User(Guid.NewGuid(), "admin", "admin@library.com", adminHash, adminSalt, UserRole.Admin);
         var libUser = new User(Guid.NewGuid(), "librarian", "librarian@library.com", libHash, libSalt, UserRole.Librarian);
+        libUser.AssignBranch(BranchSeeder.MainBranchId);
+        
         var memberUser = new User(Guid.NewGuid(), "member", "member@library.com", memberHash, memberSalt, UserRole.Member, memberJohn.Id);
 
         dbContext.Users.AddRange(adminUser, libUser, memberUser);

@@ -46,9 +46,9 @@ public sealed class GetAdminDashboardSummaryQueryHandler : IRequestHandler<GetAd
         var globalOverdueBorrows = await _borrowRepo.GetPagedAsync(null, null, "Overdue", 1, 1, cancellationToken);
         var globalBooks = await _bookRepo.SearchAsync(null, null, null, null, 1, 1, cancellationToken);
         var globalMembers = await _memberRepo.SearchAsync(null, null, 1, 1, cancellationToken);
-        var globalPendingReservations = await _reservationRepo.GetPendingCountAsync(cancellationToken);
-        var globalTotalLateFinesCollected = await _borrowRepo.GetTotalLateFinesCollectedAsync(cancellationToken);
-        var globalPendingLateFines = await _borrowRepo.GetPendingLateFinesAsync(cancellationToken);
+        var pendingReservations = await _reservationRepo.GetPendingCountAsync(null, cancellationToken);
+        var totalLateFinesCollected = await _borrowRepo.GetTotalLateFinesCollectedAsync(null, cancellationToken);
+        var pendingLateFines = await _borrowRepo.GetPendingLateFinesAsync(null, cancellationToken);
 
         var totalSummary = new DashboardSummaryDto
         {
@@ -57,9 +57,9 @@ public sealed class GetAdminDashboardSummaryQueryHandler : IRequestHandler<GetAd
             ActiveBorrows = globalActiveBorrows.TotalCount,
             OverdueBorrows = globalOverdueBorrows.TotalCount,
             TotalBranches = branches.Count(b => b.IsActive),
-            PendingReservations = globalPendingReservations,
-            TotalLateFinesCollected = globalTotalLateFinesCollected,
-            PendingLateFines = globalPendingLateFines,
+            PendingReservations = pendingReservations,
+            TotalLateFinesCollected = totalLateFinesCollected,
+            PendingLateFines = pendingLateFines,
         };
         
         var branchSummaries = new List<BranchDashboardSummaryDto>();
