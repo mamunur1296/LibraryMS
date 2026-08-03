@@ -187,9 +187,9 @@ cd LibraryMS
 dotnet run --project src/LibraryMS.DbMigrator
 ```
 **Seeded Data Accounts:**
-*   **Admin:** `admin@libraryms.com` (Password: `Admin@123`)
-*   **Librarian:** `librarian@libraryms.com` (Password: `Librarian@123`)
-*   **Member:** `member@libraryms.com` (Password: `Member@123`)
+*   **Admin:** `admin@libraryms.com` (Password: `Admin123!`)
+*   **Librarian:** `librarian@libraryms.com` (Password: `Librarian123!`)
+*   **Member:** `member@libraryms.com` (Password: `Member123!`)
 
 #### Step 4: Run the Backend Host
 ```bash
