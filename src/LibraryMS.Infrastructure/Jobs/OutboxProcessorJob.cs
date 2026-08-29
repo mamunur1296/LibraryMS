@@ -35,7 +35,8 @@ public sealed class OutboxProcessorJob
         var emailHandler = new EmailOutboxMessageHandler(
             serviceProvider.GetRequiredService<ILogger<EmailOutboxMessageHandler>>());
 
-        domainHandler.SetNext(emailHandler);
+        domainHandler.SetNext(emailHandler)
+            .SetNext(emailHandler);
         
         _messageHandlerChain = domainHandler;
     }
