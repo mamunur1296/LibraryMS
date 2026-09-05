@@ -98,6 +98,7 @@
 *   **[প্রশ্ন ১৬](file:///C:/Users/Mamunur%20Rushid/.gemini/antigravity-ide/brain/4701d0cc-dd54-43dd-8e42-720cd507d035/tech_concepts_qa4.md#L349):** SQL-এ COALESCE Function কী? এটি কীভাবে Non-Null মান খুঁজে বের করে?
 *   **[প্রশ্ন ১৭](file:///C:/Users/Mamunur%20Rushid/.gemini/antigravity-ide/brain/4701d0cc-dd54-43dd-8e42-720cd507d035/tech_concepts_qa4.md#L370):** SQL Server-এ ISNULL এবং COALESCE ফাংশনের মধ্যে মূল পার্থক্য কী?
 
+
 ---
 
 ### 📂 [বিশেষ পার্ট: linq_lifecycle_deep_dive.md](file:///C:/Users/Mamunur%20Rushid/.gemini/antigravity-ide/brain/4701d0cc-dd54-43dd-8e42-720cd507d035/linq_lifecycle_deep_dive.md) (LINQ এক্সিকিউশন লাইফসাইকেল ও ইন্টারভিউ প্রস্তুতি)
@@ -107,3 +108,12 @@
 *   **[প্রশ্ন ৩](file:///C:/Users/Mamunur%20Rushid/.gemini/antigravity-ide/brain/4701d0cc-dd54-43dd-8e42-720cd507d035/linq_lifecycle_deep_dive.md#L87):** `AsNoTracking()` কী এবং কেন ব্যবহার করা হয়?
 *   **[প্রশ্ন ৪](file:///C:/Users/Mamunur%20Rushid/.gemini/antigravity-ide/brain/4701d0cc-dd54-43dd-8e42-720cd507d035/linq_lifecycle_deep_dive.md#L97):** `First()` vs `FirstOrDefault()` এবং `Single()` vs `SingleOrDefault()` এর মধ্যে পার্থক্য কী?
 *   **[প্রশ্ন ৫](file:///C:/Users/Mamunur%20Rushid/.gemini/antigravity-ide/brain/4701d0cc-dd54-43dd-8e42-720cd507d035/linq_lifecycle_deep_dive.md#L104):** Deferred Execution-এর একটি বড় বিপদ বা Gotcha উদাহরণসহ ব্যাখ্যা করো?
+
+---
+
+### 📂 [বিশেষ পার্ট: sql_execution_order_and_engine_internals.md](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/sql_execution_order_and_engine_internals.md) (SQL Execution Order & Engine Internals)
+
+*   **[টপিক ১](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/sql_execution_order_and_engine_internals.md#L31):** SQL Query Logical Execution Order (Writing Order vs Execution Order - A to Z Steps)
+*   **[টপিক ২](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/sql_execution_order_and_engine_internals.md#L112):** Senior Engineer Level: ১০টি ইন্টারনাল ফিজিক্যাল লাইফসাইকেল ধাপ (Engine Internals & CBO)
+*   **[টপিক ৩](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/sql_execution_order_and_engine_internals.md#L182):** ফিজিক্যাল ধাপের কোথায় লজিক্যাল অর্ডার এক্সিকিউট হয় (Execution Plan Operator Tree & Volcano Model)
+
