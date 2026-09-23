@@ -117,3 +117,19 @@
 *   **[টপিক ২](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/sql_execution_order_and_engine_internals.md#L112):** Senior Engineer Level: ১০টি ইন্টারনাল ফিজিক্যাল লাইফসাইকেল ধাপ (Engine Internals & CBO)
 *   **[টপিক ৩](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/sql_execution_order_and_engine_internals.md#L182):** ফিজিক্যাল ধাপের কোথায় লজিক্যাল অর্ডার এক্সিকিউট হয় (Execution Plan Operator Tree & Volcano Model)
 
+---
+
+### 📂 [পার্ট ৫: tech_concepts_qa5.md](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/tech_concepts_qa5.md) (Database Viva Preparation & Lifecycle Deep Dive)
+
+*   **[পর্ব ১](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/tech_concepts_qa5.md#L20):** Database, DBMS এবং RDBMS-এর মৌলিক ভিত্তি ও পার্থক্য
+*   **[পর্ব ২](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/tech_concepts_qa5.md#L45):** ACID Properties — ইঞ্জিন লেভেল মেকানিজম (WAL, Undo/Redo Log, MVCC, Locks)
+*   **[পর্ব ৩](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/tech_concepts_qa5.md#L87):** Data Model-এর ঐতিহাসিক বিবর্তন (Flat-File থেকে NoSQL ও NewSQL)
+*   **[পর্ব ৪](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/tech_concepts_qa5.md#L118):** TCL (Transaction Control Language) — COMMIT, ROLLBACK, SAVEPOINT, @@TRANCOUNT, XACT_STATE()
+*   **[পর্ব ৫](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/tech_concepts_qa5.md#L149):** CAP Theorem — ডিস্ট্রিবিউটেড সিস্টেমের মূলনীতি (CP vs AP সিস্টেম)
+*   **[পর্ব ৬](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/tech_concepts_qa5.md#L173):** ER Diagram — উপাদান, সিম্বল, কার্ডিনালিটি এবং পার্টিসিপেশন
+*   **[পর্ব ৭](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/tech_concepts_qa5.md#L204):** Data Integrity (ডেটার শুদ্ধতা) নিশ্চিত করার ৪টি স্তম্ভ
+*   **[পর্ব ৮](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/tech_concepts_qa5.md#L217):** Normalization (1NF, 2NF, 3NF) এবং ডেটা অ্যানোমালি
+*   **[পর্ব ৯](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/tech_concepts_qa5.md#L251):** Partitioning বনাম Sharding (লজিক্যাল বনাম ফিজিক্যাল সার্ভার)
+*   **[পর্ব ১০](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/tech_concepts_qa5.md#L273):** DDL, Constraints, Cascading এবং DDL Triggers
+*   **[পর্ব ১১](file:///c:/MyParsonal/Project/LibraryMS/Database_Docs/tech_concepts_qa5.md#L305):** DML, DQL, Joins, Subqueries, Temp Tables এবং Functions
+
